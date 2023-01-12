@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 
 namespace Chess.Pieces
@@ -11,6 +12,7 @@ namespace Chess.Pieces
         public double Value { get; }
         public bool IsWhite { get; }
         public Point Position { get; }
+        public King ParentKing { get; }
 
         /// <summary>
         /// Get a set of all moves that this piece can perform on the given board
@@ -33,6 +35,7 @@ namespace Chess.Pieces
         public double Value => double.PositiveInfinity;
         public bool IsWhite { get; private set; }
         public Point Position { get; private set; }
+        public King ParentKing => this;
 
         public King(Point position, bool isWhite)
         {
@@ -52,7 +55,7 @@ namespace Chess.Pieces
                     {
                         Point newPos = new(Position.X + dx, Position.Y + dy);
                         if (newPos.X >= 0 && newPos.Y >= 0 && newPos.X < board.GetLength(0) && newPos.Y < board.GetLength(1)
-                            && (board[newPos.X, newPos.Y] is null || board[newPos.X, newPos.Y]!.IsWhite == !IsWhite))
+                            && (board[newPos.X, newPos.Y] is null || board[newPos.X, newPos.Y]!.IsWhite != IsWhite))
                         {
                             _ = moves.Add(newPos);
                         }
@@ -85,12 +88,14 @@ namespace Chess.Pieces
         public double Value => 9.5;
         public bool IsWhite { get; private set; }
         public Point Position { get; private set; }
+        public King ParentKing { get; private set; }
 
-        public Queen(Point position, bool isWhite)
+        public Queen(Point position, bool isWhite, King parentKing)
         {
             Position = position;
             IsWhite = isWhite;
             SymbolSpecial = isWhite ? '♕' : '♛';
+            ParentKing = parentKing;
         }
 
         public HashSet<Point> GetValidMoves(IPiece?[,] board, bool enforceCheckLegality)
@@ -106,7 +111,7 @@ namespace Chess.Pieces
                 }
                 else
                 {
-                    if (board[newPos.X, newPos.Y]!.IsWhite == !IsWhite)
+                    if (board[newPos.X, newPos.Y]!.IsWhite != IsWhite)
                     {
                         _ = moves.Add(newPos);
                     }
@@ -123,7 +128,7 @@ namespace Chess.Pieces
                 }
                 else
                 {
-                    if (board[newPos.X, newPos.Y]!.IsWhite == !IsWhite)
+                    if (board[newPos.X, newPos.Y]!.IsWhite != IsWhite)
                     {
                         _ = moves.Add(newPos);
                     }
@@ -140,7 +145,7 @@ namespace Chess.Pieces
                 }
                 else
                 {
-                    if (board[newPos.X, newPos.Y]!.IsWhite == !IsWhite)
+                    if (board[newPos.X, newPos.Y]!.IsWhite != IsWhite)
                     {
                         _ = moves.Add(newPos);
                     }
@@ -157,7 +162,7 @@ namespace Chess.Pieces
                 }
                 else
                 {
-                    if (board[newPos.X, newPos.Y]!.IsWhite == !IsWhite)
+                    if (board[newPos.X, newPos.Y]!.IsWhite != IsWhite)
                     {
                         _ = moves.Add(newPos);
                     }
@@ -174,7 +179,7 @@ namespace Chess.Pieces
                 }
                 else
                 {
-                    if (board[newPos.X, newPos.Y]!.IsWhite == !IsWhite)
+                    if (board[newPos.X, newPos.Y]!.IsWhite != IsWhite)
                     {
                         _ = moves.Add(newPos);
                     }
@@ -191,7 +196,7 @@ namespace Chess.Pieces
                 }
                 else
                 {
-                    if (board[newPos.X, newPos.Y]!.IsWhite == !IsWhite)
+                    if (board[newPos.X, newPos.Y]!.IsWhite != IsWhite)
                     {
                         _ = moves.Add(newPos);
                     }
@@ -208,7 +213,7 @@ namespace Chess.Pieces
                 }
                 else
                 {
-                    if (board[newPos.X, newPos.Y]!.IsWhite == !IsWhite)
+                    if (board[newPos.X, newPos.Y]!.IsWhite != IsWhite)
                     {
                         _ = moves.Add(newPos);
                     }
@@ -225,7 +230,7 @@ namespace Chess.Pieces
                 }
                 else
                 {
-                    if (board[newPos.X, newPos.Y]!.IsWhite == !IsWhite)
+                    if (board[newPos.X, newPos.Y]!.IsWhite != IsWhite)
                     {
                         _ = moves.Add(newPos);
                     }
@@ -234,7 +239,7 @@ namespace Chess.Pieces
             }
             if (enforceCheckLegality)
             {
-                _ = moves.RemoveWhere(m => BoardAnalysis.IsSquareOpponentReachable(board, m, IsWhite));
+                _ = moves.RemoveWhere(m => BoardAnalysis.IsSquareOpponentReachable(board.AfterMove(Position, m), ParentKing.Position, IsWhite));
             }
             return moves;
         }
@@ -258,12 +263,14 @@ namespace Chess.Pieces
         public double Value => 5.63;
         public bool IsWhite { get; private set; }
         public Point Position { get; private set; }
+        public King ParentKing { get; private set; }
 
-        public Rook(Point position, bool isWhite)
+        public Rook(Point position, bool isWhite, King parentKing)
         {
             Position = position;
             IsWhite = isWhite;
             SymbolSpecial = isWhite ? '♖' : '♜';
+            ParentKing = parentKing;
         }
 
         public HashSet<Point> GetValidMoves(IPiece?[,] board, bool enforceCheckLegality)
@@ -279,7 +286,7 @@ namespace Chess.Pieces
                 }
                 else
                 {
-                    if (board[newPos.X, newPos.Y]!.IsWhite == !IsWhite)
+                    if (board[newPos.X, newPos.Y]!.IsWhite != IsWhite)
                     {
                         _ = moves.Add(newPos);
                     }
@@ -296,7 +303,7 @@ namespace Chess.Pieces
                 }
                 else
                 {
-                    if (board[newPos.X, newPos.Y]!.IsWhite == !IsWhite)
+                    if (board[newPos.X, newPos.Y]!.IsWhite != IsWhite)
                     {
                         _ = moves.Add(newPos);
                     }
@@ -313,7 +320,7 @@ namespace Chess.Pieces
                 }
                 else
                 {
-                    if (board[newPos.X, newPos.Y]!.IsWhite == !IsWhite)
+                    if (board[newPos.X, newPos.Y]!.IsWhite != IsWhite)
                     {
                         _ = moves.Add(newPos);
                     }
@@ -330,7 +337,7 @@ namespace Chess.Pieces
                 }
                 else
                 {
-                    if (board[newPos.X, newPos.Y]!.IsWhite == !IsWhite)
+                    if (board[newPos.X, newPos.Y]!.IsWhite != IsWhite)
                     {
                         _ = moves.Add(newPos);
                     }
@@ -339,7 +346,7 @@ namespace Chess.Pieces
             }
             if (enforceCheckLegality)
             {
-                _ = moves.RemoveWhere(m => BoardAnalysis.IsSquareOpponentReachable(board, m, IsWhite));
+                _ = moves.RemoveWhere(m => BoardAnalysis.IsSquareOpponentReachable(board.AfterMove(Position, m), ParentKing.Position, IsWhite));
             }
             return moves;
         }
@@ -363,12 +370,14 @@ namespace Chess.Pieces
         public double Value => 3.33;
         public bool IsWhite { get; private set; }
         public Point Position { get; private set; }
+        public King ParentKing { get; private set; }
 
-        public Bishop(Point position, bool isWhite)
+        public Bishop(Point position, bool isWhite, King parentKing)
         {
             Position = position;
             IsWhite = isWhite;
             SymbolSpecial = isWhite ? '♗' : '♝';
+            ParentKing = parentKing;
         }
 
         public HashSet<Point> GetValidMoves(IPiece?[,] board, bool enforceCheckLegality)
@@ -384,7 +393,7 @@ namespace Chess.Pieces
                 }
                 else
                 {
-                    if (board[newPos.X, newPos.Y]!.IsWhite == !IsWhite)
+                    if (board[newPos.X, newPos.Y]!.IsWhite != IsWhite)
                     {
                         _ = moves.Add(newPos);
                     }
@@ -401,7 +410,7 @@ namespace Chess.Pieces
                 }
                 else
                 {
-                    if (board[newPos.X, newPos.Y]!.IsWhite == !IsWhite)
+                    if (board[newPos.X, newPos.Y]!.IsWhite != IsWhite)
                     {
                         _ = moves.Add(newPos);
                     }
@@ -418,7 +427,7 @@ namespace Chess.Pieces
                 }
                 else
                 {
-                    if (board[newPos.X, newPos.Y]!.IsWhite == !IsWhite)
+                    if (board[newPos.X, newPos.Y]!.IsWhite != IsWhite)
                     {
                         _ = moves.Add(newPos);
                     }
@@ -435,7 +444,7 @@ namespace Chess.Pieces
                 }
                 else
                 {
-                    if (board[newPos.X, newPos.Y]!.IsWhite == !IsWhite)
+                    if (board[newPos.X, newPos.Y]!.IsWhite != IsWhite)
                     {
                         _ = moves.Add(newPos);
                     }
@@ -444,7 +453,7 @@ namespace Chess.Pieces
             }
             if (enforceCheckLegality)
             {
-                _ = moves.RemoveWhere(m => BoardAnalysis.IsSquareOpponentReachable(board, m, IsWhite));
+                _ = moves.RemoveWhere(m => BoardAnalysis.IsSquareOpponentReachable(board.AfterMove(Position, m), ParentKing.Position, IsWhite));
             }
             return moves;
         }
@@ -468,12 +477,14 @@ namespace Chess.Pieces
         public double Value => 3.05;
         public bool IsWhite { get; private set; }
         public Point Position { get; private set; }
+        public King ParentKing { get; private set; }
 
-        public Knight(Point position, bool isWhite)
+        public Knight(Point position, bool isWhite, King parentKing)
         {
             Position = position;
             IsWhite = isWhite;
             SymbolSpecial = isWhite ? '♘' : '♞';
+            ParentKing = parentKing;
         }
 
         public HashSet<Point> GetValidMoves(IPiece?[,] board, bool enforceCheckLegality)
@@ -490,7 +501,7 @@ namespace Chess.Pieces
             }
             if (enforceCheckLegality)
             {
-                _ = moves.RemoveWhere(m => BoardAnalysis.IsSquareOpponentReachable(board, m, IsWhite));
+                _ = moves.RemoveWhere(m => BoardAnalysis.IsSquareOpponentReachable(board.AfterMove(Position, m), ParentKing.Position, IsWhite));
             }
             return moves;
         }
@@ -514,21 +525,55 @@ namespace Chess.Pieces
         public double Value => 1;
         public bool IsWhite { get; private set; }
         public Point Position { get; private set; }
+        public King ParentKing { get; private set; }
+        public bool LastMoveWasDouble { get; private set; }
 
-        public Pawn(Point position, bool isWhite)
+        public Pawn(Point position, bool isWhite, King parentKing)
         {
             Position = position;
             IsWhite = isWhite;
             SymbolSpecial = isWhite ? '♙' : '♟';
+            LastMoveWasDouble = false;
+            ParentKing = parentKing;
         }
 
         public HashSet<Point> GetValidMoves(IPiece?[,] board, bool enforceCheckLegality)
         {
             HashSet<Point> moves = new();
-
+            int dy = IsWhite ? 1 : -1;
+            bool hasMoved = Position.Y == (IsWhite ? 1 : board.GetLength(1) - 2);
+            if (board[Position.X, Position.Y + dy] is null)
+            {
+                _ = moves.Add(new Point(Position.X, Position.Y + dy));
+            }
+            // First move can optionally be two instead of one
+            if (!hasMoved && board[Position.X, Position.Y + (dy * 2)] is null)
+            {
+                _ = moves.Add(new Point(Position.X, Position.Y + (dy * 2)));
+            }
+            // Taking to diagonal left
+            if (Position.X > 0 && (
+                (board[Position.X - 1, Position.Y + dy] is not null && board[Position.X - 1, Position.Y + dy]!.IsWhite != IsWhite)
+                // En Passant
+                || (board[Position.X - 1, Position.Y + (dy * 2)] is not null && board[Position.X - 1, Position.Y + (dy * 2)]!.IsWhite != IsWhite
+                    && board[Position.X - 1, Position.Y + (dy * 2)]!.GetType() == typeof(Pawn)
+                    && ((Pawn)board[Position.X - 1, Position.Y + (dy * 2)]!).LastMoveWasDouble)))
+            {
+                _ = moves.Add(new Point(Position.X - 1, Position.Y + dy));
+            }
+            // Taking to diagonal right
+            if (Position.X < board.GetLength(0) - 1 && (
+                (board[Position.X + 1, Position.Y + dy] is not null && board[Position.X + 1, Position.Y + dy]!.IsWhite != IsWhite)
+                // En Passant
+                || (board[Position.X + 1, Position.Y + (dy * 2)] is not null && board[Position.X + 1, Position.Y + (dy * 2)]!.IsWhite != IsWhite
+                    && board[Position.X + 1, Position.Y + (dy * 2)]!.GetType() == typeof(Pawn)
+                    && ((Pawn)board[Position.X + 1, Position.Y + (dy * 2)]!).LastMoveWasDouble)))
+            {
+                _ = moves.Add(new Point(Position.X + 1, Position.Y + dy));
+            }
             if (enforceCheckLegality)
             {
-                _ = moves.RemoveWhere(m => BoardAnalysis.IsSquareOpponentReachable(board, m, IsWhite));
+                _ = moves.RemoveWhere(m => BoardAnalysis.IsSquareOpponentReachable(board.AfterMove(Position, m), ParentKing.Position, IsWhite));
             }
             return moves;
         }
@@ -537,6 +582,7 @@ namespace Chess.Pieces
         {
             if (GetValidMoves(board, true).Contains(target))
             {
+                LastMoveWasDouble = Math.Abs(target.Y - Position.Y) != 1;
                 Position = target;
                 return true;
             }
