@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Drawing;
 
 namespace Chess.Pieces
@@ -471,6 +472,11 @@ namespace Chess.Pieces
 
     public class Knight : IPiece
     {
+        public static readonly ImmutableHashSet<Point> Moves = new HashSet<Point>()
+        {
+            new(1, 2), new(1, -2), new(-1, 2), new(-1, -2), new(2, 1), new(2, -1), new(-2, 1), new(-2, -1)
+        }.ToImmutableHashSet();
+
         public string Name => "Knight";
         public char SymbolLetter => 'N';
         public char SymbolSpecial { get; private set; }
@@ -489,7 +495,7 @@ namespace Chess.Pieces
 
         public HashSet<Point> GetValidMoves(IPiece?[,] board, bool enforceCheckLegality)
         {
-            HashSet<Point> moves = new() { new(1, 2), new(1, -2), new(-1, 2), new(-1, -2), new(2, 1), new(2, -1), new(-2, 1), new(-2, -1) };
+            HashSet<Point> moves = new(Moves);
             foreach (Point newMove in moves)
             {
                 Point newPos = new(Position.X + newMove.X, Position.Y + newMove.Y);
