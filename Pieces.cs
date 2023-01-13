@@ -561,8 +561,7 @@ namespace Chess.Pieces
             if (Position.X > 0 && (
                 (board[Position.X - 1, Position.Y + dy] is not null && board[Position.X - 1, Position.Y + dy]!.IsWhite != IsWhite)
                 // En Passant
-                || (board[Position.X - 1, Position.Y + (dy * 2)] is not null && board[Position.X - 1, Position.Y + (dy * 2)]!.IsWhite != IsWhite
-                    && board[Position.X - 1, Position.Y + (dy * 2)]!.GetType() == typeof(Pawn)
+                || (board[Position.X - 1, Position.Y + (dy * 2)] is Pawn && board[Position.X - 1, Position.Y + (dy * 2)]!.IsWhite != IsWhite
                     && ((Pawn)board[Position.X - 1, Position.Y + (dy * 2)]!).LastMoveWasDouble)))
             {
                 _ = moves.Add(new Point(Position.X - 1, Position.Y + dy));
@@ -571,8 +570,7 @@ namespace Chess.Pieces
             if (Position.X < board.GetLength(0) - 1 && (
                 (board[Position.X + 1, Position.Y + dy] is not null && board[Position.X + 1, Position.Y + dy]!.IsWhite != IsWhite)
                 // En Passant
-                || (board[Position.X + 1, Position.Y + (dy * 2)] is not null && board[Position.X + 1, Position.Y + (dy * 2)]!.IsWhite != IsWhite
-                    && board[Position.X + 1, Position.Y + (dy * 2)]!.GetType() == typeof(Pawn)
+                || (board[Position.X + 1, Position.Y + (dy * 2)] is Pawn && board[Position.X + 1, Position.Y + (dy * 2)]!.IsWhite != IsWhite
                     && ((Pawn)board[Position.X + 1, Position.Y + (dy * 2)]!).LastMoveWasDouble)))
             {
                 _ = moves.Add(new Point(Position.X + 1, Position.Y + dy));

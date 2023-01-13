@@ -21,8 +21,7 @@ namespace Chess
                     {
                         Point newPos = new(target.X + dx, target.Y + dy);
                         if (newPos.X >= 0 && newPos.Y >= 0 && newPos.X < board.GetLength(0) && newPos.Y < board.GetLength(1)
-                            && board[newPos.X, newPos.Y] is not null && board[newPos.X, newPos.Y]!.IsWhite != isWhite
-                            && board[newPos.X, newPos.Y]!.GetType() == typeof(Pieces.King))
+                            && board[newPos.X, newPos.Y] is Pieces.King && board[newPos.X, newPos.Y]!.IsWhite != isWhite)
                         {
                             return true;
                         }
