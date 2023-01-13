@@ -1,7 +1,26 @@
-﻿using System.Drawing;
+﻿using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
 
 namespace Chess
 {
+    /// <remarks>
+    /// CheckWhite and CheckMateWhite mean that the check is against white,
+    /// or that white has lost respectively, and vice versa.
+    /// </remarks>
+    public enum GameState
+    {
+        StandardPlay,
+        DrawStalemate,
+        DrawFiftyMove,
+        DrawThreeFold,
+        DrawInsufficientMaterial,
+        CheckWhite,
+        CheckBlack,
+        CheckMateWhite,
+        CheckMateBlack
+    }
+
     public static class BoardAnalysis
     {
         /// <summary>
@@ -187,6 +206,55 @@ namespace Chess
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Determine the current state of the game with the given board.
+        /// </summary>
+        /// <remarks>
+        /// This method will not detect states that depend on game history, such as three-fold repetition or the 50-move rule
+        /// </remarks>
+        public static GameState DetermineGameState(Pieces.IPiece?[,] board)
+        {
+            IEnumerable<Pieces.IPiece> whitePieces = board.OfType<Pieces.IPiece>().Where(p => p.IsWhite);
+            IEnumerable<Pieces.IPiece> blackPieces = board.OfType<Pieces.IPiece>().Where(p => !p.IsWhite);
+
+            Pieces.King whiteKing = whitePieces.OfType<Pieces.King>().First();
+            Pieces.King blackKing = blackPieces.OfType<Pieces.King>().First();
+
+            HashSet<Point> whiteMoves = whitePieces.SelectMany(p => p.GetValidMoves(board, true)).ToHashSet();
+            HashSet<Point> blackMoves = blackPieces.SelectMany(p => p.GetValidMoves(board, true)).ToHashSet();
+
+            bool whiteCheck = IsSquareOpponentReachable(board, whiteKing.Position, true);
+            // White and Black cannot both be in check
+            bool blackCheck = !whiteCheck && IsSquareOpponentReachable(board, blackKing.Position, false);
+
+            if (!whiteMoves.Any())
+            {
+                // Black may only win if they have white king in check, otherwise draw
+                return whiteCheck ? GameState.CheckMateWhite : GameState.DrawStalemate;
+            }
+            if (!blackMoves.Any())
+            {
+                // White may only win if they have black king in check, otherwise draw
+                return blackCheck ? GameState.CheckMateBlack : GameState.DrawStalemate;
+            }
+
+            if ((whitePieces.Count() == 1 || (whitePieces.Count() == 2
+                    && whitePieces.Where(p => p is not Pieces.King).First() is Pieces.Bishop or Pieces.Knight))
+                && (blackPieces.Count() == 1 || (blackPieces.Count() == 2
+                    && blackPieces.Where(p => p is not Pieces.King).First() is Pieces.Bishop or Pieces.Knight)))
+            {
+                return GameState.DrawInsufficientMaterial;
+            }
+
+            if ((whitePieces.Count() == 1 && blackPieces.Count() == 3 && blackPieces.OfType<Pieces.Knight>().Count() == 2)
+                || (blackPieces.Count() == 1 && whitePieces.Count() == 3 && whitePieces.OfType<Pieces.Knight>().Count() == 2))
+            {
+                return GameState.DrawInsufficientMaterial;
+            }
+
+            return whiteCheck ? GameState.CheckWhite : blackCheck ? GameState.CheckBlack : GameState.StandardPlay;
         }
     }
 }
