@@ -204,7 +204,7 @@ namespace Chess.Pieces
                 }
             }
             // Diagonal Down Left
-            for (int dif = 1; Position.X - dif >= 0 && Position.Y - dif < board.GetLength(1); dif++)
+            for (int dif = 1; Position.X - dif >= 0 && Position.Y - dif >= 0; dif++)
             {
                 Point newPos = new(Position.X - dif, Position.Y - dif);
                 if (board[newPos.X, newPos.Y] is null)
@@ -221,7 +221,7 @@ namespace Chess.Pieces
                 }
             }
             // Diagonal Down Right
-            for (int dif = 1; Position.X + dif >= 0 && Position.Y - dif < board.GetLength(1); dif++)
+            for (int dif = 1; Position.X + dif < board.GetLength(0) && Position.Y - dif >= 0; dif++)
             {
                 Point newPos = new(Position.X + dif, Position.Y - dif);
                 if (board[newPos.X, newPos.Y] is null)
@@ -418,7 +418,7 @@ namespace Chess.Pieces
                 }
             }
             // Diagonal Down Left
-            for (int dif = 1; Position.X - dif >= 0 && Position.Y - dif < board.GetLength(1); dif++)
+            for (int dif = 1; Position.X - dif >= 0 && Position.Y - dif >= 0; dif++)
             {
                 Point newPos = new(Position.X - dif, Position.Y - dif);
                 if (board[newPos.X, newPos.Y] is null)
@@ -435,7 +435,7 @@ namespace Chess.Pieces
                 }
             }
             // Diagonal Down Right
-            for (int dif = 1; Position.X + dif >= 0 && Position.Y - dif < board.GetLength(1); dif++)
+            for (int dif = 1; Position.X + dif < board.GetLength(0) && Position.Y - dif >= 0; dif++)
             {
                 Point newPos = new(Position.X + dif, Position.Y - dif);
                 if (board[newPos.X, newPos.Y] is null)
