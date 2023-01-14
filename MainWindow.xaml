@@ -5,10 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Chess"
         mc:Ignorable="d"
-        Title="Chess" Height="500" Width="500">
+        Title="Chess" Height="500" Width="500" Loaded="Window_Loaded" SizeChanged="Window_SizeChanged">
     <Grid>
         <Border BorderBrush="Black" BorderThickness="1,1,1,1">
-            <Grid x:Name="chessBoard">
+            <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="1*"/>
                     <RowDefinition Height="1*"/>
@@ -63,5 +63,6 @@
                 <Rectangle Fill="#FFBF8245" Grid.Column="7" Grid.Row="6"/>
             </Grid>
         </Border>
+        <Canvas x:Name="chessGameCanvas"/>
     </Grid>
 </Window>
