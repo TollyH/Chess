@@ -196,7 +196,7 @@ namespace Chess
         /// <remarks>
         /// This method will not detect states that depend on game history, such as three-fold repetition or the 50-move rule
         /// </remarks>
-        public static GameState DetermineGameState(Pieces.Piece?[,] board)
+        public static GameState DetermineGameState(Pieces.Piece?[,] board, bool currentTurnWhite)
         {
             IEnumerable<Pieces.Piece> whitePieces = board.OfType<Pieces.Piece>().Where(p => p.IsWhite);
             IEnumerable<Pieces.Piece> blackPieces = board.OfType<Pieces.Piece>().Where(p => !p.IsWhite);
@@ -211,12 +211,12 @@ namespace Chess
             // White and Black cannot both be in check
             bool blackCheck = !whiteCheck && IsKingReachable(board, false);
 
-            if (!whiteMoves.Any())
+            if (!whiteMoves.Any() && currentTurnWhite)
             {
                 // Black may only win if they have white king in check, otherwise draw
                 return whiteCheck ? GameState.CheckMateWhite : GameState.DrawStalemate;
             }
-            if (!blackMoves.Any())
+            if (!blackMoves.Any() && !currentTurnWhite)
             {
                 // White may only win if they have black king in check, otherwise draw
                 return blackCheck ? GameState.CheckMateBlack : GameState.DrawStalemate;

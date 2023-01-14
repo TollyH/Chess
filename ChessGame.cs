@@ -84,7 +84,7 @@ namespace Chess
         /// </remarks>
         public GameState DetermineGameState()
         {
-            GameState staticState = BoardAnalysis.DetermineGameState(Board);
+            GameState staticState = BoardAnalysis.DetermineGameState(Board, CurrentTurnWhite);
             if (EndingStates.Contains(staticState))
             {
                 return staticState;
