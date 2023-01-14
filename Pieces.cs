@@ -73,7 +73,7 @@ namespace Chess.Pieces
             }
             if (enforceCheckLegality)
             {
-                _ = moves.RemoveWhere(m => BoardAnalysis.IsSquareOpponentReachable(board, m, IsWhite));
+                _ = moves.RemoveWhere(m => BoardAnalysis.IsSquareOpponentReachable(board.AfterMove(Position, m), m, IsWhite));
             }
             return moves;
         }
