@@ -12,7 +12,6 @@ namespace Chess.Pieces
         public abstract double Value { get; }
         public abstract bool IsWhite { get; }
         public abstract Point Position { get; protected set; }
-        public abstract King ParentKing { get; }
 
         /// <summary>
         /// Get a set of all moves that this piece can perform on the given board
@@ -44,7 +43,6 @@ namespace Chess.Pieces
         public override double Value => double.PositiveInfinity;
         public override bool IsWhite { get; }
         public override Point Position { get; protected set; }
-        public override King ParentKing => this;
 
         public King(Point position, bool isWhite)
         {
@@ -73,7 +71,7 @@ namespace Chess.Pieces
             }
             if (enforceCheckLegality)
             {
-                _ = moves.RemoveWhere(m => BoardAnalysis.IsSquareOpponentReachable(board.AfterMove(Position, m), m, IsWhite));
+                _ = moves.RemoveWhere(m => BoardAnalysis.IsKingReachable(board.AfterMove(Position, m), IsWhite, m));
             }
             return moves;
         }
@@ -87,14 +85,12 @@ namespace Chess.Pieces
         public override double Value => 9.5;
         public override bool IsWhite { get; }
         public override Point Position { get; protected set; }
-        public override King ParentKing { get; }
 
-        public Queen(Point position, bool isWhite, King parentKing)
+        public Queen(Point position, bool isWhite)
         {
             Position = position;
             IsWhite = isWhite;
             SymbolSpecial = isWhite ? '♕' : '♛';
-            ParentKing = parentKing;
         }
 
         public override HashSet<Point> GetValidMoves(Piece?[,] board, bool enforceCheckLegality)
@@ -238,7 +234,7 @@ namespace Chess.Pieces
             }
             if (enforceCheckLegality)
             {
-                _ = moves.RemoveWhere(m => BoardAnalysis.IsSquareOpponentReachable(board.AfterMove(Position, m), ParentKing.Position, IsWhite));
+                _ = moves.RemoveWhere(m => BoardAnalysis.IsKingReachable(board.AfterMove(Position, m), IsWhite));
             }
             return moves;
         }
@@ -252,14 +248,12 @@ namespace Chess.Pieces
         public override double Value => 5.63;
         public override bool IsWhite { get; }
         public override Point Position { get; protected set; }
-        public override King ParentKing { get; }
 
-        public Rook(Point position, bool isWhite, King parentKing)
+        public Rook(Point position, bool isWhite)
         {
             Position = position;
             IsWhite = isWhite;
             SymbolSpecial = isWhite ? '♖' : '♜';
-            ParentKing = parentKing;
         }
 
         public override HashSet<Point> GetValidMoves(Piece?[,] board, bool enforceCheckLegality)
@@ -335,7 +329,7 @@ namespace Chess.Pieces
             }
             if (enforceCheckLegality)
             {
-                _ = moves.RemoveWhere(m => BoardAnalysis.IsSquareOpponentReachable(board.AfterMove(Position, m), ParentKing.Position, IsWhite));
+                _ = moves.RemoveWhere(m => BoardAnalysis.IsKingReachable(board.AfterMove(Position, m), IsWhite));
             }
             return moves;
         }
@@ -349,14 +343,12 @@ namespace Chess.Pieces
         public override double Value => 3.33;
         public override bool IsWhite { get; }
         public override Point Position { get; protected set; }
-        public override King ParentKing { get; }
 
-        public Bishop(Point position, bool isWhite, King parentKing)
+        public Bishop(Point position, bool isWhite)
         {
             Position = position;
             IsWhite = isWhite;
             SymbolSpecial = isWhite ? '♗' : '♝';
-            ParentKing = parentKing;
         }
 
         public override HashSet<Point> GetValidMoves(Piece?[,] board, bool enforceCheckLegality)
@@ -432,7 +424,7 @@ namespace Chess.Pieces
             }
             if (enforceCheckLegality)
             {
-                _ = moves.RemoveWhere(m => BoardAnalysis.IsSquareOpponentReachable(board.AfterMove(Position, m), ParentKing.Position, IsWhite));
+                _ = moves.RemoveWhere(m => BoardAnalysis.IsKingReachable(board.AfterMove(Position, m), IsWhite));
             }
             return moves;
         }
@@ -451,14 +443,12 @@ namespace Chess.Pieces
         public override double Value => 3.05;
         public override bool IsWhite { get; }
         public override Point Position { get; protected set; }
-        public override King ParentKing { get; }
 
-        public Knight(Point position, bool isWhite, King parentKing)
+        public Knight(Point position, bool isWhite)
         {
             Position = position;
             IsWhite = isWhite;
             SymbolSpecial = isWhite ? '♘' : '♞';
-            ParentKing = parentKing;
         }
 
         public override HashSet<Point> GetValidMoves(Piece?[,] board, bool enforceCheckLegality)
@@ -476,7 +466,7 @@ namespace Chess.Pieces
             }
             if (enforceCheckLegality)
             {
-                _ = validMoves.RemoveWhere(m => BoardAnalysis.IsSquareOpponentReachable(board.AfterMove(Position, m), ParentKing.Position, IsWhite));
+                _ = validMoves.RemoveWhere(m => BoardAnalysis.IsKingReachable(board.AfterMove(Position, m), IsWhite));
             }
             return validMoves;
         }
@@ -490,16 +480,14 @@ namespace Chess.Pieces
         public override double Value => 1;
         public override bool IsWhite { get; }
         public override Point Position { get; protected set; }
-        public override King ParentKing { get; }
         public bool LastMoveWasDouble { get; set; }
 
-        public Pawn(Point position, bool isWhite, King parentKing)
+        public Pawn(Point position, bool isWhite)
         {
             Position = position;
             IsWhite = isWhite;
             SymbolSpecial = isWhite ? '♙' : '♟';
             LastMoveWasDouble = false;
-            ParentKing = parentKing;
         }
 
         public override HashSet<Point> GetValidMoves(Piece?[,] board, bool enforceCheckLegality)
@@ -537,7 +525,7 @@ namespace Chess.Pieces
             }
             if (enforceCheckLegality)
             {
-                _ = moves.RemoveWhere(m => BoardAnalysis.IsSquareOpponentReachable(board.AfterMove(Position, m), ParentKing.Position, IsWhite));
+                _ = moves.RemoveWhere(m => BoardAnalysis.IsKingReachable(board.AfterMove(Position, m), IsWhite));
             }
             return moves;
         }

@@ -7,13 +7,16 @@ namespace Chess
     public static class BoardAnalysis
     {
         /// <summary>
-        /// Determine whether a square, occupied or not, can be reached by any of the opponents pieces
+        /// Determine whether a king can be reached by any of the opponents pieces
         /// </summary>
         /// <param name="board">The state of the board to check</param>
-        /// <param name="target">The target square on the board</param>
-        /// <param name="isWhite">Is the current player (not the opponent!) white?</param>
-        public static bool IsSquareOpponentReachable(Pieces.Piece?[,] board, Point target, bool isWhite)
+        /// <param name="isWhite">Is the king to check white?</param>
+        /// <param name="target">Override the position of the king to check</param>
+        /// <remarks><paramref name="target"/> should always be given if checking a not-yet-peformed king move, as the king's internally stored position will be incorrect.</remarks>
+        public static bool IsKingReachable(Pieces.Piece?[,] board, bool isWhite, Point? target = null)
         {
+            target ??= board.OfType<Pieces.King>().Where(x => x.IsWhite == isWhite).First().Position;
+
             // King check
             for (int dx = -1; dx <= 1; dx++)
             {
@@ -21,7 +24,7 @@ namespace Chess
                 {
                     if (dy != 0 || dx != 0)
                     {
-                        Point newPos = new(target.X + dx, target.Y + dy);
+                        Point newPos = new(target.Value.X + dx, target.Value.Y + dy);
                         if (newPos.X >= 0 && newPos.Y >= 0 && newPos.X < board.GetLength(0) && newPos.Y < board.GetLength(1)
                             && board[newPos.X, newPos.Y] is Pieces.King && board[newPos.X, newPos.Y]!.IsWhite != isWhite)
                         {
@@ -32,9 +35,9 @@ namespace Chess
             }
 
             // Straight checks (rook & queen)
-            for (int dx = target.X + 1; dx < board.GetLength(0); dx++)
+            for (int dx = target.Value.X + 1; dx < board.GetLength(0); dx++)
             {
-                Point newPos = new(dx, target.Y);
+                Point newPos = new(dx, target.Value.Y);
                 if (board[newPos.X, newPos.Y] is not null)
                 {
                     if (board[newPos.X, newPos.Y]!.IsWhite != isWhite &&
@@ -45,9 +48,9 @@ namespace Chess
                     break;
                 }
             }
-            for (int dx = target.X - 1; dx >= 0; dx--)
+            for (int dx = target.Value.X - 1; dx >= 0; dx--)
             {
-                Point newPos = new(dx, target.Y);
+                Point newPos = new(dx, target.Value.Y);
                 if (board[newPos.X, newPos.Y] is not null)
                 {
                     if (board[newPos.X, newPos.Y]!.IsWhite != isWhite &&
@@ -58,9 +61,9 @@ namespace Chess
                     break;
                 }
             }
-            for (int dy = target.Y + 1; dy < board.GetLength(1); dy++)
+            for (int dy = target.Value.Y + 1; dy < board.GetLength(1); dy++)
             {
-                Point newPos = new(target.X, dy);
+                Point newPos = new(target.Value.X, dy);
                 if (board[newPos.X, newPos.Y] is not null)
                 {
                     if (board[newPos.X, newPos.Y]!.IsWhite != isWhite &&
@@ -71,9 +74,9 @@ namespace Chess
                     break;
                 }
             }
-            for (int dy = target.Y - 1; dy >= 0; dy--)
+            for (int dy = target.Value.Y - 1; dy >= 0; dy--)
             {
-                Point newPos = new(target.X, dy);
+                Point newPos = new(target.Value.X, dy);
                 if (board[newPos.X, newPos.Y] is not null)
                 {
                     if (board[newPos.X, newPos.Y]!.IsWhite != isWhite &&
@@ -86,9 +89,9 @@ namespace Chess
             }
 
             // Diagonal checks (bishop & queen)
-            for (int dif = 1; target.X + dif < board.GetLength(0) && target.Y + dif < board.GetLength(1); dif++)
+            for (int dif = 1; target.Value.X + dif < board.GetLength(0) && target.Value.Y + dif < board.GetLength(1); dif++)
             {
-                Point newPos = new(target.X + dif, target.Y + dif);
+                Point newPos = new(target.Value.X + dif, target.Value.Y + dif);
                 if (board[newPos.X, newPos.Y] is not null)
                 {
                     if (board[newPos.X, newPos.Y]!.IsWhite != isWhite &&
@@ -99,9 +102,9 @@ namespace Chess
                     break;
                 }
             }
-            for (int dif = 1; target.X - dif >= 0 && target.Y + dif < board.GetLength(1); dif++)
+            for (int dif = 1; target.Value.X - dif >= 0 && target.Value.Y + dif < board.GetLength(1); dif++)
             {
-                Point newPos = new(target.X - dif, target.Y + dif);
+                Point newPos = new(target.Value.X - dif, target.Value.Y + dif);
                 if (board[newPos.X, newPos.Y] is not null)
                 {
                     if (board[newPos.X, newPos.Y]!.IsWhite != isWhite &&
@@ -112,9 +115,9 @@ namespace Chess
                     break;
                 }
             }
-            for (int dif = 1; target.X - dif >= 0 && target.Y - dif >= 0; dif++)
+            for (int dif = 1; target.Value.X - dif >= 0 && target.Value.Y - dif >= 0; dif++)
             {
-                Point newPos = new(target.X - dif, target.Y - dif);
+                Point newPos = new(target.Value.X - dif, target.Value.Y - dif);
                 if (board[newPos.X, newPos.Y] is not null)
                 {
                     if (board[newPos.X, newPos.Y]!.IsWhite != isWhite &&
@@ -125,9 +128,9 @@ namespace Chess
                     break;
                 }
             }
-            for (int dif = 1; target.X + dif < board.GetLength(0) && target.Y - dif >= 0; dif++)
+            for (int dif = 1; target.Value.X + dif < board.GetLength(0) && target.Value.Y - dif >= 0; dif++)
             {
-                Point newPos = new(target.X + dif, target.Y - dif);
+                Point newPos = new(target.Value.X + dif, target.Value.Y - dif);
                 if (board[newPos.X, newPos.Y] is not null)
                 {
                     if (board[newPos.X, newPos.Y]!.IsWhite != isWhite &&
@@ -142,7 +145,7 @@ namespace Chess
             // Knight checks
             foreach (Point move in Pieces.Knight.Moves)
             {
-                Point newPos = new(target.X + move.X, target.Y + move.Y);
+                Point newPos = new(target.Value.X + move.X, target.Value.Y + move.Y);
                 if (newPos.X >= 0 && newPos.Y >= 0 && newPos.X < board.GetLength(0) && newPos.Y < board.GetLength(1)
                     && board[newPos.X, newPos.Y] is Pieces.Knight && board[newPos.X, newPos.Y]!.IsWhite != isWhite)
                 {
@@ -152,37 +155,33 @@ namespace Chess
 
             // Pawn checks
             int pawnYDiff = isWhite ? 1 : -1;
-            int newY = target.Y + pawnYDiff;
+            int newY = target.Value.Y + pawnYDiff;
             if (newY < board.GetLength(1) && newY > 0)
             {
-                if (board[target.X, target.Y] is null && board[target.X, newY] is Pieces.Pawn
-                    && board[target.X, newY]!.IsWhite != isWhite)
+                if (board[target.Value.X, target.Value.Y] is null && board[target.Value.X, newY] is Pieces.Pawn
+                    && board[target.Value.X, newY]!.IsWhite != isWhite)
                 {
                     return true;
                 }
-                if (board[target.X, target.Y] is not null
-                    // En passant
-                    || (target.Y - pawnYDiff < board.GetLength(1) && target.Y - pawnYDiff > 0
-                        && board[target.X, target.Y - pawnYDiff] is Pieces.Pawn
-                        && ((Pieces.Pawn)board[target.X, target.Y - pawnYDiff]!).LastMoveWasDouble))
+                if (board[target.Value.X, target.Value.Y] is not null)
                 {
-                    if (target.X > 0 && board[target.X - 1, newY] is Pieces.Pawn
-                        && board[target.X - 1, newY]!.IsWhite != isWhite)
+                    if (target.Value.X > 0 && board[target.Value.X - 1, newY] is Pieces.Pawn
+                        && board[target.Value.X - 1, newY]!.IsWhite != isWhite)
                     {
                         return true;
                     }
-                    if (target.X < board.GetLength(0) - 1 && board[target.X + 1, newY] is Pieces.Pawn
-                        && board[target.X + 1, newY]!.IsWhite != isWhite)
+                    if (target.Value.X < board.GetLength(0) - 1 && board[target.Value.X + 1, newY] is Pieces.Pawn
+                        && board[target.Value.X + 1, newY]!.IsWhite != isWhite)
                     {
                         return true;
                     }
                 }
             }
-            newY = target.Y + (pawnYDiff * 2);
+            newY = target.Value.Y + (pawnYDiff * 2);
             if (newY == (isWhite ? board.GetLength(1) - 2 : 1))
             {
-                if (board[target.X, target.Y] is null && board[target.X, target.Y + pawnYDiff] is null
-                    && board[target.X, newY] is Pieces.Pawn && board[target.X, newY]!.IsWhite != isWhite)
+                if (board[target.Value.X, target.Value.Y] is null && board[target.Value.X, target.Value.Y + pawnYDiff] is null
+                    && board[target.Value.X, newY] is Pieces.Pawn && board[target.Value.X, newY]!.IsWhite != isWhite)
                 {
                     return true;
                 }
@@ -208,9 +207,9 @@ namespace Chess
             HashSet<Point> whiteMoves = whitePieces.SelectMany(p => p.GetValidMoves(board, true)).ToHashSet();
             HashSet<Point> blackMoves = blackPieces.SelectMany(p => p.GetValidMoves(board, true)).ToHashSet();
 
-            bool whiteCheck = IsSquareOpponentReachable(board, whiteKing.Position, true);
+            bool whiteCheck = IsKingReachable(board, true);
             // White and Black cannot both be in check
-            bool blackCheck = !whiteCheck && IsSquareOpponentReachable(board, blackKing.Position, false);
+            bool blackCheck = !whiteCheck && IsKingReachable(board, false);
 
             if (!whiteMoves.Any())
             {
