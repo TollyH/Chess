@@ -505,34 +505,35 @@ namespace Chess.Pieces
         public override HashSet<Point> GetValidMoves(Piece?[,] board, bool enforceCheckLegality)
         {
             HashSet<Point> moves = new();
-            int dy = IsWhite ? 1 : -1;
+            int checkY = Position.Y + (IsWhite ? 1 : -1);
+            int doubleCheckY = Position.Y + (IsWhite ? 2 : -2);
             bool hasMoved = Position.Y != (IsWhite ? 1 : board.GetLength(1) - 2);
-            if (board[Position.X, Position.Y + dy] is null)
+            if (board[Position.X, checkY] is null)
             {
-                _ = moves.Add(new Point(Position.X, Position.Y + dy));
+                _ = moves.Add(new Point(Position.X, checkY));
             }
             // First move can optionally be two instead of one
-            if (!hasMoved && board[Position.X, Position.Y + (dy * 2)] is null)
+            if (!hasMoved && board[Position.X, doubleCheckY] is null)
             {
-                _ = moves.Add(new Point(Position.X, Position.Y + (dy * 2)));
+                _ = moves.Add(new Point(Position.X, doubleCheckY));
             }
             // Taking to diagonal left
             if (Position.X > 0 && (
-                (board[Position.X - 1, Position.Y + dy] is not null && board[Position.X - 1, Position.Y + dy]!.IsWhite != IsWhite)
+                (board[Position.X - 1, checkY] is not null && board[Position.X - 1, checkY]!.IsWhite != IsWhite)
                 // En Passant
-                || (board[Position.X - 1, Position.Y + (dy * 2)] is Pawn && board[Position.X - 1, Position.Y + (dy * 2)]!.IsWhite != IsWhite
-                    && ((Pawn)board[Position.X - 1, Position.Y + (dy * 2)]!).LastMoveWasDouble)))
+                || (board[Position.X - 1, Position.Y] is Pawn && board[Position.X - 1, Position.Y]!.IsWhite != IsWhite
+                    && ((Pawn)board[Position.X - 1, Position.Y]!).LastMoveWasDouble)))
             {
-                _ = moves.Add(new Point(Position.X - 1, Position.Y + dy));
+                _ = moves.Add(new Point(Position.X - 1, checkY));
             }
             // Taking to diagonal right
             if (Position.X < board.GetLength(0) - 1 && (
-                (board[Position.X + 1, Position.Y + dy] is not null && board[Position.X + 1, Position.Y + dy]!.IsWhite != IsWhite)
+                (board[Position.X + 1, checkY] is not null && board[Position.X + 1, checkY]!.IsWhite != IsWhite)
                 // En Passant
-                || (board[Position.X + 1, Position.Y + (dy * 2)] is Pawn && board[Position.X + 1, Position.Y + (dy * 2)]!.IsWhite != IsWhite
-                    && ((Pawn)board[Position.X + 1, Position.Y + (dy * 2)]!).LastMoveWasDouble)))
+                || (board[Position.X + 1, Position.Y] is Pawn && board[Position.X + 1, Position.Y]!.IsWhite != IsWhite
+                    && ((Pawn)board[Position.X + 1, Position.Y]!).LastMoveWasDouble)))
             {
-                _ = moves.Add(new Point(Position.X + 1, Position.Y + dy));
+                _ = moves.Add(new Point(Position.X + 1, checkY));
             }
             if (enforceCheckLegality)
             {

@@ -151,7 +151,7 @@ namespace Chess
             }
 
             // Pawn checks
-            int pawnYDiff = isWhite ? -1 : 1;
+            int pawnYDiff = isWhite ? 1 : -1;
             int newY = target.Y + pawnYDiff;
             if (newY < board.GetLength(1) && newY > 0)
             {

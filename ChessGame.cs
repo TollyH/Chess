@@ -142,6 +142,12 @@ namespace Chess
                     {
                         movedPawn.LastMoveWasDouble = true;
                     }
+                    // Take pawn after en passant
+                    if (destination.X != source.X && Board[destination.X, destination.Y] is null)
+                    {
+                        CapturedPieces.Add(Board[destination.X, source.Y]!);
+                        Board[destination.X, source.Y] = null;
+                    }
                 }
 
                 Board[destination.X, destination.Y] = piece;
