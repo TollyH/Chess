@@ -505,7 +505,7 @@ namespace Chess.Pieces
         {
             HashSet<Point> moves = new();
             int dy = IsWhite ? 1 : -1;
-            bool hasMoved = Position.Y == (IsWhite ? 1 : board.GetLength(1) - 2);
+            bool hasMoved = Position.Y != (IsWhite ? 1 : board.GetLength(1) - 2);
             if (board[Position.X, Position.Y + dy] is null)
             {
                 _ = moves.Add(new Point(Position.X, Position.Y + dy));
