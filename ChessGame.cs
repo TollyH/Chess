@@ -38,6 +38,7 @@ namespace Chess
         public Pieces.Piece?[,] Board { get; }
 
         public bool CurrentTurnWhite { get; private set; }
+        public bool GameOver { get; private set; }
 
         /// <summary>
         /// A list of the moves made this game as (sourcePosition, destinationPosition)
@@ -53,6 +54,7 @@ namespace Chess
         public ChessGame()
         {
             CurrentTurnWhite = true;
+            GameOver = false;
 
             Moves = new List<(Point, Point)>();
             CapturedPieces = new List<Pieces.Piece>();
@@ -106,6 +108,11 @@ namespace Chess
         /// <remarks>This method will check if the move is completely valid. No other validity checks are required.</remarks>
         public bool MovePiece(Point source, Point destination)
         {
+            if (GameOver)
+            {
+                return false;
+            }
+
             Pieces.Piece? piece = Board[source.X, source.Y];
             if (piece is null)
             {
@@ -159,6 +166,10 @@ namespace Chess
                 }
 
                 CurrentTurnWhite = !CurrentTurnWhite;
+                if (EndingStates.Contains(DetermineGameState()))
+                {
+                    GameOver = true;
+                }
                 return true;
             }
 

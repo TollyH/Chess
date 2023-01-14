@@ -84,20 +84,43 @@ namespace Chess
 
         private void UpdateCursor()
         {
+            if (game.GameOver)
+            {
+                Mouse.OverrideCursor = Cursors.Arrow;
+                return;
+            }
             if (grabbedPiece is not null && !highlightGrabbedMoves)
             {
                 Mouse.OverrideCursor = Cursors.ScrollAll;
                 return;
             }
-
             Pieces.Piece? checkPiece = GetPieceAtCanvasPoint(Mouse.GetPosition(chessGameCanvas));
             if (checkPiece is not null && checkPiece.IsWhite == game.CurrentTurnWhite)
             {
                 Mouse.OverrideCursor = Cursors.Hand;
                 return;
             }
-
             Mouse.OverrideCursor = Cursors.Arrow;
+        }
+
+        /// <summary>
+        /// If the game has ended, alert the user how it ended, otherwise do nothing
+        /// </summary>
+        private void PushEndgameMessage()
+        {
+            if (game.GameOver)
+            {
+                _ = MessageBox.Show(game.DetermineGameState() switch
+                {
+                    GameState.CheckMateWhite => "Black wins by checkmate!",
+                    GameState.CheckMateBlack => "White wins by checkmate!",
+                    GameState.DrawStalemate => "Game drawn due to stalemate",
+                    GameState.DrawInsufficientMaterial => "Game drawn as neither side has sufficient material to mate",
+                    GameState.DrawThreeFold => "Game drawn as the same position has occured three times",
+                    GameState.DrawFiftyMove => "Game drawn as fifty moves have occured without a capture or a pawn movement",
+                    _ => "Game over"
+                }, "Game Over", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
         }
 
         private System.Drawing.Point GetCoordFromCanvasPoint(Point position)
@@ -136,6 +159,10 @@ namespace Chess
 
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (game.GameOver)
+            {
+                return;
+            }
             Point mousePos = Mouse.GetPosition(chessGameCanvas);
 
             // If a piece is selected, try to move it
@@ -149,6 +176,7 @@ namespace Chess
                     grabbedPiece = null;
                     UpdateCursor();
                     UpdateGameDisplay();
+                    PushEndgameMessage();
                     return;
                 }
             }
@@ -162,6 +190,10 @@ namespace Chess
 
         private void Window_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (game.GameOver)
+            {
+                return;
+            }
             if (grabbedPiece is not null)
             {
                 System.Drawing.Point destination = GetCoordFromCanvasPoint(Mouse.GetPosition(chessGameCanvas));
@@ -185,11 +217,15 @@ namespace Chess
             }
             UpdateCursor();
             UpdateGameDisplay();
+            PushEndgameMessage();
         }
 
         private void Window_MouseLeave(object sender, MouseEventArgs e)
         {
+            if (grabbedPiece is not null)
+            {
             highlightGrabbedMoves = true;
+            }
             UpdateGameDisplay();
         }
     }
