@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -44,16 +45,44 @@ namespace Chess
                 {
                     bool enPassant = grabbedPiece is Pieces.Pawn && validMove.X != grabbedPiece.Position.X
                         && game.Board[validMove.X, validMove.Y] is null;
+
+                    Brush fillBrush;
+                    if (enPassant || game.Board[validMove.X, validMove.Y] is not null)
+                    {
+                        fillBrush = Brushes.Red;
+                    }
+                    else
+                    {
+                        fillBrush = Brushes.Yellow;
+                    }
+
                     Rectangle newRect = new()
                     {
                         Width = tileWidth,
                         Height = tileHeight,
-                        Fill = game.Board[validMove.X, validMove.Y] is null && !enPassant ? Brushes.Yellow : Brushes.Red
+                        Fill = fillBrush
                     };
                     _ = chessGameCanvas.Children.Add(newRect);
                     Canvas.SetBottom(newRect, validMove.Y * tileHeight);
                     Canvas.SetLeft(newRect, validMove.X * tileWidth);
                 }
+            }
+
+            GameState state = game.DetermineGameState();
+
+            if (state is GameState.CheckMateWhite or GameState.CheckMateBlack)
+            {
+                System.Drawing.Point kingPosition = game.Board.OfType<Pieces.King>().Where(
+                    x => x.IsWhite == (state == GameState.CheckMateWhite)).First().Position;
+                Rectangle mateHighlight = new()
+                {
+                    Width = tileWidth,
+                    Height = tileHeight,
+                    Fill = Brushes.IndianRed
+                };
+                _ = chessGameCanvas.Children.Add(mateHighlight);
+                Canvas.SetBottom(mateHighlight, kingPosition.Y * tileHeight);
+                Canvas.SetLeft(mateHighlight, kingPosition.X * tileWidth);
             }
 
             for (int x = 0; x < game.Board.GetLength(0); x++)
@@ -63,12 +92,27 @@ namespace Chess
                     Pieces.Piece? piece = game.Board[x, y];
                     if (piece is not null)
                     {
+                        Brush foregroundBrush;
+                        if (piece is Pieces.King && ((piece.IsWhite && state == GameState.CheckWhite) || (!piece.IsWhite && state == GameState.CheckBlack)))
+                        {
+                            foregroundBrush = Brushes.Red;
+                        }
+                        else if (highlightGrabbedMoves && piece == grabbedPiece)
+                        {
+                            foregroundBrush = Brushes.Blue;
+                        }
+                        else
+                        {
+                            foregroundBrush = Brushes.Black;
+                        }
+
                         Viewbox newPiece = new()
                         {
-                            Child = new TextBlock() 
+                            Child = new TextBlock()
                             {
                                 Text = piece.SymbolSpecial.ToString(),
-                                FontFamily = new("Segoe UI Symbol")
+                                FontFamily = new("Segoe UI Symbol"),
+                                Foreground = foregroundBrush
                             },
                             Width = tileWidth,
                             Height = tileHeight
@@ -224,7 +268,7 @@ namespace Chess
         {
             if (grabbedPiece is not null)
             {
-            highlightGrabbedMoves = true;
+                highlightGrabbedMoves = true;
             }
             UpdateGameDisplay();
         }
