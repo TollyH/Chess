@@ -1,42 +1,50 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Drawing;
 
 namespace Chess.Pieces
 {
-    public interface IPiece
+    public abstract class Piece
     {
-        public string Name { get; }
-        public char SymbolLetter { get; }
-        public char SymbolSpecial { get; }
-        public double Value { get; }
-        public bool IsWhite { get; }
-        public Point Position { get; }
-        public King ParentKing { get; }
+        public abstract string Name { get; }
+        public abstract char SymbolLetter { get; }
+        public abstract char SymbolSpecial { get; }
+        public abstract double Value { get; }
+        public abstract bool IsWhite { get; }
+        public abstract Point Position { get; protected set; }
+        public abstract King ParentKing { get; }
 
         /// <summary>
         /// Get a set of all moves that this piece can perform on the given board
         /// </summary>
         /// <param name="enforceCheckLegality">Whether or not moves that would put own king into check are discounted</param>
-        public HashSet<Point> GetValidMoves(IPiece?[,] board, bool enforceCheckLegality);
+        public abstract HashSet<Point> GetValidMoves(Piece?[,] board, bool enforceCheckLegality);
+
         /// <summary>
         /// Move this piece to a square on the board
         /// </summary>
         /// <returns><see langword="true"/> if the move was valid and executed, <see langword="false"/> otherwise</returns>
         /// <remarks>This method will ensure that the move is valid</remarks>
-        public bool Move(IPiece?[,] board, Point target);
+        public bool Move(Piece?[,] board, Point target)
+        {
+            if (GetValidMoves(board, true).Contains(target))
+            {
+                Position = target;
+                return true;
+            }
+            return false;
+        }
     }
 
-    public class King : IPiece
+    public class King : Piece
     {
-        public string Name => "King";
-        public char SymbolLetter => 'K';
-        public char SymbolSpecial { get; private set; }
-        public double Value => double.PositiveInfinity;
-        public bool IsWhite { get; private set; }
-        public Point Position { get; private set; }
-        public King ParentKing => this;
+        public override string Name => "King";
+        public override char SymbolLetter => 'K';
+        public override char SymbolSpecial { get; }
+        public override double Value => double.PositiveInfinity;
+        public override bool IsWhite { get; }
+        public override Point Position { get; protected set; }
+        public override King ParentKing => this;
 
         public King(Point position, bool isWhite)
         {
@@ -45,7 +53,7 @@ namespace Chess.Pieces
             SymbolSpecial = isWhite ? '♔' : '♚';
         }
 
-        public HashSet<Point> GetValidMoves(IPiece?[,] board, bool enforceCheckLegality)
+        public override HashSet<Point> GetValidMoves(Piece?[,] board, bool enforceCheckLegality)
         {
             HashSet<Point> moves = new();
             for (int dx = -1; dx <= 1; dx++)
@@ -69,27 +77,17 @@ namespace Chess.Pieces
             }
             return moves;
         }
-
-        public bool Move(IPiece?[,] board, Point target)
-        {
-            if (GetValidMoves(board, true).Contains(target))
-            {
-                Position = target;
-                return true;
-            }
-            return false;
-        }
     }
 
-    public class Queen : IPiece
+    public class Queen : Piece
     {
-        public string Name => "Queen";
-        public char SymbolLetter => 'Q';
-        public char SymbolSpecial { get; private set; }
-        public double Value => 9.5;
-        public bool IsWhite { get; private set; }
-        public Point Position { get; private set; }
-        public King ParentKing { get; private set; }
+        public override string Name => "Queen";
+        public override char SymbolLetter => 'Q';
+        public override char SymbolSpecial { get; }
+        public override double Value => 9.5;
+        public override bool IsWhite { get; }
+        public override Point Position { get; protected set; }
+        public override King ParentKing { get; }
 
         public Queen(Point position, bool isWhite, King parentKing)
         {
@@ -99,7 +97,7 @@ namespace Chess.Pieces
             ParentKing = parentKing;
         }
 
-        public HashSet<Point> GetValidMoves(IPiece?[,] board, bool enforceCheckLegality)
+        public override HashSet<Point> GetValidMoves(Piece?[,] board, bool enforceCheckLegality)
         {
             HashSet<Point> moves = new();
             // Right
@@ -244,27 +242,17 @@ namespace Chess.Pieces
             }
             return moves;
         }
-
-        public bool Move(IPiece?[,] board, Point target)
-        {
-            if (GetValidMoves(board, true).Contains(target))
-            {
-                Position = target;
-                return true;
-            }
-            return false;
-        }
     }
 
-    public class Rook : IPiece
+    public class Rook : Piece
     {
-        public string Name => "Rook";
-        public char SymbolLetter => 'R';
-        public char SymbolSpecial { get; private set; }
-        public double Value => 5.63;
-        public bool IsWhite { get; private set; }
-        public Point Position { get; private set; }
-        public King ParentKing { get; private set; }
+        public override string Name => "Rook";
+        public override char SymbolLetter => 'R';
+        public override char SymbolSpecial { get; }
+        public override double Value => 5.63;
+        public override bool IsWhite { get; }
+        public override Point Position { get; protected set; }
+        public override King ParentKing { get; }
 
         public Rook(Point position, bool isWhite, King parentKing)
         {
@@ -274,7 +262,7 @@ namespace Chess.Pieces
             ParentKing = parentKing;
         }
 
-        public HashSet<Point> GetValidMoves(IPiece?[,] board, bool enforceCheckLegality)
+        public override HashSet<Point> GetValidMoves(Piece?[,] board, bool enforceCheckLegality)
         {
             HashSet<Point> moves = new();
             // Right
@@ -351,27 +339,17 @@ namespace Chess.Pieces
             }
             return moves;
         }
-
-        public bool Move(IPiece?[,] board, Point target)
-        {
-            if (GetValidMoves(board, true).Contains(target))
-            {
-                Position = target;
-                return true;
-            }
-            return false;
-        }
     }
 
-    public class Bishop : IPiece
+    public class Bishop : Piece
     {
-        public string Name => "Bishop";
-        public char SymbolLetter => 'B';
-        public char SymbolSpecial { get; private set; }
-        public double Value => 3.33;
-        public bool IsWhite { get; private set; }
-        public Point Position { get; private set; }
-        public King ParentKing { get; private set; }
+        public override string Name => "Bishop";
+        public override char SymbolLetter => 'B';
+        public override char SymbolSpecial { get; }
+        public override double Value => 3.33;
+        public override bool IsWhite { get; }
+        public override Point Position { get; protected set; }
+        public override King ParentKing { get; }
 
         public Bishop(Point position, bool isWhite, King parentKing)
         {
@@ -381,7 +359,7 @@ namespace Chess.Pieces
             ParentKing = parentKing;
         }
 
-        public HashSet<Point> GetValidMoves(IPiece?[,] board, bool enforceCheckLegality)
+        public override HashSet<Point> GetValidMoves(Piece?[,] board, bool enforceCheckLegality)
         {
             HashSet<Point> moves = new();
             // Diagonal Up Right
@@ -458,32 +436,22 @@ namespace Chess.Pieces
             }
             return moves;
         }
-
-        public bool Move(IPiece?[,] board, Point target)
-        {
-            if (GetValidMoves(board, true).Contains(target))
-            {
-                Position = target;
-                return true;
-            }
-            return false;
-        }
     }
 
-    public class Knight : IPiece
+    public class Knight : Piece
     {
         public static readonly ImmutableHashSet<Point> Moves = new HashSet<Point>()
         {
             new(1, 2), new(1, -2), new(-1, 2), new(-1, -2), new(2, 1), new(2, -1), new(-2, 1), new(-2, -1)
         }.ToImmutableHashSet();
 
-        public string Name => "Knight";
-        public char SymbolLetter => 'N';
-        public char SymbolSpecial { get; private set; }
-        public double Value => 3.05;
-        public bool IsWhite { get; private set; }
-        public Point Position { get; private set; }
-        public King ParentKing { get; private set; }
+        public override string Name => "Knight";
+        public override char SymbolLetter => 'N';
+        public override char SymbolSpecial { get; }
+        public override double Value => 3.05;
+        public override bool IsWhite { get; }
+        public override Point Position { get; protected set; }
+        public override King ParentKing { get; }
 
         public Knight(Point position, bool isWhite, King parentKing)
         {
@@ -493,7 +461,7 @@ namespace Chess.Pieces
             ParentKing = parentKing;
         }
 
-        public HashSet<Point> GetValidMoves(IPiece?[,] board, bool enforceCheckLegality)
+        public override HashSet<Point> GetValidMoves(Piece?[,] board, bool enforceCheckLegality)
         {
             HashSet<Point> moves = new(Moves);
             foreach (Point newMove in moves)
@@ -511,27 +479,17 @@ namespace Chess.Pieces
             }
             return moves;
         }
-
-        public bool Move(IPiece?[,] board, Point target)
-        {
-            if (GetValidMoves(board, true).Contains(target))
-            {
-                Position = target;
-                return true;
-            }
-            return false;
-        }
     }
 
-    public class Pawn : IPiece
+    public class Pawn : Piece
     {
-        public string Name => "Pawn";
-        public char SymbolLetter => 'P';
-        public char SymbolSpecial { get; private set; }
-        public double Value => 1;
-        public bool IsWhite { get; private set; }
-        public Point Position { get; private set; }
-        public King ParentKing { get; private set; }
+        public override string Name => "Pawn";
+        public override char SymbolLetter => 'P';
+        public override char SymbolSpecial { get; }
+        public override double Value => 1;
+        public override bool IsWhite { get; }
+        public override Point Position { get; protected set; }
+        public override King ParentKing { get; }
         public bool LastMoveWasDouble { get; private set; }
 
         public Pawn(Point position, bool isWhite, King parentKing)
@@ -543,7 +501,7 @@ namespace Chess.Pieces
             ParentKing = parentKing;
         }
 
-        public HashSet<Point> GetValidMoves(IPiece?[,] board, bool enforceCheckLegality)
+        public override HashSet<Point> GetValidMoves(Piece?[,] board, bool enforceCheckLegality)
         {
             HashSet<Point> moves = new();
             int dy = IsWhite ? 1 : -1;
@@ -580,17 +538,6 @@ namespace Chess.Pieces
                 _ = moves.RemoveWhere(m => BoardAnalysis.IsSquareOpponentReachable(board.AfterMove(Position, m), ParentKing.Position, IsWhite));
             }
             return moves;
-        }
-
-        public bool Move(IPiece?[,] board, Point target)
-        {
-            if (GetValidMoves(board, true).Contains(target))
-            {
-                LastMoveWasDouble = Math.Abs(target.Y - Position.Y) != 1;
-                Position = target;
-                return true;
-            }
-            return false;
         }
     }
 }

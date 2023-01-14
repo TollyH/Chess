@@ -29,7 +29,7 @@ namespace Chess
         /// <param name="board">The state of the board to check</param>
         /// <param name="target">The target square on the board</param>
         /// <param name="isWhite">Is the current player (not the opponent!) white?</param>
-        public static bool IsSquareOpponentReachable(Pieces.IPiece?[,] board, Point target, bool isWhite)
+        public static bool IsSquareOpponentReachable(Pieces.Piece?[,] board, Point target, bool isWhite)
         {
             // King check
             for (int dx = -1; dx <= 1; dx++)
@@ -214,10 +214,10 @@ namespace Chess
         /// <remarks>
         /// This method will not detect states that depend on game history, such as three-fold repetition or the 50-move rule
         /// </remarks>
-        public static GameState DetermineGameState(Pieces.IPiece?[,] board)
+        public static GameState DetermineGameState(Pieces.Piece?[,] board)
         {
-            IEnumerable<Pieces.IPiece> whitePieces = board.OfType<Pieces.IPiece>().Where(p => p.IsWhite);
-            IEnumerable<Pieces.IPiece> blackPieces = board.OfType<Pieces.IPiece>().Where(p => !p.IsWhite);
+            IEnumerable<Pieces.Piece> whitePieces = board.OfType<Pieces.Piece>().Where(p => p.IsWhite);
+            IEnumerable<Pieces.Piece> blackPieces = board.OfType<Pieces.Piece>().Where(p => !p.IsWhite);
 
             Pieces.King whiteKing = whitePieces.OfType<Pieces.King>().First();
             Pieces.King blackKing = blackPieces.OfType<Pieces.King>().First();
