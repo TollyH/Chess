@@ -14,5 +14,33 @@ namespace Chess
             newBoard[oldPoint.X, oldPoint.Y] = null;
             return newBoard;
         }
+
+        /// <summary>
+        /// Get a string representation of the given board.
+        /// </summary>
+        /// <remarks>The string contains no whitespace and only stores information on piece type, colour, and location.</remarks>
+        public static string ChessBoardToString(this Pieces.Piece?[,] board)
+        {
+            string result = string.Empty;
+
+            for (int y = 0; y < board.GetLength(1); y++)
+            {
+                for (int x = 0; x < board.GetLength(0); x++)
+                {
+                    Pieces.Piece? piece = board[x, y];
+                    if (piece is null)
+                    {
+                        result += "nn";
+                    }
+                    else
+                    {
+                        result += piece.SymbolLetter;
+                        result += piece.IsWhite ? 'w' : 'b';
+                    }
+                }
+            }
+
+            return result;
+        }
     }
 }
