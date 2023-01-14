@@ -72,8 +72,7 @@ namespace Chess
 
             if (state is GameState.CheckMateWhite or GameState.CheckMateBlack)
             {
-                System.Drawing.Point kingPosition = game.Board.OfType<Pieces.King>().Where(
-                    x => x.IsWhite == (state == GameState.CheckMateWhite)).First().Position;
+                System.Drawing.Point kingPosition = state == GameState.CheckMateWhite ? game.WhiteKing.Position : game.BlackKing.Position;
                 Rectangle mateHighlight = new()
                 {
                     Width = tileWidth,
