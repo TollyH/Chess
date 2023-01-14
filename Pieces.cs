@@ -463,21 +463,22 @@ namespace Chess.Pieces
 
         public override HashSet<Point> GetValidMoves(Piece?[,] board, bool enforceCheckLegality)
         {
-            HashSet<Point> moves = new(Moves);
-            foreach (Point newMove in moves)
+            HashSet<Point> vectors = new(Moves);
+            HashSet<Point> validMoves = new();
+            foreach (Point newMove in vectors)
             {
                 Point newPos = new(Position.X + newMove.X, Position.Y + newMove.Y);
-                if (newPos.X < 0 || newPos.Y < 0 || newPos.X >= board.GetLength(0) || newPos.Y >= board.GetLength(1)
-                    || (board[newPos.X, newPos.Y] is not null && board[newPos.X, newPos.Y]!.IsWhite == IsWhite))
+                if (newPos.X >= 0 && newPos.Y >= 0 && newPos.X < board.GetLength(0) && newPos.Y < board.GetLength(1)
+                    && (board[newPos.X, newPos.Y] is null || board[newPos.X, newPos.Y]!.IsWhite != IsWhite))
                 {
-                    _ = moves.Remove(newPos);
+                    _ = validMoves.Add(newPos);
                 }
             }
             if (enforceCheckLegality)
             {
-                _ = moves.RemoveWhere(m => BoardAnalysis.IsSquareOpponentReachable(board.AfterMove(Position, m), ParentKing.Position, IsWhite));
+                _ = validMoves.RemoveWhere(m => BoardAnalysis.IsSquareOpponentReachable(board.AfterMove(Position, m), ParentKing.Position, IsWhite));
             }
-            return moves;
+            return validMoves;
         }
     }
 
