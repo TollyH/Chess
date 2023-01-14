@@ -491,7 +491,7 @@ namespace Chess.Pieces
         public override bool IsWhite { get; }
         public override Point Position { get; protected set; }
         public override King ParentKing { get; }
-        public bool LastMoveWasDouble { get; private set; }
+        public bool LastMoveWasDouble { get; set; }
 
         public Pawn(Point position, bool isWhite, King parentKing)
         {

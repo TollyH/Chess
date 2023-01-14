@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Drawing;
+using System.Linq;
 
 namespace Chess
 {
@@ -128,10 +130,20 @@ namespace Chess
                     CapturedPieces.Add(Board[destination.X, destination.Y]!);
                     StaleMoveCounter = 0;
                 }
-                if (piece is Pieces.Pawn)
+
+                foreach (Pieces.Pawn pawn in Board.OfType<Pieces.Pawn>())
+                {
+                    pawn.LastMoveWasDouble = false;
+                }
+                if (piece is Pieces.Pawn movedPawn)
                 {
                     StaleMoveCounter = 0;
+                    if (Math.Abs(destination.Y - source.Y) > 1)
+                    {
+                        movedPawn.LastMoveWasDouble = true;
+                    }
                 }
+
                 Board[destination.X, destination.Y] = piece;
                 Board[source.X, source.Y] = null;
 
