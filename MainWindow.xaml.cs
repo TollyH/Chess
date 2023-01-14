@@ -14,7 +14,7 @@ namespace Chess
 
         private Pieces.Piece? grabbedPiece = null;
 
-        private Dictionary<Pieces.Piece, Viewbox> pieceViews = new();
+        private readonly Dictionary<Pieces.Piece, Viewbox> pieceViews = new();
 
         double tileWidth;
         double tileHeight;
@@ -60,14 +60,9 @@ namespace Chess
 
         private void UpdateCursor()
         {
-            if (grabbedPiece is not null)
-            {
-                Mouse.OverrideCursor = Cursors.ScrollAll;
-            }
-            else
-            {
-                Mouse.OverrideCursor = GetPieceAtCanvasPoint(Mouse.GetPosition(chessGameCanvas)) is null ? Cursors.Arrow : Cursors.Hand;
-            }
+            Mouse.OverrideCursor = grabbedPiece is not null
+                ? Cursors.ScrollAll
+                : GetPieceAtCanvasPoint(Mouse.GetPosition(chessGameCanvas)) is null ? Cursors.Arrow : Cursors.Hand;
         }
 
         private System.Drawing.Point GetCoordFromCanvasPoint(Point position)
@@ -79,11 +74,9 @@ namespace Chess
         private Pieces.Piece? GetPieceAtCanvasPoint(Point position)
         {
             System.Drawing.Point coord = GetCoordFromCanvasPoint(position);
-            if (coord.X < 0 || coord.Y < 0 || coord.X >= game.Board.GetLength(0) || coord.Y >= game.Board.GetLength(1))
-            {
-                return null;
-            }
-            return game.Board[coord.X, coord.Y];
+            return coord.X < 0 || coord.Y < 0 || coord.X >= game.Board.GetLength(0) || coord.Y >= game.Board.GetLength(1)
+                ? null
+                : game.Board[coord.X, coord.Y];
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -100,8 +93,8 @@ namespace Chess
         {
             if (grabbedPiece is not null)
             {
-                Canvas.SetBottom(pieceViews[grabbedPiece], (chessGameCanvas.ActualHeight - Mouse.GetPosition(chessGameCanvas).Y) - (tileHeight / 2));
-                Canvas.SetLeft(pieceViews[grabbedPiece], (Mouse.GetPosition(chessGameCanvas).X) - (tileWidth / 2));
+                Canvas.SetBottom(pieceViews[grabbedPiece], chessGameCanvas.ActualHeight - Mouse.GetPosition(chessGameCanvas).Y - (tileHeight / 2));
+                Canvas.SetLeft(pieceViews[grabbedPiece], Mouse.GetPosition(chessGameCanvas).X - (tileWidth / 2));
             }
             UpdateCursor();
         }
