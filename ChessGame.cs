@@ -145,6 +145,7 @@ namespace Chess
                     BoardCounts[newBoardString] = 1;
                 }
 
+                CurrentTurnWhite = !CurrentTurnWhite;
                 return true;
             }
 
