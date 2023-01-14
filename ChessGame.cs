@@ -2,6 +2,23 @@
 
 namespace Chess
 {
+    /// <remarks>
+    /// CheckWhite and CheckMateWhite mean that the check is against white,
+    /// or that white has lost respectively, and vice versa.
+    /// </remarks>
+    public enum GameState
+    {
+        StandardPlay,
+        DrawStalemate,
+        DrawFiftyMove,
+        DrawThreeFold,
+        DrawInsufficientMaterial,
+        CheckWhite,
+        CheckBlack,
+        CheckMateWhite,
+        CheckMateBlack
+    }
+
     public class ChessGame
     {
         public Pieces.Piece?[,] Board { get; private set; }
