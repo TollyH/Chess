@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="Chess" Height="500" Width="500" Loaded="Window_Loaded" SizeChanged="Window_SizeChanged" MouseMove="Window_MouseMove" MouseDown="Window_MouseDown" MouseUp="Window_MouseUp" MouseLeave="Window_MouseLeave">
     <Grid>
-        <Border BorderBrush="Black" BorderThickness="1,1,1,1">
+        <Border BorderBrush="Black" BorderThickness="1">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="1*"/>
@@ -63,6 +63,6 @@
                 <Rectangle Fill="#FFBF8245" Grid.Column="7" Grid.Row="6"/>
             </Grid>
         </Border>
-        <Canvas x:Name="chessGameCanvas"/>
+        <Canvas x:Name="chessGameCanvas" Margin="1"/>
     </Grid>
 </Window>
