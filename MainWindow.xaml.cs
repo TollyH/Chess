@@ -42,11 +42,13 @@ namespace Chess
             {
                 foreach (System.Drawing.Point validMove in grabbedPiece.GetValidMoves(game.Board, true))
                 {
+                    bool enPassant = grabbedPiece is Pieces.Pawn && validMove.X != grabbedPiece.Position.X
+                        && game.Board[validMove.X, validMove.Y] is null;
                     Rectangle newRect = new()
                     {
                         Width = tileWidth,
                         Height = tileHeight,
-                        Fill = game.Board[validMove.X, validMove.Y] is null ? Brushes.Yellow : Brushes.Red
+                        Fill = game.Board[validMove.X, validMove.Y] is null && !enPassant ? Brushes.Yellow : Brushes.Red
                     };
                     _ = chessGameCanvas.Children.Add(newRect);
                     Canvas.SetBottom(newRect, validMove.Y * tileHeight);
