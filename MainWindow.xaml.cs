@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -42,11 +43,8 @@ namespace Chess
             {
                 foreach (System.Drawing.Point validMove in grabbedPiece.GetValidMoves(game.Board, true))
                 {
-                    bool enPassant = grabbedPiece is Pieces.Pawn && validMove.X != grabbedPiece.Position.X
-                        && game.Board[validMove.X, validMove.Y] is null;
-
                     Brush fillBrush;
-                    if (enPassant || game.Board[validMove.X, validMove.Y] is not null)
+                    if (game.Board[validMove.X, validMove.Y] is not null)
                     {
                         fillBrush = Brushes.Red;
                     }
@@ -65,6 +63,21 @@ namespace Chess
                     Canvas.SetBottom(newRect, validMove.Y * tileHeight);
                     Canvas.SetLeft(newRect, validMove.X * tileWidth);
                 }
+            }
+
+            if (grabbedPiece is Pieces.Pawn && game.EnPassantSquare is not null && highlightGrabbedMoves
+                && Math.Abs(grabbedPiece.Position.X - game.EnPassantSquare.Value.X) == 1
+                && Math.Abs(grabbedPiece.Position.Y - game.EnPassantSquare.Value.Y) == 1)
+            {
+                Rectangle enPassantHighlight = new()
+                {
+                    Width = tileWidth,
+                    Height = tileHeight,
+                    Fill = Brushes.OrangeRed
+                };
+                _ = chessGameCanvas.Children.Add(enPassantHighlight);
+                Canvas.SetBottom(enPassantHighlight, game.EnPassantSquare.Value.Y * tileHeight);
+                Canvas.SetLeft(enPassantHighlight, game.EnPassantSquare.Value.X * tileWidth);
             }
 
             GameState state = game.DetermineGameState();

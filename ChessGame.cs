@@ -49,6 +49,7 @@ namespace Chess
         public List<(Point, Point)> Moves { get; }
         public List<Pieces.Piece> CapturedPieces { get; }
 
+        public Point? EnPassantSquare { get; private set; }
         public bool WhiteMayCastleKingside { get; private set; }
         public bool WhiteMayCastleQueenside { get; private set; }
         public bool BlackMayCastleKingside { get; private set; }
@@ -70,6 +71,7 @@ namespace Chess
             Moves = new List<(Point, Point)>();
             CapturedPieces = new List<Pieces.Piece>();
 
+            EnPassantSquare = null;
             WhiteMayCastleKingside = true;
             WhiteMayCastleQueenside = true;
             BlackMayCastleKingside = true;
@@ -188,19 +190,22 @@ namespace Chess
             {
                 // King performed castle, move correct rook
                 pieceMoved = true;
-                if (CurrentTurnWhite)
-                {
-                    _ = WhiteKing.Move(Board, destination, true);
-                }
-                else
-                {
-                    _ = BlackKing.Move(Board, destination, true);
-                }
+                _ = piece.Move(Board, destination, true);
+
                 int rookXPos = destination.X == 2 ? 0 : 7;
                 int newRookXPos = destination.X == 2 ? 3 : 5;
                 _ = Board[rookXPos, homeY]!.Move(Board, new Point(newRookXPos, homeY), true);
                 Board[newRookXPos, homeY] = Board[rookXPos, homeY];
                 Board[rookXPos, homeY] = null;
+            }
+            else if (piece is Pieces.Pawn && destination == EnPassantSquare
+                && Math.Abs(source.X - destination.X) == 1 && Math.Abs(source.Y - destination.Y) == 1)
+            {
+                pieceMoved = true;
+                _ = piece.Move(Board, destination, true);
+                // Take pawn after en passant
+                CapturedPieces.Add(Board[destination.X, source.Y]!);
+                Board[destination.X, source.Y] = null;
             }
             else
             {
@@ -217,22 +222,13 @@ namespace Chess
                     StaleMoveCounter = 0;
                 }
 
-                foreach (Pieces.Pawn pawn in Board.OfType<Pieces.Pawn>())
-                {
-                    pawn.LastMoveWasDouble = false;
-                }
-                if (piece is Pieces.Pawn movedPawn)
+                EnPassantSquare = null;
+                if (piece is Pieces.Pawn)
                 {
                     StaleMoveCounter = 0;
                     if (Math.Abs(destination.Y - source.Y) > 1)
                     {
-                        movedPawn.LastMoveWasDouble = true;
-                    }
-                    // Take pawn after en passant
-                    if (destination.X != source.X && Board[destination.X, destination.Y] is null)
-                    {
-                        CapturedPieces.Add(Board[destination.X, source.Y]!);
-                        Board[destination.X, source.Y] = null;
+                        EnPassantSquare = new Point(source.X, source.Y + (piece.IsWhite ? 1 : -1));
                     }
                 }
                 else if (piece is Pieces.King)

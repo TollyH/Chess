@@ -487,16 +487,17 @@ namespace Chess.Pieces
         public override double Value => 1;
         public override bool IsWhite { get; }
         public override Point Position { get; protected set; }
-        public bool LastMoveWasDouble { get; set; }
 
         public Pawn(Point position, bool isWhite)
         {
             Position = position;
             IsWhite = isWhite;
             SymbolSpecial = isWhite ? '♙' : '♟';
-            LastMoveWasDouble = false;
         }
 
+        /// <remarks>
+        /// This method will not return an available en passant move
+        /// </remarks>
         public override HashSet<Point> GetValidMoves(Piece?[,] board, bool enforceCheckLegality)
         {
             HashSet<Point> moves = new();
@@ -513,20 +514,14 @@ namespace Chess.Pieces
                 _ = moves.Add(new Point(Position.X, doubleCheckY));
             }
             // Taking to diagonal left
-            if (Position.X > 0 && (
-                (board[Position.X - 1, checkY] is not null && board[Position.X - 1, checkY]!.IsWhite != IsWhite)
-                // En Passant
-                || (board[Position.X - 1, Position.Y] is Pawn && board[Position.X - 1, Position.Y]!.IsWhite != IsWhite
-                    && ((Pawn)board[Position.X - 1, Position.Y]!).LastMoveWasDouble)))
+            if (Position.X > 0 && 
+                board[Position.X - 1, checkY] is not null && board[Position.X - 1, checkY]!.IsWhite != IsWhite)
             {
                 _ = moves.Add(new Point(Position.X - 1, checkY));
             }
             // Taking to diagonal right
-            if (Position.X < board.GetLength(0) - 1 && (
-                (board[Position.X + 1, checkY] is not null && board[Position.X + 1, checkY]!.IsWhite != IsWhite)
-                // En Passant
-                || (board[Position.X + 1, Position.Y] is Pawn && board[Position.X + 1, Position.Y]!.IsWhite != IsWhite
-                    && ((Pawn)board[Position.X + 1, Position.Y]!).LastMoveWasDouble)))
+            if (Position.X < board.GetLength(0) - 1 && 
+                board[Position.X + 1, checkY] is not null && board[Position.X + 1, checkY]!.IsWhite != IsWhite)
             {
                 _ = moves.Add(new Point(Position.X + 1, checkY));
             }
