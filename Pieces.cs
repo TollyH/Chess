@@ -464,10 +464,10 @@ namespace Chess.Pieces
 
     public class Knight : Piece
     {
-        public static readonly ImmutableHashSet<Point> Moves = new HashSet<Point>()
+        public static readonly ImmutableArray<Point> Moves = new Point[8]
         {
             new(1, 2), new(1, -2), new(-1, 2), new(-1, -2), new(2, 1), new(2, -1), new(-2, 1), new(-2, -1)
-        }.ToImmutableHashSet();
+        }.ToImmutableArray();
 
         public override string Name => "Knight";
         public override char SymbolLetter => 'N';

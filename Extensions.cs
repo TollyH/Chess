@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using System.Text;
 
 namespace Chess
 {
@@ -21,7 +22,7 @@ namespace Chess
         /// <remarks>The string contains no whitespace and only stores information on piece type, colour, and location.</remarks>
         public static string ChessBoardToString(this Pieces.Piece?[,] board)
         {
-            string result = string.Empty;
+            StringBuilder result = new(128);
 
             for (int y = 0; y < board.GetLength(1); y++)
             {
@@ -30,17 +31,16 @@ namespace Chess
                     Pieces.Piece? piece = board[x, y];
                     if (piece is null)
                     {
-                        result += "nn";
+                        _ = result.Append("nn");
                     }
                     else
                     {
-                        result += piece.SymbolLetter;
-                        result += piece.IsWhite ? 'w' : 'b';
+                        _ = result.Append(piece.SymbolLetter).Append(piece.IsWhite ? 'w' : 'b');
                     }
                 }
             }
 
-            return result;
+            return result.ToString();
         }
     }
 }

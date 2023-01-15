@@ -199,12 +199,12 @@ namespace Chess
         /// </remarks>
         public static bool IsCastlePossible(Pieces.Piece?[,] board, bool currentTurnWhite, bool kingside)
         {
-            if (IsKingReachable(board, currentTurnWhite))
+            int yPos = currentTurnWhite ? 0 : 7;
+            if (IsKingReachable(board, currentTurnWhite, new Point(4, yPos)))
             {
                 return false;
             }
 
-            int yPos = currentTurnWhite ? 0 : 7;
             if (kingside)
             {
                 Point rookDest = new(5, yPos);
@@ -254,37 +254,33 @@ namespace Chess
             IEnumerable<Pieces.Piece> whitePieces = board.OfType<Pieces.Piece>().Where(p => p.IsWhite);
             IEnumerable<Pieces.Piece> blackPieces = board.OfType<Pieces.Piece>().Where(p => !p.IsWhite);
 
-            Pieces.King whiteKing = whitePieces.OfType<Pieces.King>().First();
-            Pieces.King blackKing = blackPieces.OfType<Pieces.King>().First();
-
-            HashSet<Point> whiteMoves = whitePieces.SelectMany(p => p.GetValidMoves(board, true)).ToHashSet();
-            HashSet<Point> blackMoves = blackPieces.SelectMany(p => p.GetValidMoves(board, true)).ToHashSet();
-
             bool whiteCheck = IsKingReachable(board, true);
             // White and Black cannot both be in check
             bool blackCheck = !whiteCheck && IsKingReachable(board, false);
 
-            if (!whiteMoves.Any() && currentTurnWhite)
+            if (currentTurnWhite && !whitePieces.SelectMany(p => p.GetValidMoves(board, true)).Any())
             {
                 // Black may only win if they have white king in check, otherwise draw
                 return whiteCheck ? GameState.CheckMateWhite : GameState.DrawStalemate;
             }
-            if (!blackMoves.Any() && !currentTurnWhite)
+            if (!currentTurnWhite && !blackPieces.SelectMany(p => p.GetValidMoves(board, true)).Any())
             {
                 // White may only win if they have black king in check, otherwise draw
                 return blackCheck ? GameState.CheckMateBlack : GameState.DrawStalemate;
             }
 
-            if ((whitePieces.Count() == 1 || (whitePieces.Count() == 2
+            int whitePiecesCount = whitePieces.Count();
+            int blackPiecesCount = blackPieces.Count();
+            if ((whitePiecesCount == 1 || (whitePiecesCount == 2
                     && whitePieces.Where(p => p is not Pieces.King).First() is Pieces.Bishop or Pieces.Knight))
-                && (blackPieces.Count() == 1 || (blackPieces.Count() == 2
+                && (blackPiecesCount == 1 || (blackPiecesCount == 2
                     && blackPieces.Where(p => p is not Pieces.King).First() is Pieces.Bishop or Pieces.Knight)))
             {
                 return GameState.DrawInsufficientMaterial;
             }
 
-            if ((whitePieces.Count() == 1 && blackPieces.Count() == 3 && blackPieces.OfType<Pieces.Knight>().Count() == 2)
-                || (blackPieces.Count() == 1 && whitePieces.Count() == 3 && whitePieces.OfType<Pieces.Knight>().Count() == 2))
+            if ((whitePiecesCount == 1 && blackPiecesCount == 3 && blackPieces.OfType<Pieces.Knight>().Count() == 2)
+                || (blackPiecesCount == 1 && whitePiecesCount == 3 && whitePieces.OfType<Pieces.Knight>().Count() == 2))
             {
                 return GameState.DrawInsufficientMaterial;
             }
