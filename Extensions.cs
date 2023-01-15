@@ -29,14 +29,7 @@ namespace Chess
                 for (int x = 0; x < board.GetLength(0); x++)
                 {
                     Pieces.Piece? piece = board[x, y];
-                    if (piece is null)
-                    {
-                        _ = result.Append("nn");
-                    }
-                    else
-                    {
-                        _ = result.Append(piece.SymbolLetter).Append(piece.IsWhite ? 'w' : 'b');
-                    }
+                    _ = piece is null ? result.Append("nn") : result.Append(piece.SymbolLetter).Append(piece.IsWhite ? 'w' : 'b');
                 }
             }
 
