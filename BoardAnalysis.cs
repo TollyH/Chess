@@ -191,6 +191,59 @@ namespace Chess
         }
 
         /// <summary>
+        /// Determine if the player who's turn it is may castle in a given direction on this turn
+        /// </summary>
+        /// <param name="kingside"><see langword="true"/> if checking kingside, <see langword="false"/> if checking queenside</param>
+        /// <remarks>
+        /// This method will not consider whether a king or rook has moved before
+        /// </remarks>
+        public static bool IsCastlePossible(Pieces.Piece?[,] board, bool currentTurnWhite, bool kingside)
+        {
+            if (IsKingReachable(board, currentTurnWhite))
+            {
+                return false;
+            }
+
+            int yPos = currentTurnWhite ? 0 : 7;
+            if (kingside)
+            {
+                Point rookDest = new(5, yPos);
+                Point kingDest = new(6, yPos);
+                if (board[rookDest.X, yPos] is not null
+                    || IsKingReachable(board, currentTurnWhite, rookDest))
+                {
+                    return false;
+                }
+                if (board[kingDest.X, yPos] is not null
+                    || IsKingReachable(board, currentTurnWhite, kingDest))
+                {
+                    return false;
+                }
+                return true;
+            }
+            else
+            {
+                Point rookDest = new(3, yPos);
+                Point kingDest = new(2, yPos);
+                if (board[rookDest.X, yPos] is not null
+                    || IsKingReachable(board, currentTurnWhite, rookDest))
+                {
+                    return false;
+                }
+                if (board[kingDest.X, yPos] is not null
+                    || IsKingReachable(board, currentTurnWhite, kingDest))
+                {
+                    return false;
+                }
+                if (board[1, yPos] is not null)
+                {
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        /// <summary>
         /// Determine the current state of the game with the given board.
         /// </summary>
         /// <remarks>

@@ -121,6 +121,10 @@ namespace Chess
         /// Determine if the player who's turn it is may castle in a given direction on this turn
         /// </summary>
         /// <param name="kingside"><see langword="true"/> if checking kingside, <see langword="false"/> if checking queenside</param>
+        /// <remarks>
+        /// This method is similar to <see cref="BoardAnalysis.IsCastlePossible"/>,
+        /// however it also accounts for whether a king or rook have moved before
+        /// </remarks>
         public bool IsCastlePossible(bool kingside)
         {
             if (GameOver)
@@ -128,12 +132,6 @@ namespace Chess
                 return false;
             }
 
-            if (BoardAnalysis.IsKingReachable(Board, CurrentTurnWhite))
-            {
-                return false;
-            }
-
-            int yPos = CurrentTurnWhite ? 0 : 7;
             if (kingside)
             {
                 if (CurrentTurnWhite && !WhiteMayCastleKingside)
@@ -144,20 +142,6 @@ namespace Chess
                 {
                     return false;
                 }
-
-                Point rookDest = new(5, yPos);
-                Point kingDest = new(6, yPos);
-                if (Board[rookDest.X, yPos] is not null
-                    || BoardAnalysis.IsKingReachable(Board, CurrentTurnWhite, rookDest))
-                {
-                    return false;
-                }
-                if (Board[kingDest.X, yPos] is not null
-                    || BoardAnalysis.IsKingReachable(Board, CurrentTurnWhite, kingDest))
-                {
-                    return false;
-                }
-                return true;
             }
             else
             {
@@ -169,25 +153,9 @@ namespace Chess
                 {
                     return false;
                 }
-
-                Point rookDest = new(3, yPos);
-                Point kingDest = new(2, yPos);
-                if (Board[rookDest.X, yPos] is not null
-                    || BoardAnalysis.IsKingReachable(Board, CurrentTurnWhite, rookDest))
-                {
-                    return false;
-                }
-                if (Board[kingDest.X, yPos] is not null
-                    || BoardAnalysis.IsKingReachable(Board, CurrentTurnWhite, kingDest))
-                {
-                    return false;
-                }
-                if (Board[1, yPos] is not null)
-                {
-                    return false;
-                }
-                return true;
             }
+
+            return BoardAnalysis.IsCastlePossible(Board, CurrentTurnWhite, kingside);
         }
 
         /// <summary>
