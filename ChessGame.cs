@@ -277,6 +277,12 @@ namespace Chess
                     {
                         EnPassantSquare = new Point(source.X, source.Y + (piece.IsWhite ? 1 : -1));
                     }
+                    if (destination.Y == (piece.IsWhite ? 7 : 0))
+                    {
+                        // TODO: Promotion into any piece, not just Queen
+                        piece = new Pieces.Queen(piece.Position, piece.IsWhite);
+                        Board[source.X, source.Y] = piece;
+                    }
                 }
                 else if (piece is Pieces.King)
                 {
