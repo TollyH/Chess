@@ -20,6 +20,11 @@ namespace Chess.Pieces
         public abstract HashSet<Point> GetValidMoves(Piece?[,] board, bool enforceCheckLegality);
 
         /// <summary>
+        /// Create a clone of a chess piece, allowing modification of the clone without affecting the original
+        /// </summary>
+        public abstract Piece Clone();
+
+        /// <summary>
         /// Move this piece to a square on the board
         /// </summary>
         /// <returns><see langword="true"/> if the move was valid and executed, <see langword="false"/> otherwise</returns>
@@ -78,6 +83,11 @@ namespace Chess.Pieces
                 _ = moves.RemoveWhere(m => BoardAnalysis.IsKingReachable(board.AfterMove(Position, m), IsWhite, m));
             }
             return moves;
+        }
+
+        public override King Clone()
+        {
+            return new King(Position, IsWhite);
         }
     }
 
@@ -242,6 +252,11 @@ namespace Chess.Pieces
             }
             return moves;
         }
+
+        public override Queen Clone()
+        {
+            return new Queen(Position, IsWhite);
+        }
     }
 
     public class Rook : Piece
@@ -340,6 +355,11 @@ namespace Chess.Pieces
             }
             return moves;
         }
+
+        public override Rook Clone()
+        {
+            return new Rook(Position, IsWhite);
+        }
     }
 
     public class Bishop : Piece
@@ -435,6 +455,11 @@ namespace Chess.Pieces
             }
             return moves;
         }
+
+        public override Bishop Clone()
+        {
+            return new Bishop(Position, IsWhite);
+        }
     }
 
     public class Knight : Piece
@@ -476,6 +501,11 @@ namespace Chess.Pieces
                 _ = validMoves.RemoveWhere(m => BoardAnalysis.IsKingReachable(board.AfterMove(Position, m), IsWhite));
             }
             return validMoves;
+        }
+
+        public override Knight Clone()
+        {
+            return new Knight(Position, IsWhite);
         }
     }
 
@@ -530,6 +560,11 @@ namespace Chess.Pieces
                 _ = moves.RemoveWhere(m => BoardAnalysis.IsKingReachable(board.AfterMove(Position, m), IsWhite));
             }
             return moves;
+        }
+
+        public override Pawn Clone()
+        {
+            return new Pawn(Position, IsWhite);
         }
     }
 }

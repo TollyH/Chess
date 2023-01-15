@@ -60,6 +60,9 @@ namespace Chess
         // Used to detect three-fold repetition
         public Dictionary<string, int> BoardCounts { get; }
 
+        /// <summary>
+        /// Create a new standard chess game with all values at their defaults
+        /// </summary>
         public ChessGame()
         {
             CurrentTurnWhite = true;
@@ -91,6 +94,50 @@ namespace Chess
                 { new Pieces.Knight(new Point(6, 0), true), new Pieces.Pawn(new Point(6, 1), true), null, null, null, null, new Pieces.Pawn(new Point(6, 6), false), new Pieces.Knight(new Point(6, 7), false) },
                 { new Pieces.Rook(new Point(7, 0), true), new Pieces.Pawn(new Point(7, 1), true), null, null, null, null, new Pieces.Pawn(new Point(7, 6), false), new Pieces.Rook(new Point(7, 7), false) }
             };
+        }
+
+        /// <summary>
+        /// Create a new instance of a chess game, setting each game parameter to a non-default value
+        /// </summary>
+        public ChessGame(Pieces.Piece?[,] board, bool currentTurnWhite, bool gameOver, List<(Point, Point)> moves,
+            List<Pieces.Piece> capturedPieces, Point? enPassantSquare, bool whiteMayCastleKingside, bool whiteMayCastleQueenside,
+            bool blackMayCastleKingside, bool blackMayCastleQueenside, int staleMoveCounter, Dictionary<string, int> boardCounts)
+        {
+            Board = board;
+            WhiteKing = Board.OfType<Pieces.King>().Where(k => k.IsWhite).First();
+            BlackKing = Board.OfType<Pieces.King>().Where(k => !k.IsWhite).First();
+
+            CurrentTurnWhite = currentTurnWhite;
+            GameOver = gameOver;
+            Moves = moves;
+            CapturedPieces = capturedPieces;
+            EnPassantSquare = enPassantSquare;
+            WhiteMayCastleKingside = whiteMayCastleKingside;
+            WhiteMayCastleQueenside = whiteMayCastleQueenside;
+            BlackMayCastleKingside = blackMayCastleKingside;
+            BlackMayCastleQueenside = blackMayCastleQueenside;
+            StaleMoveCounter = staleMoveCounter;
+            BoardCounts = boardCounts;
+        }
+
+        /// <summary>
+        /// Create a deep copy of all parameters to this chess game
+        /// </summary>
+        public ChessGame Clone()
+        {
+            Pieces.Piece?[,] boardClone = new Pieces.Piece?[Board.GetLength(0), Board.GetLength(1)];
+            for (int x = 0; x < boardClone.GetLength(0); x++)
+            {
+                for (int y = 0; y < boardClone.GetLength(1); y++)
+                {
+                    boardClone[x, y] = Board[x, y]?.Clone();
+                }
+            }
+
+            return new ChessGame(boardClone, CurrentTurnWhite, GameOver, new(Moves),
+                CapturedPieces.Select(c => c.Clone()).ToList(), EnPassantSquare, WhiteMayCastleKingside,
+                WhiteMayCastleQueenside, BlackMayCastleKingside, BlackMayCastleQueenside, StaleMoveCounter,
+                new(BoardCounts));
         }
 
         /// <summary>
