@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -82,6 +81,35 @@ namespace Chess
                 _ = chessGameCanvas.Children.Add(mateHighlight);
                 Canvas.SetBottom(mateHighlight, kingPosition.Y * tileHeight);
                 Canvas.SetLeft(mateHighlight, kingPosition.X * tileWidth);
+            }
+
+            if (grabbedPiece is Pieces.King && highlightGrabbedMoves)
+            {
+                int yPos = game.CurrentTurnWhite ? 0 : 7;
+                if (game.IsCastlePossible(true))
+                {
+                    Rectangle castleHighlight = new()
+                    {
+                        Width = tileWidth,
+                        Height = tileHeight,
+                        Fill = Brushes.MediumPurple
+                    };
+                    _ = chessGameCanvas.Children.Add(castleHighlight);
+                    Canvas.SetBottom(castleHighlight, yPos * tileHeight);
+                    Canvas.SetLeft(castleHighlight, 6 * tileWidth);
+                }
+                if (game.IsCastlePossible(false))
+                {
+                    Rectangle castleHighlight = new()
+                    {
+                        Width = tileWidth,
+                        Height = tileHeight,
+                        Fill = Brushes.MediumPurple
+                    };
+                    _ = chessGameCanvas.Children.Add(castleHighlight);
+                    Canvas.SetBottom(castleHighlight, yPos * tileHeight);
+                    Canvas.SetLeft(castleHighlight, 2 * tileWidth);
+                }
             }
 
             for (int x = 0; x < game.Board.GetLength(0); x++)

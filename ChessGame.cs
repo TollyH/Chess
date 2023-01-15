@@ -49,6 +49,11 @@ namespace Chess
         public List<(Point, Point)> Moves { get; }
         public List<Pieces.Piece> CapturedPieces { get; }
 
+        public bool WhiteMayCastleKingside { get; private set; }
+        public bool WhiteMayCastleQueenside { get; private set; }
+        public bool BlackMayCastleKingside { get; private set; }
+        public bool BlackMayCastleQueenside { get; private set; }
+
         // Used for the 50-move rule
         public int StaleMoveCounter { get; private set; }
         // Used to detect three-fold repetition
@@ -64,6 +69,11 @@ namespace Chess
 
             Moves = new List<(Point, Point)>();
             CapturedPieces = new List<Pieces.Piece>();
+
+            WhiteMayCastleKingside = true;
+            WhiteMayCastleQueenside = true;
+            BlackMayCastleKingside = true;
+            BlackMayCastleQueenside = true;
 
             StaleMoveCounter = 0;
             BoardCounts = new Dictionary<string, int>();
@@ -108,6 +118,79 @@ namespace Chess
         }
 
         /// <summary>
+        /// Determine if the player who's turn it is may castle in a given direction on this turn
+        /// </summary>
+        /// <param name="kingside"><see langword="true"/> if checking kingside, <see langword="false"/> if checking queenside</param>
+        public bool IsCastlePossible(bool kingside)
+        {
+            if (GameOver)
+            {
+                return false;
+            }
+
+            if (BoardAnalysis.IsKingReachable(Board, CurrentTurnWhite))
+            {
+                return false;
+            }
+
+            int yPos = CurrentTurnWhite ? 0 : 7;
+            if (kingside)
+            {
+                if (CurrentTurnWhite && !WhiteMayCastleKingside)
+                {
+                    return false;
+                }
+                if (!CurrentTurnWhite && !BlackMayCastleKingside)
+                {
+                    return false;
+                }
+
+                Point rookDest = new(5, yPos);
+                Point kingDest = new(6, yPos);
+                if (Board[rookDest.X, yPos] is not null
+                    || BoardAnalysis.IsKingReachable(Board, CurrentTurnWhite, rookDest))
+                {
+                    return false;
+                }
+                if (Board[kingDest.X, yPos] is not null
+                    || BoardAnalysis.IsKingReachable(Board, CurrentTurnWhite, kingDest))
+                {
+                    return false;
+                }
+                return true;
+            }
+            else
+            {
+                if (CurrentTurnWhite && !WhiteMayCastleQueenside)
+                {
+                    return false;
+                }
+                if (!CurrentTurnWhite && !BlackMayCastleQueenside)
+                {
+                    return false;
+                }
+
+                Point rookDest = new(3, yPos);
+                Point kingDest = new(2, yPos);
+                if (Board[rookDest.X, yPos] is not null
+                    || BoardAnalysis.IsKingReachable(Board, CurrentTurnWhite, rookDest))
+                {
+                    return false;
+                }
+                if (Board[kingDest.X, yPos] is not null
+                    || BoardAnalysis.IsKingReachable(Board, CurrentTurnWhite, kingDest))
+                {
+                    return false;
+                }
+                if (Board[1, yPos] is not null)
+                {
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        /// <summary>
         /// Move a piece on the board from a <paramref name="source"/> coordinate to a <paramref name="destination"/> coordinate.
         /// </summary>
         /// <returns><see langword="true"/> if the move was valid and executed, <see langword="false"/> otherwise</returns>
@@ -129,7 +212,33 @@ namespace Chess
                 return false;
             }
 
-            bool pieceMoved = piece.Move(Board, destination);
+            bool pieceMoved;
+            int homeY = CurrentTurnWhite ? 0 : 7;
+            if (piece is Pieces.King && source.X == 4 && destination.Y == homeY
+                && ((destination.X == 6 && IsCastlePossible(true))
+                    || (destination.X == 2 && IsCastlePossible(false))))
+            {
+                // King performed castle, move correct rook
+                pieceMoved = true;
+                if (CurrentTurnWhite)
+                {
+                    WhiteKing.Move(Board, destination, true);
+                }
+                else
+                {
+                    BlackKing.Move(Board, destination, true);
+                }
+                int rookXPos = destination.X == 2 ? 0 : 7;
+                int newRookXPos = destination.X == 2 ? 3 : 5;
+                Board[rookXPos, homeY]!.Move(Board, new Point(newRookXPos, homeY), true);
+                Board[newRookXPos, homeY] = Board[rookXPos, homeY];
+                Board[rookXPos, homeY] = null;
+            }
+            else
+            {
+                pieceMoved = piece.Move(Board, destination);
+            }
+
             if (pieceMoved)
             {
                 StaleMoveCounter++;
@@ -156,6 +265,44 @@ namespace Chess
                     {
                         CapturedPieces.Add(Board[destination.X, source.Y]!);
                         Board[destination.X, source.Y] = null;
+                    }
+                }
+                else if (piece is Pieces.King)
+                {
+                    if (piece.IsWhite)
+                    {
+                        WhiteMayCastleKingside = false;
+                        WhiteMayCastleQueenside = false;
+                    }
+                    else
+                    {
+                        BlackMayCastleKingside = false;
+                        BlackMayCastleQueenside = false;
+                    }
+                }
+                else if (piece is Pieces.Rook)
+                {
+                    if (piece.IsWhite)
+                    {
+                        if (source.X == 0)
+                        {
+                            WhiteMayCastleQueenside = false;
+                        }
+                        else if (source.X == 7)
+                        {
+                            WhiteMayCastleKingside = false;
+                        }
+                    }
+                    else
+                    {
+                        if (source.X == 0)
+                        {
+                            BlackMayCastleQueenside = false;
+                        }
+                        else if (source.X == 7)
+                        {
+                            BlackMayCastleKingside = false;
+                        }
                     }
                 }
 

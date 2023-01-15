@@ -23,10 +23,10 @@ namespace Chess.Pieces
         /// Move this piece to a square on the board
         /// </summary>
         /// <returns><see langword="true"/> if the move was valid and executed, <see langword="false"/> otherwise</returns>
-        /// <remarks>This method will ensure that the move is valid</remarks>
-        public bool Move(Piece?[,] board, Point target)
+        /// <remarks>This method will ensure that the move is valid, unless <paramref name="bypassValidity"/> is <see langword="true"/></remarks>
+        public bool Move(Piece?[,] board, Point target, bool bypassValidity = false)
         {
-            if (GetValidMoves(board, true).Contains(target))
+            if (bypassValidity || GetValidMoves(board, true).Contains(target))
             {
                 Position = target;
                 return true;
@@ -51,6 +51,9 @@ namespace Chess.Pieces
             SymbolSpecial = isWhite ? '♔' : '♚';
         }
 
+        /// <remarks>
+        /// This method will not return either of the castling moves
+        /// </remarks>
         public override HashSet<Point> GetValidMoves(Piece?[,] board, bool enforceCheckLegality)
         {
             HashSet<Point> moves = new();
@@ -256,6 +259,9 @@ namespace Chess.Pieces
             SymbolSpecial = isWhite ? '♖' : '♜';
         }
 
+        /// <remarks>
+        /// This method will not return an available castling move
+        /// </remarks>
         public override HashSet<Point> GetValidMoves(Piece?[,] board, bool enforceCheckLegality)
         {
             HashSet<Point> moves = new();
