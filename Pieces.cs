@@ -40,7 +40,8 @@ namespace Chess.Pieces
         public override string Name => "King";
         public override char SymbolLetter => 'K';
         public override char SymbolSpecial { get; }
-        public override double Value => double.PositiveInfinity;
+        // King should not contribute to overall board value, as it always present
+        public override double Value => 0;
         public override bool IsWhite { get; }
         public override Point Position { get; protected set; }
 
