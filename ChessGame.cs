@@ -133,6 +133,7 @@ namespace Chess
             if (pieceMoved)
             {
                 StaleMoveCounter++;
+                Moves.Add((source, destination));
                 if (Board[destination.X, destination.Y] is not null)
                 {
                     CapturedPieces.Add(Board[destination.X, destination.Y]!);
