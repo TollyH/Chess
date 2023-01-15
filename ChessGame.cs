@@ -211,10 +211,10 @@ namespace Chess
         /// Move a piece on the board from a <paramref name="source"/> coordinate to a <paramref name="destination"/> coordinate.
         /// </summary>
         /// <returns><see langword="true"/> if the move was valid and executed, <see langword="false"/> otherwise</returns>
-        /// <remarks>This method will check if the move is completely valid. No other validity checks are required.</remarks>
-        public bool MovePiece(Point source, Point destination)
+        /// <remarks>This method will check if the move is completely valid, unless <paramref name="forceMove"/> is <see langword="true"/>. No other validity checks are required.</remarks>
+        public bool MovePiece(Point source, Point destination, bool forceMove = false)
         {
-            if (GameOver)
+            if (!forceMove && GameOver)
             {
                 return false;
             }
@@ -224,7 +224,7 @@ namespace Chess
             {
                 return false;
             }
-            if (piece.IsWhite != CurrentTurnWhite)
+            if (!forceMove && piece.IsWhite != CurrentTurnWhite)
             {
                 return false;
             }
@@ -232,8 +232,8 @@ namespace Chess
             bool pieceMoved;
             int homeY = CurrentTurnWhite ? 0 : 7;
             if (piece is Pieces.King && source.X == 4 && destination.Y == homeY
-                && ((destination.X == 6 && IsCastlePossible(true))
-                    || (destination.X == 2 && IsCastlePossible(false))))
+                && ((destination.X == 6 && (forceMove || IsCastlePossible(true)))
+                    || (destination.X == 2 && (forceMove || IsCastlePossible(false)))))
             {
                 // King performed castle, move correct rook
                 pieceMoved = true;
@@ -245,8 +245,8 @@ namespace Chess
                 Board[newRookXPos, homeY] = Board[rookXPos, homeY];
                 Board[rookXPos, homeY] = null;
             }
-            else if (piece is Pieces.Pawn && destination == EnPassantSquare
-                && Math.Abs(source.X - destination.X) == 1 && Math.Abs(source.Y - destination.Y) == 1)
+            else if (piece is Pieces.Pawn && destination == EnPassantSquare && (forceMove ||
+                (Math.Abs(source.X - destination.X) == 1 && Math.Abs(source.Y - destination.Y) == 1)))
             {
                 pieceMoved = true;
                 _ = piece.Move(Board, destination, true);
@@ -256,7 +256,7 @@ namespace Chess
             }
             else
             {
-                pieceMoved = piece.Move(Board, destination);
+                pieceMoved = piece.Move(Board, destination, forceMove);
             }
 
             if (pieceMoved)
