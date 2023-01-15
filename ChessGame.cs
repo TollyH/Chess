@@ -222,15 +222,15 @@ namespace Chess
                 pieceMoved = true;
                 if (CurrentTurnWhite)
                 {
-                    WhiteKing.Move(Board, destination, true);
+                    _ = WhiteKing.Move(Board, destination, true);
                 }
                 else
                 {
-                    BlackKing.Move(Board, destination, true);
+                    _ = BlackKing.Move(Board, destination, true);
                 }
                 int rookXPos = destination.X == 2 ? 0 : 7;
                 int newRookXPos = destination.X == 2 ? 3 : 5;
-                Board[rookXPos, homeY]!.Move(Board, new Point(newRookXPos, homeY), true);
+                _ = Board[rookXPos, homeY]!.Move(Board, new Point(newRookXPos, homeY), true);
                 Board[newRookXPos, homeY] = Board[rookXPos, homeY];
                 Board[rookXPos, homeY] = null;
             }
