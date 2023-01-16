@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -20,6 +21,9 @@ namespace Chess
         /// <see langword="true"/> if the player has selected a piece but isn't dragging it, <see langword="false"/> otherwise
         /// </summary>
         private bool highlightGrabbedMoves = false;
+
+        private bool whiteIsComputer = false;
+        private bool blackIsComputer = true;
 
         private readonly Dictionary<Pieces.Piece, Viewbox> pieceViews = new();
 
@@ -179,7 +183,8 @@ namespace Chess
                 return;
             }
             Pieces.Piece? checkPiece = GetPieceAtCanvasPoint(Mouse.GetPosition(chessGameCanvas));
-            if (checkPiece is not null && checkPiece.IsWhite == game.CurrentTurnWhite)
+            if (checkPiece is not null && ((checkPiece.IsWhite && game.CurrentTurnWhite && !whiteIsComputer)
+                || (!checkPiece.IsWhite && !game.CurrentTurnWhite && !blackIsComputer)))
             {
                 Mouse.OverrideCursor = Cursors.Hand;
                 return;
@@ -210,14 +215,13 @@ namespace Chess
         /// <summary>
         /// Perform a computer move if necessary
         /// </summary>
-        private void CheckComputerMove()
+        private async Task CheckComputerMove()
         {
             // TODO: Currently black is always computer player, make that configurable
-            // TODO: Stop blocking UI thread, player shouldn't be able to drag computer pieces with it unblocked
 
-            if (!game.GameOver && !game.CurrentTurnWhite)
+            while (!game.GameOver && ((game.CurrentTurnWhite && whiteIsComputer) || (!game.CurrentTurnWhite && blackIsComputer)))
             {
-                BoardAnalysis.PossibleMove bestMove = BoardAnalysis.EstimateBestPossibleMove(game, 4);
+                BoardAnalysis.PossibleMove bestMove = await BoardAnalysis.EstimateBestPossibleMove(game, 4);
                 _ = game.MovePiece(bestMove.Source, bestMove.Destination, true);
                 UpdateGameDisplay();
                 PushEndgameMessage();
@@ -238,9 +242,10 @@ namespace Chess
                 : game.Board[coord.X, coord.Y];
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             UpdateGameDisplay();
+            await CheckComputerMove();
         }
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -258,7 +263,7 @@ namespace Chess
             UpdateCursor();
         }
 
-        private void Window_MouseDown(object sender, MouseButtonEventArgs e)
+        private async void Window_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (game.GameOver)
             {
@@ -278,19 +283,34 @@ namespace Chess
                     UpdateCursor();
                     UpdateGameDisplay();
                     PushEndgameMessage();
-                    CheckComputerMove();
+                    await CheckComputerMove();
                     return;
                 }
             }
 
             highlightGrabbedMoves = false;
             Pieces.Piece? toCheck = GetPieceAtCanvasPoint(mousePos);
-            grabbedPiece = toCheck is null || toCheck.IsWhite == game.CurrentTurnWhite ? toCheck : null;
+            if (toCheck is not null)
+            {
+                if ((toCheck.IsWhite && game.CurrentTurnWhite && !whiteIsComputer)
+                    || (!toCheck.IsWhite && !game.CurrentTurnWhite && !blackIsComputer))
+                {
+                    grabbedPiece = toCheck;
+                }
+                else
+                {
+                    grabbedPiece = null;
+                }
+            }
+            else
+            {
+                grabbedPiece = null;
+            }
             UpdateGameDisplay();
             UpdateCursor();
         }
 
-        private void Window_MouseUp(object sender, MouseButtonEventArgs e)
+        private async void Window_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (game.GameOver)
             {
@@ -307,20 +327,23 @@ namespace Chess
                     return;
                 }
                 bool success = game.MovePiece(grabbedPiece.Position, destination);
-                if (!success)
-                {
-                    highlightGrabbedMoves = true;
-                }
-                else
+                if (success)
                 {
                     grabbedPiece = null;
                     highlightGrabbedMoves = false;
+                    UpdateCursor();
+                    UpdateGameDisplay();
+                    PushEndgameMessage();
+                    await CheckComputerMove();
+                    return;
+                }
+                else
+                {
+                    highlightGrabbedMoves = true;
                 }
             }
             UpdateCursor();
             UpdateGameDisplay();
-            PushEndgameMessage();
-            CheckComputerMove();
         }
 
         private void Window_MouseLeave(object sender, MouseEventArgs e)

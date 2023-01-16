@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Chess
 {
@@ -329,9 +330,9 @@ namespace Chess
         /// Use <see cref="EvaluatePossibleMoves"/> to find the best possible move in the current state of the game
         /// </summary>
         /// <param name="maxDepth">The maximum number of half-moves in the future to search</param>
-        public static PossibleMove EstimateBestPossibleMove(ChessGame game, int maxDepth)
+        public static async Task<PossibleMove> EstimateBestPossibleMove(ChessGame game, int maxDepth)
         {
-            PossibleMove[] moves = EvaluatePossibleMoves(game, maxDepth);
+            PossibleMove[] moves = await EvaluatePossibleMoves(game, maxDepth);
             PossibleMove bestMove = new(default, default,
                 game.CurrentTurnWhite ? double.NegativeInfinity : double.PositiveInfinity, false, false, 0, 0);
             foreach (PossibleMove potentialMove in moves)
@@ -367,7 +368,7 @@ namespace Chess
         /// </summary>
         /// <param name="maxDepth">The maximum number of half-moves in the future to search</param>
         /// <returns>An array of all possible moves, with information on board value and ability to checkmate</returns>
-        public static PossibleMove[] EvaluatePossibleMoves(ChessGame game, int maxDepth)
+        public static async Task<PossibleMove[]> EvaluatePossibleMoves(ChessGame game, int maxDepth)
         {
             List<PossibleMove> possibleMoves = new();
             int targetLength = 0;
@@ -402,7 +403,13 @@ namespace Chess
                 }
             }
 
-            while (possibleMoves.Count < targetLength) { }
+            await Task.Run(async() =>
+            {
+                while (possibleMoves.Count < targetLength)
+                {
+                    await Task.Delay(50);
+                }
+            });
 
             return possibleMoves.ToArray();
         }
