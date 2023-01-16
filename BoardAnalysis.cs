@@ -432,7 +432,9 @@ namespace Chess
             }
             else if (piece is Pieces.Pawn && game.EnPassantSquare is not null
                 && Math.Abs(piece.Position.X - game.EnPassantSquare.Value.X) == 1
-                && piece.Position.Y == (game.CurrentTurnWhite ? 4 : 3))
+                && piece.Position.Y == (game.CurrentTurnWhite ? 4 : 3)
+                && !IsKingReachable(game.Board.AfterMove(piece.Position,
+                        game.EnPassantSquare.Value), game.CurrentTurnWhite))
             {
                 _ = allValidMoves.Add(game.EnPassantSquare.Value);
             }

@@ -246,7 +246,8 @@ namespace Chess
                 Board[rookXPos, homeY] = null;
             }
             else if (piece is Pieces.Pawn && destination == EnPassantSquare && (forceMove ||
-                (Math.Abs(source.X - destination.X) == 1 && source.Y == (CurrentTurnWhite ? 4 : 3))))
+                (Math.Abs(source.X - destination.X) == 1 && source.Y == (CurrentTurnWhite ? 4 : 3)
+                && !BoardAnalysis.IsKingReachable(Board.AfterMove(source, destination), CurrentTurnWhite))))
             {
                 pieceMoved = true;
                 _ = piece.Move(Board, destination, true);
