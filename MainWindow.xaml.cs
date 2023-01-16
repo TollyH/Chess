@@ -71,7 +71,7 @@ namespace Chess
 
             if (grabbedPiece is Pieces.Pawn && game.EnPassantSquare is not null && highlightGrabbedMoves
                 && Math.Abs(grabbedPiece.Position.X - game.EnPassantSquare.Value.X) == 1
-                && Math.Abs(grabbedPiece.Position.Y - game.EnPassantSquare.Value.Y) == 1)
+                && grabbedPiece.Position.Y == (game.CurrentTurnWhite ? 4 : 3))
             {
                 Rectangle enPassantHighlight = new()
                 {
