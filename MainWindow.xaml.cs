@@ -207,6 +207,23 @@ namespace Chess
             }
         }
 
+        /// <summary>
+        /// Perform a computer move if necessary
+        /// </summary>
+        private void CheckComputerMove()
+        {
+            // TODO: Currently black is always computer player, make that configurable
+            // TODO: Stop blocking UI thread, player shouldn't be able to drag computer pieces with it unblocked
+
+            if (!game.GameOver && !game.CurrentTurnWhite)
+            {
+                BoardAnalysis.PossibleMove bestMove = BoardAnalysis.EstimateBestPossibleMove(game, 4);
+                _ = game.MovePiece(bestMove.Source, bestMove.Destination, true);
+                UpdateGameDisplay();
+                PushEndgameMessage();
+            }
+        }
+
         private System.Drawing.Point GetCoordFromCanvasPoint(Point position)
         {
             // Canvas coordinates are relative to top-left, whereas chess' are from bottom-left, so y is inverted
@@ -261,6 +278,7 @@ namespace Chess
                     UpdateCursor();
                     UpdateGameDisplay();
                     PushEndgameMessage();
+                    CheckComputerMove();
                     return;
                 }
             }
@@ -302,6 +320,7 @@ namespace Chess
             UpdateCursor();
             UpdateGameDisplay();
             PushEndgameMessage();
+            CheckComputerMove();
         }
 
         private void Window_MouseLeave(object sender, MouseEventArgs e)
