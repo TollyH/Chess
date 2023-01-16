@@ -42,6 +42,7 @@ namespace Chess
 
         public bool CurrentTurnWhite { get; private set; }
         public bool GameOver { get; private set; }
+        public bool AwaitingPromotionResponse { get; private set; }
 
         /// <summary>
         /// A list of the moves made this game as (sourcePosition, destinationPosition)
@@ -67,6 +68,7 @@ namespace Chess
         {
             CurrentTurnWhite = true;
             GameOver = false;
+            AwaitingPromotionResponse = false;
 
             WhiteKing = new Pieces.King(new Point(4, 0), true);
             BlackKing = new Pieces.King(new Point(4, 7), false);
@@ -210,9 +212,13 @@ namespace Chess
         /// <summary>
         /// Move a piece on the board from a <paramref name="source"/> coordinate to a <paramref name="destination"/> coordinate.
         /// </summary>
+        /// <param name="autoQueen">
+        /// If a pawn is promoted, should it automatically become a queen (<see langword="true"/>),
+        /// or should the user be prompted for a promotion type (<see langword="false"/>)
+        /// </param>
         /// <returns><see langword="true"/> if the move was valid and executed, <see langword="false"/> otherwise</returns>
         /// <remarks>This method will check if the move is completely valid, unless <paramref name="forceMove"/> is <see langword="true"/>. No other validity checks are required.</remarks>
-        public bool MovePiece(Point source, Point destination, bool forceMove = false)
+        public bool MovePiece(Point source, Point destination, bool forceMove = false, bool autoQueen = true)
         {
             if (!forceMove && GameOver)
             {
@@ -299,8 +305,18 @@ namespace Chess
                     }
                     if (destination.Y == (piece.IsWhite ? 7 : 0))
                     {
-                        // TODO: Promotion into any piece, not just Queen
-                        piece = new Pieces.Queen(piece.Position, piece.IsWhite);
+                        if (autoQueen)
+                        {
+                            piece = new Pieces.Queen(piece.Position, piece.IsWhite);
+                        }
+                        else
+                        {
+                            AwaitingPromotionResponse = true;
+                            PromotionPrompt prompt = new(CurrentTurnWhite);
+                            _ = prompt.ShowDialog();
+                            piece = (Pieces.Piece)Activator.CreateInstance(prompt.ChosenPieceType, piece.Position, piece.IsWhite)!;
+                            AwaitingPromotionResponse = false;
+                        }
                         Board[source.X, source.Y] = piece;
                     }
                 }

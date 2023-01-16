@@ -41,6 +41,10 @@ namespace Chess
 
         public void UpdateGameDisplay()
         {
+            if (game.AwaitingPromotionResponse)
+            {
+                return;
+            }
             chessGameCanvas.Children.Clear();
             pieceViews.Clear();
 
@@ -370,7 +374,7 @@ namespace Chess
             if (grabbedPiece is not null && highlightGrabbedMoves)
             {
                 System.Drawing.Point destination = GetCoordFromCanvasPoint(mousePos);
-                bool success = game.MovePiece(grabbedPiece.Position, destination);
+                bool success = game.MovePiece(grabbedPiece.Position, destination, autoQueen: false);
                 if (success)
                 {
                     highlightGrabbedMoves = false;
@@ -422,7 +426,7 @@ namespace Chess
                     UpdateGameDisplay();
                     return;
                 }
-                bool success = game.MovePiece(grabbedPiece.Position, destination);
+                bool success = game.MovePiece(grabbedPiece.Position, destination, autoQueen: false);
                 if (success)
                 {
                     grabbedPiece = null;
