@@ -5,9 +5,123 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Chess"
         mc:Ignorable="d"
-        Title="Chess" Height="500" Width="500" Loaded="Window_Loaded" SizeChanged="Window_SizeChanged" MouseMove="Window_MouseMove" MouseDown="Window_MouseDown" MouseUp="Window_MouseUp" MouseLeave="Window_MouseLeave">
+        Title="Chess" Height="750" Width="750" Loaded="Window_Loaded" SizeChanged="Window_SizeChanged" MouseMove="Window_MouseMove" MouseDown="Window_MouseDown" MouseUp="Window_MouseUp" MouseLeave="Window_MouseLeave">
     <Grid>
-        <Border BorderBrush="Black" BorderThickness="1">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="16*"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="16*"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Column="1" Grid.Row="0" Orientation="Horizontal">
+            <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
+                <Label Content="a"/>
+            </Viewbox>
+            <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
+                <Label Content="b"/>
+            </Viewbox>
+            <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
+                <Label Content="c"/>
+            </Viewbox>
+            <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
+                <Label Content="d"/>
+            </Viewbox>
+            <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
+                <Label Content="e"/>
+            </Viewbox>
+            <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
+                <Label Content="f"/>
+            </Viewbox>
+            <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
+                <Label Content="g"/>
+            </Viewbox>
+            <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
+                <Label Content="h"/>
+            </Viewbox>
+        </StackPanel>
+        <StackPanel Grid.Column="0" Grid.Row="1" Orientation="Vertical">
+            <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}">
+                <Label Content="8"/>
+            </Viewbox>
+            <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}">
+                <Label Content="7"/>
+            </Viewbox>
+            <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}">
+                <Label Content="6"/>
+            </Viewbox>
+            <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}">
+                <Label Content="5"/>
+            </Viewbox>
+            <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}">
+                <Label Content="4"/>
+            </Viewbox>
+            <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}">
+                <Label Content="3"/>
+            </Viewbox>
+            <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}">
+                <Label Content="2"/>
+            </Viewbox>
+            <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}">
+                <Label Content="1"/>
+            </Viewbox>
+        </StackPanel>
+        <StackPanel Grid.Column="1" Grid.Row="2" Orientation="Horizontal">
+            <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
+                <Label Content="a"/>
+            </Viewbox>
+            <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
+                <Label Content="b"/>
+            </Viewbox>
+            <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
+                <Label Content="c"/>
+            </Viewbox>
+            <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
+                <Label Content="d"/>
+            </Viewbox>
+            <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
+                <Label Content="e"/>
+            </Viewbox>
+            <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
+                <Label Content="f"/>
+            </Viewbox>
+            <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
+                <Label Content="g"/>
+            </Viewbox>
+            <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
+                <Label Content="h"/>
+            </Viewbox>
+        </StackPanel>
+        <StackPanel Grid.Column="2" Grid.Row="1" Orientation="Vertical">
+            <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}">
+                <Label Content="8"/>
+            </Viewbox>
+            <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}">
+                <Label Content="7"/>
+            </Viewbox>
+            <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}">
+                <Label Content="6"/>
+            </Viewbox>
+            <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}">
+                <Label Content="5"/>
+            </Viewbox>
+            <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}">
+                <Label Content="4"/>
+            </Viewbox>
+            <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}">
+                <Label Content="3"/>
+            </Viewbox>
+            <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}">
+                <Label Content="2"/>
+            </Viewbox>
+            <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}">
+                <Label Content="1"/>
+            </Viewbox>
+        </StackPanel>
+        <Border Grid.Column="1" Grid.Row="1" BorderBrush="Black" BorderThickness="1">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="1*"/>
@@ -29,7 +143,7 @@
                     <ColumnDefinition Width="1*"/>
                     <ColumnDefinition Width="1*"/>
                 </Grid.ColumnDefinitions>
-                <Rectangle Fill="#FFBF8245" Grid.Column="0" Grid.Row="1"/>
+                <Rectangle x:Name="rectSizeReference" Fill="#FFBF8245" Grid.Column="0" Grid.Row="1"/>
                 <Rectangle Fill="#FFBF8245" Grid.Column="0" Grid.Row="3"/>
                 <Rectangle Fill="#FFBF8245" Grid.Column="0" Grid.Row="5"/>
                 <Rectangle Fill="#FFBF8245" Grid.Column="0" Grid.Row="7"/>
@@ -63,6 +177,6 @@
                 <Rectangle Fill="#FFBF8245" Grid.Column="7" Grid.Row="6"/>
             </Grid>
         </Border>
-        <Canvas x:Name="chessGameCanvas" Margin="1"/>
+        <Canvas Grid.Column="1" Grid.Row="1" x:Name="chessGameCanvas" Margin="1"/>
     </Grid>
 </Window>
