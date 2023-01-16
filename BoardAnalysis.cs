@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Threading;
 
 namespace Chess
 {
@@ -286,6 +288,236 @@ namespace Chess
             }
 
             return whiteCheck ? GameState.CheckWhite : blackCheck ? GameState.CheckBlack : GameState.StandardPlay;
+        }
+
+        /// <summary>
+        /// Calculate the value of the given board based on the remaining pieces
+        /// </summary>
+        /// <returns>
+        /// A <see cref="double"/> representing the total piece value of the entire board.
+        /// Positive means white has stronger material, negative means black does.
+        /// </returns>
+        public static double CalculateBoardValue(Pieces.Piece?[,] board)
+        {
+            return board.OfType<Pieces.Piece>().Sum(p => p.IsWhite ? p.Value : -p.Value);
+        }
+
+        public readonly struct PossibleMove
+        {
+            public Point Source { get; }
+            public Point Destination { get; }
+            public double EvaluatedFutureValue { get; }
+            public bool WhiteMateLocated { get; }
+            public bool BlackMateLocated { get; }
+            public int DepthToWhiteMate { get; }
+            public int DepthToBlackMate { get; }
+
+            public PossibleMove(Point source, Point destination, double evaluatedFutureValue,
+                bool whiteMateLocated, bool blackMateLocated, int depthToWhiteMate, int depthToBlackMate)
+            {
+                Source = source;
+                Destination = destination;
+                EvaluatedFutureValue = evaluatedFutureValue;
+                WhiteMateLocated = whiteMateLocated;
+                BlackMateLocated = blackMateLocated;
+                DepthToWhiteMate = depthToWhiteMate;
+                DepthToBlackMate = depthToBlackMate;
+            }
+        }
+
+        /// <summary>
+        /// Use <see cref="EvaluatePossibleMoves"/> to find the best possible move in the current state of the game
+        /// </summary>
+        /// <param name="maxDepth">The maximum number of half-moves in the future to search</param>
+        public static PossibleMove EstimateBestPossibleMove(ChessGame game, int maxDepth)
+        {
+            PossibleMove[] moves = EvaluatePossibleMoves(game, maxDepth);
+            PossibleMove bestMove = new(default, default,
+                game.CurrentTurnWhite ? double.NegativeInfinity : double.PositiveInfinity, false, false, 0, 0);
+            foreach (PossibleMove potentialMove in moves)
+            {
+                if (game.CurrentTurnWhite)
+                {
+                    if ((!bestMove.BlackMateLocated && potentialMove.BlackMateLocated)
+                        || (!bestMove.BlackMateLocated && potentialMove.EvaluatedFutureValue > bestMove.EvaluatedFutureValue)
+                        || (bestMove.BlackMateLocated && potentialMove.BlackMateLocated
+                            && potentialMove.DepthToBlackMate < bestMove.DepthToBlackMate))
+                    {
+                        bestMove = potentialMove;
+                    }
+                }
+                else
+                {
+                    if ((!bestMove.WhiteMateLocated && potentialMove.WhiteMateLocated)
+                        || (!bestMove.WhiteMateLocated && potentialMove.EvaluatedFutureValue < bestMove.EvaluatedFutureValue)
+                        || (bestMove.WhiteMateLocated && potentialMove.WhiteMateLocated
+                            && potentialMove.DepthToWhiteMate < bestMove.DepthToWhiteMate))
+                    {
+                        bestMove = potentialMove;
+                    }
+                }
+            }
+            return bestMove;
+        }
+
+        /// <summary>
+        /// Evaluate each possible move in the current state of the game
+        /// </summary>
+        /// <param name="maxDepth">The maximum number of half-moves in the future to search</param>
+        /// <returns>An array of all possible moves, with information on board value and ability to checkmate</returns>
+        public static PossibleMove[] EvaluatePossibleMoves(ChessGame game, int maxDepth)
+        {
+            List<PossibleMove> possibleMoves = new();
+            int targetLength = 0;
+
+            foreach (Pieces.Piece? piece in game.Board)
+            {
+                if (piece is not null)
+                {
+                    if (piece.IsWhite != game.CurrentTurnWhite)
+                    {
+                        continue;
+                    }
+
+                    foreach (Point validMove in GetValidMovesForEval(game, piece))
+                    {
+                        targetLength++;
+                        Point thisPosition = piece.Position;
+                        Point thisValidMove = validMove;
+                        ChessGame gameClone = game.Clone();
+                        _ = gameClone.MovePiece(piece.Position, validMove, true);
+
+                        Thread processThread = new(() =>
+                        {
+                            PossibleMove bestSubMove = MinimaxMove(gameClone,
+                                double.NegativeInfinity, double.PositiveInfinity, 1, maxDepth);
+                            possibleMoves.Add(new PossibleMove(thisPosition, thisValidMove, bestSubMove.EvaluatedFutureValue,
+                                bestSubMove.WhiteMateLocated, bestSubMove.BlackMateLocated,
+                                bestSubMove.DepthToWhiteMate, bestSubMove.DepthToBlackMate));
+                        });
+                        processThread.Start();
+                    }
+                }
+            }
+
+            while (possibleMoves.Count < targetLength) { }
+
+            return possibleMoves.ToArray();
+        }
+
+        private static HashSet<Point> GetValidMovesForEval(ChessGame game, Pieces.Piece piece)
+        {
+            HashSet<Point> allValidMoves = piece.GetValidMoves(game.Board, true);
+
+            if (piece is Pieces.King)
+            {
+                int homeY = game.CurrentTurnWhite ? 0 : 7;
+                if (game.IsCastlePossible(true))
+                {
+                    _ = allValidMoves.Add(new Point(6, homeY));
+                }
+                if (game.IsCastlePossible(false))
+                {
+                    _ = allValidMoves.Add(new Point(2, homeY));
+                }
+            }
+            else if (piece is Pieces.Pawn && game.EnPassantSquare is not null
+                && Math.Abs(piece.Position.X - game.EnPassantSquare.Value.X) == 1
+                && Math.Abs(piece.Position.Y - game.EnPassantSquare.Value.Y) == 1)
+            {
+                _ = allValidMoves.Add(game.EnPassantSquare.Value);
+            }
+
+            return allValidMoves;
+        }
+
+        private static PossibleMove MinimaxMove(ChessGame game, double alpha, double beta, int depth, int maxDepth)
+        {
+            (Point, Point) lastMove = game.Moves.Last();
+            if (game.GameOver)
+            {
+                GameState state = game.DetermineGameState();
+                if (state == GameState.CheckMateWhite)
+                {
+                    return new PossibleMove(lastMove.Item1, lastMove.Item2, double.NegativeInfinity, true, false, depth, 0);
+                }
+                else if (state == GameState.CheckMateBlack)
+                {
+                    return new PossibleMove(lastMove.Item1, lastMove.Item2, double.PositiveInfinity, false, true, 0, depth);
+                }
+                else
+                {
+                    // Draw
+                    return new PossibleMove(lastMove.Item1, lastMove.Item2, 0, false, false, 0, 0);
+                }
+            }
+            if (depth > maxDepth)
+            {
+                return new PossibleMove(lastMove.Item1, lastMove.Item2, CalculateBoardValue(game.Board), false, false, 0, 0);
+            }
+
+            PossibleMove bestMove = new(default, default,
+                game.CurrentTurnWhite ? double.NegativeInfinity : double.PositiveInfinity, false, false, 0, 0);
+
+            foreach (Pieces.Piece? piece in game.Board)
+            {
+                if (piece is not null)
+                {
+                    if (piece.IsWhite != game.CurrentTurnWhite)
+                    {
+                        continue;
+                    }
+
+                    foreach (Point validMove in GetValidMovesForEval(game, piece))
+                    {
+                        ChessGame gameClone = game.Clone();
+                        _ = gameClone.MovePiece(piece.Position, validMove, true);
+                        PossibleMove potentialMove = MinimaxMove(gameClone, alpha, beta, depth + 1, maxDepth);
+                        if (game.CurrentTurnWhite)
+                        {
+                            if ((!bestMove.BlackMateLocated && potentialMove.BlackMateLocated)
+                                || (!bestMove.BlackMateLocated && potentialMove.EvaluatedFutureValue > bestMove.EvaluatedFutureValue)
+                                || (bestMove.BlackMateLocated && potentialMove.BlackMateLocated
+                                    && potentialMove.DepthToBlackMate < bestMove.DepthToBlackMate))
+                            {
+                                bestMove = new PossibleMove(piece.Position, validMove, potentialMove.EvaluatedFutureValue,
+                                    potentialMove.WhiteMateLocated, potentialMove.BlackMateLocated,
+                                    potentialMove.DepthToWhiteMate, potentialMove.DepthToBlackMate);
+                            }
+                            if (potentialMove.EvaluatedFutureValue >= beta)
+                            {
+                                return bestMove;
+                            }
+                            if (potentialMove.EvaluatedFutureValue > alpha)
+                            {
+                                alpha = potentialMove.EvaluatedFutureValue;
+                            }
+                        }
+                        else
+                        {
+                            if ((!bestMove.WhiteMateLocated && potentialMove.WhiteMateLocated)
+                                || (!bestMove.WhiteMateLocated && potentialMove.EvaluatedFutureValue < bestMove.EvaluatedFutureValue)
+                                || (bestMove.WhiteMateLocated && potentialMove.WhiteMateLocated
+                                    && potentialMove.DepthToWhiteMate < bestMove.DepthToWhiteMate))
+                            {
+                                bestMove = new PossibleMove(piece.Position, validMove, potentialMove.EvaluatedFutureValue,
+                                    potentialMove.WhiteMateLocated, potentialMove.BlackMateLocated,
+                                    potentialMove.DepthToWhiteMate, potentialMove.DepthToBlackMate);
+                            }
+                            if (potentialMove.EvaluatedFutureValue <= alpha)
+                            {
+                                return bestMove;
+                            }
+                            if (potentialMove.EvaluatedFutureValue < beta)
+                            {
+                                beta = potentialMove.EvaluatedFutureValue;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return bestMove;
         }
     }
 }
