@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -25,6 +26,9 @@ namespace Chess
         private bool whiteIsComputer = false;
         private bool blackIsComputer = true;
 
+        private bool currentTurnEvaluated = false;
+        private bool manuallyEvaluating = false;
+
         private readonly Dictionary<Pieces.Piece, Viewbox> pieceViews = new();
 
         double tileWidth;
@@ -42,6 +46,20 @@ namespace Chess
 
             tileWidth = chessGameCanvas.ActualWidth / game.Board.GetLength(0);
             tileHeight = chessGameCanvas.ActualHeight / game.Board.GetLength(1);
+
+            whiteCaptures.Content = game.CapturedPieces.Count(p => p.IsWhite);
+            blackCaptures.Content = game.CapturedPieces.Count(p => !p.IsWhite);
+            if (!currentTurnEvaluated)
+            {
+                if (game.CurrentTurnWhite)
+                {
+                    whiteEvaluation.Content = "?";
+                }
+                else
+                {
+                    blackEvaluation.Content = "?";
+                }
+            }
 
             GameState state = game.DetermineGameState();
 
@@ -240,6 +258,25 @@ namespace Chess
             }
         }
 
+        private void UpdateEvaluationMeter(BoardAnalysis.PossibleMove bestMove, bool white)
+        {
+            Label toUpdate = white ? whiteEvaluation : blackEvaluation;
+            if ((bestMove.WhiteMateLocated && !bestMove.BlackMateLocated)
+                || bestMove.EvaluatedFutureValue == double.NegativeInfinity)
+            {
+                toUpdate.Content = $"-M{(int)Math.Ceiling(bestMove.DepthToWhiteMate / 2d)}";
+            }
+            else if ((bestMove.BlackMateLocated && !bestMove.WhiteMateLocated)
+                || bestMove.EvaluatedFutureValue == double.PositiveInfinity)
+            {
+                toUpdate.Content = $"M{(int)Math.Ceiling(bestMove.DepthToBlackMate / 2d)}";
+            }
+            else
+            {
+                toUpdate.Content = bestMove.EvaluatedFutureValue.ToString("0.00");
+            }
+        }
+
         /// <summary>
         /// Perform a computer move if necessary
         /// </summary>
@@ -252,6 +289,8 @@ namespace Chess
                 BoardAnalysis.PossibleMove bestMove = await BoardAnalysis.EstimateBestPossibleMove(game, 4);
                 _ = game.MovePiece(bestMove.Source, bestMove.Destination, true);
                 UpdateGameDisplay();
+                // Turn has been inverted already but we have value for the now old turn
+                UpdateEvaluationMeter(bestMove, !game.CurrentTurnWhite);
                 PushEndgameMessage();
             }
         }
@@ -308,6 +347,7 @@ namespace Chess
                 {
                     highlightGrabbedMoves = false;
                     grabbedPiece = null;
+                    currentTurnEvaluated = false;
                     UpdateCursor();
                     UpdateGameDisplay();
                     PushEndgameMessage();
@@ -318,7 +358,7 @@ namespace Chess
 
             highlightGrabbedMoves = false;
             Pieces.Piece? toCheck = GetPieceAtCanvasPoint(mousePos);
-            if (toCheck is not null)
+            if (toCheck is not null && !manuallyEvaluating)
             {
                 if ((toCheck.IsWhite && game.CurrentTurnWhite && !whiteIsComputer)
                     || (!toCheck.IsWhite && !game.CurrentTurnWhite && !blackIsComputer))
@@ -359,6 +399,7 @@ namespace Chess
                 {
                     grabbedPiece = null;
                     highlightGrabbedMoves = false;
+                    currentTurnEvaluated = false;
                     UpdateCursor();
                     UpdateGameDisplay();
                     PushEndgameMessage();
@@ -381,6 +422,24 @@ namespace Chess
                 highlightGrabbedMoves = true;
             }
             UpdateGameDisplay();
+        }
+
+        private async void evaluation_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (currentTurnEvaluated || (game.CurrentTurnWhite && whiteIsComputer)
+                || (!game.CurrentTurnWhite && blackIsComputer))
+            {
+                return;
+            }
+            manuallyEvaluating = true;
+            grabbedPiece = null;
+            highlightGrabbedMoves = false;
+            UpdateGameDisplay();
+            UpdateCursor();
+            BoardAnalysis.PossibleMove bestMove = await BoardAnalysis.EstimateBestPossibleMove(game, 4);
+            UpdateEvaluationMeter(bestMove, game.CurrentTurnWhite);
+            currentTurnEvaluated = true;
+            manuallyEvaluating = false;
         }
     }
 }
