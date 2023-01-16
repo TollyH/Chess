@@ -539,7 +539,7 @@ namespace Chess.Pieces
                 _ = moves.Add(new Point(Position.X, checkY));
             }
             // First move can optionally be two instead of one
-            if (!hasMoved && board[Position.X, doubleCheckY] is null)
+            if (!hasMoved && board[Position.X, checkY] is null && board[Position.X, doubleCheckY] is null)
             {
                 _ = moves.Add(new Point(Position.X, doubleCheckY));
             }
