@@ -326,6 +326,11 @@ namespace Chess
 
         private Pieces.Piece? GetPieceAtCanvasPoint(Point position)
         {
+            if (position.X < 0 || position.Y < 0
+                || position.X > chessGameCanvas.ActualWidth || position.Y > chessGameCanvas.ActualHeight)
+            {
+                return null;
+            }
             System.Drawing.Point coord = GetCoordFromCanvasPoint(position);
             return coord.X < 0 || coord.Y < 0 || coord.X >= game.Board.GetLength(0) || coord.Y >= game.Board.GetLength(1)
                 ? null
