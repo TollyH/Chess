@@ -59,7 +59,33 @@ namespace Chess
                 Canvas.SetLeft(mateHighlight, kingPosition.X * tileWidth);
             }
 
-            else if (grabbedPiece is not null && highlightGrabbedMoves)
+            if (game.Moves.Count > 0)
+            {
+                (System.Drawing.Point lastMoveSource, System.Drawing.Point lastMoveDestination) = game.Moves[^1];
+
+                Rectangle sourceMoveHighlight = new()
+                {
+                    Width = tileWidth,
+                    Height = tileHeight,
+                    Fill = Brushes.CadetBlue
+                };
+                _ = chessGameCanvas.Children.Add(sourceMoveHighlight);
+                Canvas.SetBottom(sourceMoveHighlight, lastMoveSource.Y * tileHeight);
+                Canvas.SetLeft(sourceMoveHighlight, lastMoveSource.X * tileWidth);
+
+                Rectangle destinationMoveHighlight = new()
+                {
+                    Width = tileWidth,
+                    Height = tileHeight,
+                    Fill = Brushes.Cyan
+                };
+                _ = chessGameCanvas.Children.Add(destinationMoveHighlight);
+                Canvas.SetBottom(destinationMoveHighlight, lastMoveDestination.Y * tileHeight);
+                Canvas.SetLeft(destinationMoveHighlight, lastMoveDestination.X * tileWidth);
+
+            }
+
+            if (grabbedPiece is not null && highlightGrabbedMoves)
             {
                 foreach (System.Drawing.Point validMove in grabbedPiece.GetValidMoves(game.Board, true))
                 {
