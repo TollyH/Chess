@@ -56,13 +56,13 @@ namespace Chess
 
             whiteCaptures.Content = game.CapturedPieces.Count(p => p.IsWhite);
             blackCaptures.Content = game.CapturedPieces.Count(p => !p.IsWhite);
-            if (currentBestMove is null)
+            if (currentBestMove is null && !manuallyEvaluating)
             {
-                if (game.CurrentTurnWhite)
+                if (game.CurrentTurnWhite && !whiteIsComputer)
                 {
                     whiteEvaluation.Content = "?";
                 }
-                else
+                else if (!blackIsComputer)
                 {
                     blackEvaluation.Content = "?";
                 }
@@ -288,22 +288,26 @@ namespace Chess
             }
         }
 
-        private void UpdateEvaluationMeter(BoardAnalysis.PossibleMove bestMove, bool white)
+        private void UpdateEvaluationMeter(BoardAnalysis.PossibleMove? bestMove, bool white)
         {
             Label toUpdate = white ? whiteEvaluation : blackEvaluation;
-            if ((bestMove.WhiteMateLocated && !bestMove.BlackMateLocated)
-                || bestMove.EvaluatedFutureValue == double.NegativeInfinity)
+            if (bestMove is null)
             {
-                toUpdate.Content = $"-M{(int)Math.Ceiling(bestMove.DepthToWhiteMate / 2d)}";
+                toUpdate.Content = "...";
             }
-            else if ((bestMove.BlackMateLocated && !bestMove.WhiteMateLocated)
-                || bestMove.EvaluatedFutureValue == double.PositiveInfinity)
+            else if ((bestMove.Value.WhiteMateLocated && !bestMove.Value.BlackMateLocated)
+                || bestMove.Value.EvaluatedFutureValue == double.NegativeInfinity)
             {
-                toUpdate.Content = $"+M{(int)Math.Ceiling(bestMove.DepthToBlackMate / 2d)}";
+                toUpdate.Content = $"-M{(int)Math.Ceiling(bestMove.Value.DepthToWhiteMate / 2d)}";
+            }
+            else if ((bestMove.Value.BlackMateLocated && !bestMove.Value.WhiteMateLocated)
+                || bestMove.Value.EvaluatedFutureValue == double.PositiveInfinity)
+            {
+                toUpdate.Content = $"+M{(int)Math.Ceiling(bestMove.Value.DepthToBlackMate / 2d)}";
             }
             else
             {
-                toUpdate.Content = bestMove.EvaluatedFutureValue.ToString("+0.00;-0.00;0.00");
+                toUpdate.Content = bestMove.Value.EvaluatedFutureValue.ToString("+0.00;-0.00;0.00");
             }
         }
 
@@ -315,6 +319,7 @@ namespace Chess
             while (!game.GameOver && ((game.CurrentTurnWhite && whiteIsComputer) || (!game.CurrentTurnWhite && blackIsComputer)))
             {
                 CancellationToken cancellationToken = cancelMoveComputation.Token;
+                UpdateEvaluationMeter(null, game.CurrentTurnWhite);
                 BoardAnalysis.PossibleMove bestMove = await BoardAnalysis.EstimateBestPossibleMove(game, 4, cancellationToken);
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -487,6 +492,7 @@ namespace Chess
             manuallyEvaluating = true;
             grabbedPiece = null;
             highlightGrabbedMoves = false;
+            UpdateEvaluationMeter(null, game.CurrentTurnWhite);
             UpdateGameDisplay();
             UpdateCursor();
 
