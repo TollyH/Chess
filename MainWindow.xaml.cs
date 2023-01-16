@@ -292,11 +292,11 @@ namespace Chess
             else if ((bestMove.BlackMateLocated && !bestMove.WhiteMateLocated)
                 || bestMove.EvaluatedFutureValue == double.PositiveInfinity)
             {
-                toUpdate.Content = $"M{(int)Math.Ceiling(bestMove.DepthToBlackMate / 2d)}";
+                toUpdate.Content = $"+M{(int)Math.Ceiling(bestMove.DepthToBlackMate / 2d)}";
             }
             else
             {
-                toUpdate.Content = bestMove.EvaluatedFutureValue.ToString("0.00");
+                toUpdate.Content = bestMove.EvaluatedFutureValue.ToString("+0.00;-0.00;0.00");
             }
         }
 
