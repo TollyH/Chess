@@ -265,6 +265,25 @@ namespace Chess
                 Moves.Add((source, destination));
                 if (Board[destination.X, destination.Y] is not null)
                 {
+                    if (Board[destination.X, destination.Y] is Pieces.Rook)
+                    {
+                        if (destination == new Point(0, 0))
+                        {
+                            WhiteMayCastleQueenside = false;
+                        }
+                        else if (destination == new Point(7, 0))
+                        {
+                            WhiteMayCastleKingside = false;
+                        }
+                        else if (destination == new Point(0, 7))
+                        {
+                            BlackMayCastleQueenside = false;
+                        }
+                        else if (destination == new Point(7, 7))
+                        {
+                            BlackMayCastleKingside = false;
+                        }
+                    }
                     CapturedPieces.Add(Board[destination.X, destination.Y]!);
                     StaleMoveCounter = 0;
                 }
