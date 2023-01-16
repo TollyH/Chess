@@ -43,7 +43,23 @@ namespace Chess
             tileWidth = chessGameCanvas.ActualWidth / game.Board.GetLength(0);
             tileHeight = chessGameCanvas.ActualHeight / game.Board.GetLength(1);
 
-            if (grabbedPiece is not null && highlightGrabbedMoves)
+            GameState state = game.DetermineGameState();
+
+            if (state is GameState.CheckMateWhite or GameState.CheckMateBlack)
+            {
+                System.Drawing.Point kingPosition = state == GameState.CheckMateWhite ? game.WhiteKing.Position : game.BlackKing.Position;
+                Rectangle mateHighlight = new()
+                {
+                    Width = tileWidth,
+                    Height = tileHeight,
+                    Fill = Brushes.IndianRed
+                };
+                _ = chessGameCanvas.Children.Add(mateHighlight);
+                Canvas.SetBottom(mateHighlight, kingPosition.Y * tileHeight);
+                Canvas.SetLeft(mateHighlight, kingPosition.X * tileWidth);
+            }
+
+            else if (grabbedPiece is not null && highlightGrabbedMoves)
             {
                 foreach (System.Drawing.Point validMove in grabbedPiece.GetValidMoves(game.Board, true))
                 {
@@ -86,23 +102,7 @@ namespace Chess
                 Canvas.SetLeft(enPassantHighlight, game.EnPassantSquare.Value.X * tileWidth);
             }
 
-            GameState state = game.DetermineGameState();
-
-            if (state is GameState.CheckMateWhite or GameState.CheckMateBlack)
-            {
-                System.Drawing.Point kingPosition = state == GameState.CheckMateWhite ? game.WhiteKing.Position : game.BlackKing.Position;
-                Rectangle mateHighlight = new()
-                {
-                    Width = tileWidth,
-                    Height = tileHeight,
-                    Fill = Brushes.IndianRed
-                };
-                _ = chessGameCanvas.Children.Add(mateHighlight);
-                Canvas.SetBottom(mateHighlight, kingPosition.Y * tileHeight);
-                Canvas.SetLeft(mateHighlight, kingPosition.X * tileWidth);
-            }
-
-            if (grabbedPiece is Pieces.King && highlightGrabbedMoves)
+            else if (grabbedPiece is Pieces.King && highlightGrabbedMoves)
             {
                 int yPos = game.CurrentTurnWhite ? 0 : 7;
                 if (game.IsCastlePossible(true))
