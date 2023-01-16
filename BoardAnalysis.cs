@@ -338,7 +338,8 @@ namespace Chess
             {
                 if (game.CurrentTurnWhite)
                 {
-                    if ((!bestMove.BlackMateLocated && potentialMove.BlackMateLocated)
+                    if (bestMove.EvaluatedFutureValue == double.NegativeInfinity
+                        || (!bestMove.BlackMateLocated && potentialMove.BlackMateLocated)
                         || (!bestMove.BlackMateLocated && potentialMove.EvaluatedFutureValue > bestMove.EvaluatedFutureValue)
                         || (bestMove.BlackMateLocated && potentialMove.BlackMateLocated
                             && potentialMove.DepthToBlackMate < bestMove.DepthToBlackMate))
@@ -348,7 +349,8 @@ namespace Chess
                 }
                 else
                 {
-                    if ((!bestMove.WhiteMateLocated && potentialMove.WhiteMateLocated)
+                    if (bestMove.EvaluatedFutureValue == double.PositiveInfinity
+                        || (!bestMove.WhiteMateLocated && potentialMove.WhiteMateLocated)
                         || (!bestMove.WhiteMateLocated && potentialMove.EvaluatedFutureValue < bestMove.EvaluatedFutureValue)
                         || (bestMove.WhiteMateLocated && potentialMove.WhiteMateLocated
                             && potentialMove.DepthToWhiteMate < bestMove.DepthToWhiteMate))
@@ -475,7 +477,8 @@ namespace Chess
                         PossibleMove potentialMove = MinimaxMove(gameClone, alpha, beta, depth + 1, maxDepth);
                         if (game.CurrentTurnWhite)
                         {
-                            if ((!bestMove.BlackMateLocated && potentialMove.BlackMateLocated)
+                            if (bestMove.EvaluatedFutureValue == double.NegativeInfinity
+                                || (!bestMove.BlackMateLocated && potentialMove.BlackMateLocated)
                                 || (!bestMove.BlackMateLocated && potentialMove.EvaluatedFutureValue > bestMove.EvaluatedFutureValue)
                                 || (bestMove.BlackMateLocated && potentialMove.BlackMateLocated
                                     && potentialMove.DepthToBlackMate < bestMove.DepthToBlackMate))
@@ -495,7 +498,8 @@ namespace Chess
                         }
                         else
                         {
-                            if ((!bestMove.WhiteMateLocated && potentialMove.WhiteMateLocated)
+                            if (bestMove.EvaluatedFutureValue == double.PositiveInfinity
+                                || (!bestMove.WhiteMateLocated && potentialMove.WhiteMateLocated)
                                 || (!bestMove.WhiteMateLocated && potentialMove.EvaluatedFutureValue < bestMove.EvaluatedFutureValue)
                                 || (bestMove.WhiteMateLocated && potentialMove.WhiteMateLocated
                                     && potentialMove.DepthToWhiteMate < bestMove.DepthToWhiteMate))
