@@ -26,7 +26,7 @@ namespace Chess
         private bool whiteIsComputer = false;
         private bool blackIsComputer = true;
 
-        private bool currentTurnEvaluated = false;
+        private BoardAnalysis.PossibleMove? currentBestMove = null;
         private bool manuallyEvaluating = false;
 
         private readonly Dictionary<Pieces.Piece, Viewbox> pieceViews = new();
@@ -49,7 +49,7 @@ namespace Chess
 
             whiteCaptures.Content = game.CapturedPieces.Count(p => p.IsWhite);
             blackCaptures.Content = game.CapturedPieces.Count(p => !p.IsWhite);
-            if (!currentTurnEvaluated)
+            if (currentBestMove is null)
             {
                 if (game.CurrentTurnWhite)
                 {
@@ -101,6 +101,29 @@ namespace Chess
                 Canvas.SetBottom(destinationMoveHighlight, lastMoveDestination.Y * tileHeight);
                 Canvas.SetLeft(destinationMoveHighlight, lastMoveDestination.X * tileWidth);
 
+            }
+
+            if (currentBestMove is not null)
+            {
+                Rectangle bestMoveSrcHighlight = new()
+                {
+                    Width = tileWidth,
+                    Height = tileHeight,
+                    Fill = Brushes.LightGreen
+                };
+                _ = chessGameCanvas.Children.Add(bestMoveSrcHighlight);
+                Canvas.SetBottom(bestMoveSrcHighlight, currentBestMove.Value.Source.Y * tileHeight);
+                Canvas.SetLeft(bestMoveSrcHighlight, currentBestMove.Value.Source.X * tileWidth);
+
+                Rectangle bestMoveDstHighlight = new()
+                {
+                    Width = tileWidth,
+                    Height = tileHeight,
+                    Fill = Brushes.Green
+                };
+                _ = chessGameCanvas.Children.Add(bestMoveDstHighlight);
+                Canvas.SetBottom(bestMoveDstHighlight, currentBestMove.Value.Destination.Y * tileHeight);
+                Canvas.SetLeft(bestMoveDstHighlight, currentBestMove.Value.Destination.X * tileWidth);
             }
 
             if (grabbedPiece is not null && highlightGrabbedMoves)
@@ -347,7 +370,7 @@ namespace Chess
                 {
                     highlightGrabbedMoves = false;
                     grabbedPiece = null;
-                    currentTurnEvaluated = false;
+                    currentBestMove = null;
                     UpdateCursor();
                     UpdateGameDisplay();
                     PushEndgameMessage();
@@ -399,7 +422,7 @@ namespace Chess
                 {
                     grabbedPiece = null;
                     highlightGrabbedMoves = false;
-                    currentTurnEvaluated = false;
+                    currentBestMove = null;
                     UpdateCursor();
                     UpdateGameDisplay();
                     PushEndgameMessage();
@@ -426,7 +449,7 @@ namespace Chess
 
         private async void evaluation_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (currentTurnEvaluated || (game.CurrentTurnWhite && whiteIsComputer)
+            if (currentBestMove is not null || (game.CurrentTurnWhite && whiteIsComputer)
                 || (!game.CurrentTurnWhite && blackIsComputer))
             {
                 return;
@@ -438,7 +461,8 @@ namespace Chess
             UpdateCursor();
             BoardAnalysis.PossibleMove bestMove = await BoardAnalysis.EstimateBestPossibleMove(game, 4);
             UpdateEvaluationMeter(bestMove, game.CurrentTurnWhite);
-            currentTurnEvaluated = true;
+            currentBestMove = bestMove;
+            UpdateGameDisplay();
             manuallyEvaluating = false;
         }
     }
