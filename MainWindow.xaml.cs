@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -30,6 +31,8 @@ namespace Chess
         private bool manuallyEvaluating = false;
 
         private readonly Dictionary<Pieces.Piece, Viewbox> pieceViews = new();
+
+        private CancellationTokenSource cancelMoveComputation = new();
 
         double tileWidth;
         double tileHeight;
@@ -313,7 +316,13 @@ namespace Chess
 
             while (!game.GameOver && ((game.CurrentTurnWhite && whiteIsComputer) || (!game.CurrentTurnWhite && blackIsComputer)))
             {
-                BoardAnalysis.PossibleMove bestMove = await BoardAnalysis.EstimateBestPossibleMove(game, 4);
+                CancellationToken cancellationToken = cancelMoveComputation.Token;
+                BoardAnalysis.PossibleMove bestMove = await BoardAnalysis.EstimateBestPossibleMove(game, 4, cancellationToken);
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+
                 _ = game.MovePiece(bestMove.Source, bestMove.Destination, true);
                 UpdateGameDisplay();
                 // Turn has been inverted already but we have value for the now old turn
@@ -468,7 +477,14 @@ namespace Chess
             highlightGrabbedMoves = false;
             UpdateGameDisplay();
             UpdateCursor();
-            BoardAnalysis.PossibleMove bestMove = await BoardAnalysis.EstimateBestPossibleMove(game, 4);
+
+            CancellationToken cancellationToken = cancelMoveComputation.Token;
+            BoardAnalysis.PossibleMove bestMove = await BoardAnalysis.EstimateBestPossibleMove(game, 4, cancellationToken);
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+
             UpdateEvaluationMeter(bestMove, game.CurrentTurnWhite);
             currentBestMove = bestMove;
             UpdateGameDisplay();

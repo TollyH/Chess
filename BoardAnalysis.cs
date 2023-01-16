@@ -330,9 +330,9 @@ namespace Chess
         /// Use <see cref="EvaluatePossibleMoves"/> to find the best possible move in the current state of the game
         /// </summary>
         /// <param name="maxDepth">The maximum number of half-moves in the future to search</param>
-        public static async Task<PossibleMove> EstimateBestPossibleMove(ChessGame game, int maxDepth)
+        public static async Task<PossibleMove> EstimateBestPossibleMove(ChessGame game, int maxDepth, CancellationToken cancellationToken)
         {
-            PossibleMove[] moves = await EvaluatePossibleMoves(game, maxDepth);
+            PossibleMove[] moves = await EvaluatePossibleMoves(game, maxDepth, cancellationToken);
             PossibleMove bestMove = new(default, default,
                 game.CurrentTurnWhite ? double.NegativeInfinity : double.PositiveInfinity, false, false, 0, 0);
             foreach (PossibleMove potentialMove in moves)
@@ -360,6 +360,10 @@ namespace Chess
                     }
                 }
             }
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return default;
+            }
             return bestMove;
         }
 
@@ -368,7 +372,7 @@ namespace Chess
         /// </summary>
         /// <param name="maxDepth">The maximum number of half-moves in the future to search</param>
         /// <returns>An array of all possible moves, with information on board value and ability to checkmate</returns>
-        public static async Task<PossibleMove[]> EvaluatePossibleMoves(ChessGame game, int maxDepth)
+        public static async Task<PossibleMove[]> EvaluatePossibleMoves(ChessGame game, int maxDepth, CancellationToken cancellationToken)
         {
             List<PossibleMove> possibleMoves = new();
             int targetLength = 0;
@@ -393,7 +397,7 @@ namespace Chess
                         Thread processThread = new(() =>
                         {
                             PossibleMove bestSubMove = MinimaxMove(gameClone,
-                                double.NegativeInfinity, double.PositiveInfinity, 1, maxDepth);
+                                double.NegativeInfinity, double.PositiveInfinity, 1, maxDepth, cancellationToken);
                             possibleMoves.Add(new PossibleMove(thisPosition, thisValidMove, bestSubMove.EvaluatedFutureValue,
                                 bestSubMove.WhiteMateLocated, bestSubMove.BlackMateLocated,
                                 bestSubMove.DepthToWhiteMate, bestSubMove.DepthToBlackMate));
@@ -403,14 +407,18 @@ namespace Chess
                 }
             }
 
-            await Task.Run(async() =>
+            await Task.Run(async () =>
             {
-                while (possibleMoves.Count < targetLength)
+                while (possibleMoves.Count < targetLength || cancellationToken.IsCancellationRequested)
                 {
                     await Task.Delay(50);
                 }
-            });
+            }, cancellationToken);
 
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return Array.Empty<PossibleMove>();
+            }
             return possibleMoves.ToArray();
         }
 
@@ -442,7 +450,7 @@ namespace Chess
             return allValidMoves;
         }
 
-        private static PossibleMove MinimaxMove(ChessGame game, double alpha, double beta, int depth, int maxDepth)
+        private static PossibleMove MinimaxMove(ChessGame game, double alpha, double beta, int depth, int maxDepth, CancellationToken cancellationToken)
         {
             (Point, Point) lastMove = game.Moves.Last();
             if (game.GameOver)
@@ -483,7 +491,11 @@ namespace Chess
                     {
                         ChessGame gameClone = game.Clone();
                         _ = gameClone.MovePiece(piece.Position, validMove, true);
-                        PossibleMove potentialMove = MinimaxMove(gameClone, alpha, beta, depth + 1, maxDepth);
+                        PossibleMove potentialMove = MinimaxMove(gameClone, alpha, beta, depth + 1, maxDepth, cancellationToken);
+                        if (cancellationToken.IsCancellationRequested)
+                        {
+                            return bestMove;
+                        }
                         if (game.CurrentTurnWhite)
                         {
                             if (bestMove.EvaluatedFutureValue == double.NegativeInfinity
