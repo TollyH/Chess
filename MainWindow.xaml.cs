@@ -25,7 +25,7 @@ namespace Chess
         private bool highlightGrabbedMoves = false;
 
         private bool whiteIsComputer = false;
-        private bool blackIsComputer = true;
+        private bool blackIsComputer = false;
 
         private BoardAnalysis.PossibleMove? currentBestMove = null;
         private bool manuallyEvaluating = false;
@@ -312,8 +312,6 @@ namespace Chess
         /// </summary>
         private async Task CheckComputerMove()
         {
-            // TODO: Currently black is always computer player, make that configurable
-
             while (!game.GameOver && ((game.CurrentTurnWhite && whiteIsComputer) || (!game.CurrentTurnWhite && blackIsComputer)))
             {
                 CancellationToken cancellationToken = cancelMoveComputation.Token;
@@ -348,6 +346,20 @@ namespace Chess
             return coord.X < 0 || coord.Y < 0 || coord.X >= game.Board.GetLength(0) || coord.Y >= game.Board.GetLength(1)
                 ? null
                 : game.Board[coord.X, coord.Y];
+        }
+
+        private async Task NewGame()
+        {
+            cancelMoveComputation.Cancel();
+            cancelMoveComputation = new CancellationTokenSource();
+            game = new ChessGame();
+            currentBestMove = null;
+            manuallyEvaluating = false;
+            grabbedPiece = null;
+            highlightGrabbedMoves = false;
+            UpdateGameDisplay();
+            UpdateCursor();
+            await CheckComputerMove();
         }
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
@@ -489,6 +501,34 @@ namespace Chess
             currentBestMove = bestMove;
             UpdateGameDisplay();
             manuallyEvaluating = false;
+        }
+
+        private async void NewGame_Click(object sender, RoutedEventArgs e)
+        {
+            whiteIsComputer = false;
+            blackIsComputer = false;
+            await NewGame();
+        }
+
+        private async void NewGameCpuWhite_Click(object sender, RoutedEventArgs e)
+        {
+            whiteIsComputer = false;
+            blackIsComputer = true;
+            await NewGame();
+        }
+
+        private async void NewGameCpuBlack_Click(object sender, RoutedEventArgs e)
+        {
+            whiteIsComputer = true;
+            blackIsComputer = false;
+            await NewGame();
+        }
+
+        private async void NewGameCpuOnly_Click(object sender, RoutedEventArgs e)
+        {
+            whiteIsComputer = true;
+            blackIsComputer = true;
+            await NewGame();
         }
     }
 }
