@@ -37,6 +37,7 @@ namespace Chess
         }.ToImmutableHashSet();
 
         public Pieces.Piece?[,] Board { get; }
+        public string InitialState { get; }
 
         public Pieces.King WhiteKing { get; }
         public Pieces.King BlackKing { get; }
@@ -97,6 +98,8 @@ namespace Chess
                 { new Pieces.Knight(new Point(6, 0), true), new Pieces.Pawn(new Point(6, 1), true), null, null, null, null, new Pieces.Pawn(new Point(6, 6), false), new Pieces.Knight(new Point(6, 7), false) },
                 { new Pieces.Rook(new Point(7, 0), true), new Pieces.Pawn(new Point(7, 1), true), null, null, null, null, new Pieces.Pawn(new Point(7, 6), false), new Pieces.Rook(new Point(7, 7), false) }
             };
+
+            InitialState = ToString();
         }
 
         /// <summary>
@@ -104,7 +107,8 @@ namespace Chess
         /// </summary>
         public ChessGame(Pieces.Piece?[,] board, bool currentTurnWhite, bool gameOver, List<(Point, Point)> moves,
             List<Pieces.Piece> capturedPieces, Point? enPassantSquare, bool whiteMayCastleKingside, bool whiteMayCastleQueenside,
-            bool blackMayCastleKingside, bool blackMayCastleQueenside, int staleMoveCounter, Dictionary<string, int> boardCounts)
+            bool blackMayCastleKingside, bool blackMayCastleQueenside, int staleMoveCounter, Dictionary<string, int> boardCounts,
+            string? initialState)
         {
             if (board.GetLength(0) != 8 || board.GetLength(1) != 8)
             {
@@ -139,6 +143,8 @@ namespace Chess
             BlackMayCastleQueenside = blackMayCastleQueenside;
             StaleMoveCounter = staleMoveCounter;
             BoardCounts = boardCounts;
+
+            InitialState = initialState ?? ToString();
         }
 
         /// <summary>
@@ -158,7 +164,7 @@ namespace Chess
             return new ChessGame(boardClone, CurrentTurnWhite, GameOver, new(Moves),
                 CapturedPieces.Select(c => c.Clone()).ToList(), EnPassantSquare, WhiteMayCastleKingside,
                 WhiteMayCastleQueenside, BlackMayCastleKingside, BlackMayCastleQueenside, StaleMoveCounter,
-                new(BoardCounts));
+                new(BoardCounts), InitialState);
         }
 
         /// <summary>
