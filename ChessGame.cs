@@ -460,11 +460,11 @@ namespace Chess
                         if (canReachDest.Any())
                         {
                             string coordinate = source.ToChessCoordinate();
-                            if (canReachDest.Where(p => p.Position.Y == source.Y).Any())
+                            if (canReachDest.Where(p => p.Position.X == source.X).Any())
                             {
                                 newMove = coordinate[1] + newMove;
                             }
-                            if (canReachDest.Where(p => p.Position.X == source.X).Any())
+                            if (canReachDest.Where(p => p.Position.Y == source.Y).Any())
                             {
                                 newMove = coordinate[0] + newMove;
                             }
