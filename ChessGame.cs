@@ -105,6 +105,11 @@ namespace Chess
             List<Pieces.Piece> capturedPieces, Point? enPassantSquare, bool whiteMayCastleKingside, bool whiteMayCastleQueenside,
             bool blackMayCastleKingside, bool blackMayCastleQueenside, int staleMoveCounter, Dictionary<string, int> boardCounts)
         {
+            if (board.GetLength(0) != 8 || board.GetLength(1) != 8)
+            {
+                throw new ArgumentException("Boards must be 8x8 in size");
+            }
+
             Board = board;
             WhiteKing = Board.OfType<Pieces.King>().Where(k => k.IsWhite).First();
             BlackKing = Board.OfType<Pieces.King>().Where(k => !k.IsWhite).First();
