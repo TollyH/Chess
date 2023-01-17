@@ -176,7 +176,7 @@ namespace Chess
             {
                 return staticState;
             }
-            if (BoardCounts.GetValueOrDefault(ToString()) >= 3)
+            if (BoardCounts.GetValueOrDefault(ToString(true)) >= 3)
             {
                 return GameState.DrawThreeFold;
             }
@@ -385,7 +385,7 @@ namespace Chess
                 Board[destination.X, destination.Y] = piece;
                 Board[source.X, source.Y] = null;
 
-                string newBoardString = ToString();
+                string newBoardString = ToString(true);
                 if (BoardCounts.ContainsKey(newBoardString))
                 {
                     BoardCounts[newBoardString]++;
@@ -411,6 +411,18 @@ namespace Chess
         /// </summary>
         /// <remarks>The resulting string complies with the Forsyth–Edwards Notation standard</remarks>
         public override string ToString()
+        {
+            return ToString(false);
+        }
+
+        /// <summary>
+        /// Get a string representation of the given board.
+        /// </summary>
+        /// <remarks>
+        /// The resulting string complies with the Forsyth–Edwards Notation standard,
+        /// unless <paramref name="omitTurnAndMoveCounts"/> is <see langword="true"/>
+        /// </remarks>
+        public string ToString(bool omitTurnAndMoveCounts)
         {
             StringBuilder result = new(90);
 
@@ -444,7 +456,7 @@ namespace Chess
                 }
             }
 
-            _ = result.Append(' ').Append(CurrentTurnWhite ? "w " : "b ");
+            _ = omitTurnAndMoveCounts ? result.Append(' ') : result.Append(CurrentTurnWhite ? " w " : " b ");
 
             bool atLeastOneCastle = false;
             if (WhiteMayCastleKingside)
@@ -473,10 +485,10 @@ namespace Chess
             }
 
             _ = EnPassantSquare is null
-                ? result.Append(" - ")
-                : result.Append(' ').Append(EnPassantSquare.Value.ToChessCoordinate()).Append(' ');
+                ? result.Append(" -")
+                : result.Append(' ').Append(EnPassantSquare.Value.ToChessCoordinate());
 
-            _ = result.Append(StaleMoveCounter).Append(' ').Append((Moves.Count / 2) + 1);
+            _ = omitTurnAndMoveCounts ? null : result.Append(' ').Append(StaleMoveCounter).Append(' ').Append((Moves.Count / 2) + 1);
 
             return result.ToString();
         }
