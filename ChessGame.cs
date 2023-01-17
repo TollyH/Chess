@@ -459,15 +459,26 @@ namespace Chess
                                 && p.GetValidMoves(oldGame.Board, true).Contains(destination));
                         if (canReachDest.Any())
                         {
+                            bool success = false;
                             string coordinate = source.ToChessCoordinate();
+                            // Other pieces on same file, disambiguate with rank
                             if (canReachDest.Where(p => p.Position.X == source.X).Any())
                             {
+                                success = true;
                                 newMove = coordinate[1] + newMove;
                             }
+                            // Other pieces on same rank, disambiguate with file
                             if (canReachDest.Where(p => p.Position.Y == source.Y).Any())
                             {
+                                success = true;
                                 newMove = coordinate[0] + newMove;
                             }
+                            if (!success)
+                            {
+                                // Pieces are on different rank and file, but can reach same square
+                                // Prefer disambiguating with file
+                                newMove = coordinate[0] + newMove;
+                        }
                         }
                         if (!castle)
                         {
