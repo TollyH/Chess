@@ -109,6 +109,19 @@ namespace Chess
             WhiteKing = Board.OfType<Pieces.King>().Where(k => k.IsWhite).First();
             BlackKing = Board.OfType<Pieces.King>().Where(k => !k.IsWhite).First();
 
+            if ((whiteMayCastleKingside && (Board[7, 0] is not Pieces.Rook || !Board[7, 0]!.IsWhite
+                    || Board[4, 0] is not Pieces.King || !Board[4, 0]!.IsWhite))
+                || (whiteMayCastleQueenside && (Board[0, 0] is not Pieces.Rook || !Board[0, 0]!.IsWhite
+                    || Board[4, 0] is not Pieces.King || !Board[4, 0]!.IsWhite))
+                || (blackMayCastleKingside && (Board[7, 7] is not Pieces.Rook || Board[7, 7]!.IsWhite
+                    || Board[4, 7] is not Pieces.King || Board[4, 7]!.IsWhite))
+                || (blackMayCastleQueenside && (Board[0, 7] is not Pieces.Rook || Board[0, 7]!.IsWhite
+                    || Board[4, 7] is not Pieces.King || Board[4, 7]!.IsWhite)))
+            {
+                throw new ArgumentException(
+                    "At least one castling allowed flag was set to true without a valid position for performing it");
+            }
+
             CurrentTurnWhite = currentTurnWhite;
             GameOver = gameOver;
             Moves = moves;
