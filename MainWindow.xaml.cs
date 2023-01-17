@@ -126,7 +126,9 @@ namespace Chess
 
             }
 
-            if (currentBestMove is not null)
+            if (currentBestMove is not null
+                // Prevent cases where there are no valid moves highlighting (0, 0)
+                && currentBestMove.Value.Source != currentBestMove.Value.Destination)
             {
                 Rectangle bestMoveSrcHighlight = new()
                 {
