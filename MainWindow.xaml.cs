@@ -556,5 +556,10 @@ namespace Chess
             blackIsComputer = true;
             await NewGame();
         }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            cancelMoveComputation.Cancel();
+        }
     }
 }
