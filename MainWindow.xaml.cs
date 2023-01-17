@@ -54,8 +54,24 @@ namespace Chess
             tileWidth = chessGameCanvas.ActualWidth / game.Board.GetLength(0);
             tileHeight = chessGameCanvas.ActualHeight / game.Board.GetLength(1);
 
-            whiteCaptures.Content = game.CapturedPieces.Count(p => p.IsWhite);
-            blackCaptures.Content = game.CapturedPieces.Count(p => !p.IsWhite);
+            whiteCaptures.Content = 0;
+            whiteCaptures.ToolTip = "";
+            foreach (Pieces.Piece capturedPiece in game.CapturedPieces.Where(p => p.IsWhite))
+            {
+                whiteCaptures.Content = (int)whiteCaptures.Content + 1;
+                whiteCaptures.ToolTip = (string)whiteCaptures.ToolTip + capturedPiece.Name + "\r\n";
+            }
+            whiteCaptures.ToolTip = ((string)whiteCaptures.ToolTip).TrimEnd();
+
+            blackCaptures.Content = 0;
+            blackCaptures.ToolTip = "";
+            foreach (Pieces.Piece capturedPiece in game.CapturedPieces.Where(p => !p.IsWhite))
+            {
+                blackCaptures.Content = (int)blackCaptures.Content + 1;
+                blackCaptures.ToolTip = (string)blackCaptures.ToolTip + capturedPiece.Name + "\r\n";
+            }
+            blackCaptures.ToolTip = ((string)blackCaptures.ToolTip).TrimEnd();
+
             if (currentBestMove is null && !manuallyEvaluating)
             {
                 if (game.CurrentTurnWhite && !whiteIsComputer)
