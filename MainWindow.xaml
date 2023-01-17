@@ -21,6 +21,8 @@
                 <MenuItem Header="New Game (1 Player - _White)" Click="NewGameCpuWhite_Click"/>
                 <MenuItem Header="New Game (1 Player - _Black)" Click="NewGameCpuBlack_Click"/>
                 <MenuItem Header="New Game (0 Player - _Computer Only)" Click="NewGameCpuOnly_Click"/>
+                <Separator/>
+                <MenuItem Header="Export to _PGN" Click="PGNExport_Click"/>
             </MenuItem>
         </Menu>
         <Grid Grid.Row="1">

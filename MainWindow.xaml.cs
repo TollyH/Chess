@@ -582,5 +582,10 @@ namespace Chess
         {
             cancelMoveComputation.Cancel();
         }
+
+        private void PGNExport_Click(object sender, RoutedEventArgs e)
+        {
+            _ = new PGNExport(game, whiteIsComputer, blackIsComputer).ShowDialog();
+        }
     }
 }

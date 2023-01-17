@@ -478,7 +478,7 @@ namespace Chess
                                 // Pieces are on different rank and file, but can reach same square
                                 // Prefer disambiguating with file
                                 newMove = coordinate[0] + newMove;
-                        }
+                            }
                         }
                         if (!castle)
                         {
@@ -590,6 +590,44 @@ namespace Chess
             _ = omitTurnAndMoveCounts ? null : result.Append(' ').Append(StaleMoveCounter).Append(' ').Append((Moves.Count / 2) + 1);
 
             return result.ToString();
+        }
+
+        /// <summary>
+        /// Convert this game to a PGN file for use in other chess programs
+        /// </summary>
+        public string ToPGN(string? eventName, string? siteName, DateOnly? startDate, string whiteName, string blackName,
+            bool whiteIsComputer, bool blackIsComputer)
+        {
+            GameState state = DetermineGameState();
+            string pgn = $"[Event \"{eventName?.Replace("\\", "\\\\")?.Replace("\"", "\\\"") ?? "?"}\"]\n" +
+                $"[Site \"{siteName?.Replace("\\", "\\\\")?.Replace("\"", "\\\"") ?? "?"}\"]\n" +
+                $"[Date \"{startDate?.ToString("yyyy.MM.dd") ?? "????.??.??"}\"]\n" +
+                "[Round \"?\"]\n" +
+                $"[White \"{whiteName?.Replace("\\", "\\\\")?.Replace("\"", "\\\"") ?? "?"}\"]\n" +
+                $"[Black \"{blackName?.Replace("\\", "\\\\")?.Replace("\"", "\\\"") ?? "?"}\"]\n" +
+                $"[Result \"{(!GameOver ? "*" : state == GameState.CheckMateBlack ? "1-0" : "0-1")}\"]\n" +
+                $"[WhiteType \"{(whiteIsComputer ? "program" : "human")}\"]\n" +
+                $"[BlackType \"{(blackIsComputer ? "program" : "human")}\"]\n\n";
+
+            // Include initial state if not a standard chess game
+            if (InitialState != "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+            {
+                pgn += $"[SetUp \"1\"]\n[FEN \"{InitialState}\"]\n\n";
+            }
+
+            string compiledMoveText = "";
+            for (int i = 0; i < MoveText.Count; i += 2)
+            {
+                compiledMoveText += $" {(i / 2) + 1}. {MoveText[i]}";
+                if (i + 1 < MoveText.Count)
+                {
+                    compiledMoveText += $" {MoveText[i + 1]}";
+                }
+            }
+            pgn += compiledMoveText.Trim();
+            pgn += !GameOver ? " *\n\n" : state == GameState.CheckMateBlack ? " 1-0\n\n" : " 0-1\n\n";
+
+            return pgn;
         }
 
         /// <summary>
@@ -708,8 +746,10 @@ namespace Chess
             int staleMoves = int.Parse(fields[4]);
 
             // Forsyth–Edwards doesn't define what the previous moves were, so they moves list starts empty
+            // For the PGN standard, if black moves first then a single move "..." is added to the start of the move text list
             return new ChessGame(board, currentTurnWhite, EndingStates.Contains(BoardAnalysis.DetermineGameState(board, currentTurnWhite)),
-                new(), new(), new(), enPassant, whiteKingside, whiteQueenside, blackKingside, blackQueenside, staleMoves, new(), null);
+                new(), currentTurnWhite ? new() : new() { "..." }, new(), enPassant, whiteKingside, whiteQueenside, blackKingside, blackQueenside,
+                staleMoves, new(), null);
         }
     }
 }
