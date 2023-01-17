@@ -1,5 +1,4 @@
 ﻿using System.Drawing;
-using System.Text;
 
 namespace Chess
 {
@@ -16,24 +15,11 @@ namespace Chess
             return newBoard;
         }
 
-        /// <summary>
-        /// Get a string representation of the given board.
-        /// </summary>
-        /// <remarks>The string contains no whitespace and only stores information on piece type, colour, and location.</remarks>
-        public static string ChessBoardToString(this Pieces.Piece?[,] board)
+        private const string files = "abcdefgh";
+        private const string ranks = "12345678";
+        public static string ToChessCoordinate(this Point point)
         {
-            StringBuilder result = new(128);
-
-            for (int y = 0; y < board.GetLength(1); y++)
-            {
-                for (int x = 0; x < board.GetLength(0); x++)
-                {
-                    Pieces.Piece? piece = board[x, y];
-                    _ = piece is null ? result.Append("nn") : result.Append(piece.SymbolLetter).Append(piece.IsWhite ? 'w' : 'b');
-                }
-            }
-
-            return result.ToString();
+            return $"{files[point.X]}{ranks[point.Y]}";
         }
     }
 }

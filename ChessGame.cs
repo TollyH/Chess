@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Drawing;
 using System.Linq;
+using System.Text;
 
 namespace Chess
 {
@@ -175,7 +176,7 @@ namespace Chess
             {
                 return staticState;
             }
-            if (BoardCounts.GetValueOrDefault(Board.ChessBoardToString()) >= 3)
+            if (BoardCounts.GetValueOrDefault(ToString()) >= 3)
             {
                 return GameState.DrawThreeFold;
             }
@@ -279,9 +280,9 @@ namespace Chess
                 // Take pawn after en passant
                 if (Board[destination.X, source.Y] is not null)
                 {
-                CapturedPieces.Add(Board[destination.X, source.Y]!);
-                Board[destination.X, source.Y] = null;
-            }
+                    CapturedPieces.Add(Board[destination.X, source.Y]!);
+                    Board[destination.X, source.Y] = null;
+                }
             }
             else
             {
@@ -384,7 +385,7 @@ namespace Chess
                 Board[destination.X, destination.Y] = piece;
                 Board[source.X, source.Y] = null;
 
-                string newBoardString = Board.ChessBoardToString();
+                string newBoardString = ToString();
                 if (BoardCounts.ContainsKey(newBoardString))
                 {
                     BoardCounts[newBoardString]++;
@@ -403,6 +404,81 @@ namespace Chess
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Get a string representation of the given board.
+        /// </summary>
+        /// <remarks>The resulting string complies with the Forsyth–Edwards Notation standard</remarks>
+        public override string ToString()
+        {
+            StringBuilder result = new(90);
+
+            for (int y = Board.GetLength(1) - 1; y >= 0; y--)
+            {
+                int consecutiveNull = 0;
+                for (int x = 0; x < Board.GetLength(0); x++)
+                {
+                    Pieces.Piece? piece = Board[x, y];
+                    if (piece is null)
+                    {
+                        consecutiveNull++;
+                    }
+                    else
+                    {
+                        if (consecutiveNull > 0)
+                        {
+                            _ = result.Append(consecutiveNull);
+                            consecutiveNull = 0;
+                        }
+                        _ = result.Append(piece.IsWhite ? char.ToUpper(piece.SymbolLetter) : char.ToLower(piece.SymbolLetter));
+                    }
+                }
+                if (consecutiveNull > 0)
+                {
+                    _ = result.Append(consecutiveNull);
+                }
+                if (y > 0)
+                {
+                    _ = result.Append('/');
+                }
+            }
+
+            _ = result.Append(' ').Append(CurrentTurnWhite ? "w " : "b ");
+
+            bool atLeastOneCastle = false;
+            if (WhiteMayCastleKingside)
+            {
+                atLeastOneCastle = true;
+                _ = result.Append('K');
+            }
+            if (WhiteMayCastleQueenside)
+            {
+                atLeastOneCastle = true;
+                _ = result.Append('Q');
+            }
+            if (BlackMayCastleKingside)
+            {
+                atLeastOneCastle = true;
+                _ = result.Append('k');
+            }
+            if (WhiteMayCastleQueenside)
+            {
+                atLeastOneCastle = true;
+                _ = result.Append('q');
+            }
+            if (!atLeastOneCastle)
+            {
+                _ = result.Append('-');
+            }
+
+            _ = EnPassantSquare is null
+                ? result.Append(" - ")
+                : result.Append(' ').Append(EnPassantSquare.Value.ToChessCoordinate()).Append(' ');
+
+            _ = result.Append(StaleMoveCounter).Append(' ').Append((Moves.Count / 2) + 1);
+
+            return result.ToString();
         }
     }
 }
