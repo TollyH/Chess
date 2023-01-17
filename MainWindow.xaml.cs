@@ -436,12 +436,15 @@ namespace Chess
 
             highlightGrabbedMoves = false;
             Pieces.Piece? toCheck = GetPieceAtCanvasPoint(mousePos);
-            if (toCheck is not null && !manuallyEvaluating)
+            if (toCheck is not null)
             {
                 if ((toCheck.IsWhite && game.CurrentTurnWhite && !whiteIsComputer)
                     || (!toCheck.IsWhite && !game.CurrentTurnWhite && !blackIsComputer))
                 {
                     grabbedPiece = toCheck;
+                    manuallyEvaluating = false;
+                    cancelMoveComputation.Cancel();
+                    cancelMoveComputation = new CancellationTokenSource();
                 }
                 else
                 {
