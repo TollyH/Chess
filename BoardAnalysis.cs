@@ -376,7 +376,7 @@ namespace Chess
         public static async Task<PossibleMove[]> EvaluatePossibleMoves(ChessGame game, int maxDepth, CancellationToken cancellationToken)
         {
             ConcurrentBag<PossibleMove> possibleMoves = new();
-            int targetLength = 0;
+            int remainingThreads = 0;
 
             foreach (Pieces.Piece? piece in game.Board)
             {
@@ -389,7 +389,7 @@ namespace Chess
 
                     foreach (Point validMove in GetValidMovesForEval(game, piece))
                     {
-                        targetLength++;
+                        remainingThreads++;
                         Point thisPosition = piece.Position;
                         Point thisValidMove = validMove;
                         ChessGame gameClone = game.Clone();
@@ -399,9 +399,14 @@ namespace Chess
                         {
                             PossibleMove bestSubMove = MinimaxMove(gameClone,
                                 double.NegativeInfinity, double.PositiveInfinity, 1, maxDepth, cancellationToken);
-                            possibleMoves.Add(new PossibleMove(thisPosition, thisValidMove, bestSubMove.EvaluatedFutureValue,
-                                bestSubMove.WhiteMateLocated, bestSubMove.BlackMateLocated,
-                                bestSubMove.DepthToWhiteMate, bestSubMove.DepthToBlackMate));
+                            // Don't include default value in results
+                            if (bestSubMove.Source != bestSubMove.Destination)
+                            {
+                                possibleMoves.Add(new PossibleMove(thisPosition, thisValidMove, bestSubMove.EvaluatedFutureValue,
+                                    bestSubMove.WhiteMateLocated, bestSubMove.BlackMateLocated,
+                                    bestSubMove.DepthToWhiteMate, bestSubMove.DepthToBlackMate));
+                            }
+                            remainingThreads--;
                         });
                         processThread.Start();
                     }
@@ -410,7 +415,7 @@ namespace Chess
 
             await Task.Run(async () =>
             {
-                while (possibleMoves.Count < targetLength || cancellationToken.IsCancellationRequested)
+                while (remainingThreads > 0 || cancellationToken.IsCancellationRequested)
                 {
                     await Task.Delay(50);
                 }
