@@ -21,5 +21,10 @@ namespace Chess
         {
             return $"{files[point.X]}{ranks[point.Y]}";
         }
+
+        public static Point FromChessCoordinate(this string coordinate)
+        {
+            return new Point(files.IndexOf(coordinate[0]), ranks.IndexOf(coordinate[1]));
+        }
     }
 }

@@ -43,7 +43,7 @@ namespace Chess
         public Pieces.King BlackKing { get; }
 
         public bool CurrentTurnWhite { get; private set; }
-        public bool GameOver { get; private set; }
+        public bool GameOver => EndingStates.Contains(DetermineGameState());
         public bool AwaitingPromotionResponse { get; private set; }
 
         /// <summary>
@@ -69,7 +69,6 @@ namespace Chess
         public ChessGame()
         {
             CurrentTurnWhite = true;
-            GameOver = false;
             AwaitingPromotionResponse = false;
 
             WhiteKing = new Pieces.King(new Point(4, 0), true);
@@ -105,7 +104,7 @@ namespace Chess
         /// <summary>
         /// Create a new instance of a chess game, setting each game parameter to a non-default value
         /// </summary>
-        public ChessGame(Pieces.Piece?[,] board, bool currentTurnWhite, bool gameOver, List<(Point, Point)> moves,
+        public ChessGame(Pieces.Piece?[,] board, bool currentTurnWhite, List<(Point, Point)> moves,
             List<Pieces.Piece> capturedPieces, Point? enPassantSquare, bool whiteMayCastleKingside, bool whiteMayCastleQueenside,
             bool blackMayCastleKingside, bool blackMayCastleQueenside, int staleMoveCounter, Dictionary<string, int> boardCounts,
             string? initialState)
@@ -133,7 +132,6 @@ namespace Chess
             }
 
             CurrentTurnWhite = currentTurnWhite;
-            GameOver = gameOver;
             Moves = moves;
             CapturedPieces = capturedPieces;
             EnPassantSquare = enPassantSquare;
@@ -161,7 +159,7 @@ namespace Chess
                 }
             }
 
-            return new ChessGame(boardClone, CurrentTurnWhite, GameOver, new(Moves),
+            return new ChessGame(boardClone, CurrentTurnWhite, new(Moves),
                 CapturedPieces.Select(c => c.Clone()).ToList(), EnPassantSquare, WhiteMayCastleKingside,
                 WhiteMayCastleQueenside, BlackMayCastleKingside, BlackMayCastleQueenside, StaleMoveCounter,
                 new(BoardCounts), InitialState);
@@ -402,10 +400,6 @@ namespace Chess
                 }
 
                 CurrentTurnWhite = !CurrentTurnWhite;
-                if (EndingStates.Contains(DetermineGameState()))
-                {
-                    GameOver = true;
-                }
                 return true;
             }
 
@@ -497,6 +491,132 @@ namespace Chess
             _ = omitTurnAndMoveCounts ? null : result.Append(' ').Append(StaleMoveCounter).Append(' ').Append((Moves.Count / 2) + 1);
 
             return result.ToString();
+        }
+
+        /// <summary>
+        /// Convert Forsyth–Edwards Notation to a chess game instance.
+        /// </summary>
+        public static ChessGame FromForsythEdwards(string forsythEdwards)
+        {
+            string[] fields = forsythEdwards.Split(' ');
+            if (fields.Length != 6)
+            {
+                throw new FormatException("Forsyth–Edwards Notation requires 6 fields separated by spaces");
+            }
+
+            string[] ranks = fields[0].Split('/');
+            if (ranks.Length != 8)
+            {
+                throw new FormatException("Board definitions must have 8 ranks separated by a forward slash");
+            }
+            Pieces.Piece?[,] board = new Pieces.Piece?[8, 8];
+            for (int r = 0; r < ranks.Length; r++)
+            {
+                int fileIndex = 0;
+                foreach (char pieceChar in ranks[r])
+                {
+                    switch (pieceChar)
+                    {
+                        case 'K':
+                            board[fileIndex, 7 - r] = new Pieces.King(new Point(fileIndex, 7 - r), true);
+                            break;
+                        case 'Q':
+                            board[fileIndex, 7 - r] = new Pieces.Queen(new Point(fileIndex, 7 - r), true);
+                            break;
+                        case 'R':
+                            board[fileIndex, 7 - r] = new Pieces.Rook(new Point(fileIndex, 7 - r), true);
+                            break;
+                        case 'B':
+                            board[fileIndex, 7 - r] = new Pieces.Bishop(new Point(fileIndex, 7 - r), true);
+                            break;
+                        case 'N':
+                            board[fileIndex, 7 - r] = new Pieces.Knight(new Point(fileIndex, 7 - r), true);
+                            break;
+                        case 'P':
+                            board[fileIndex, 7 - r] = new Pieces.Pawn(new Point(fileIndex, 7 - r), true);
+                            break;
+                        case 'k':
+                            board[fileIndex, 7 - r] = new Pieces.King(new Point(fileIndex, 7 - r), false);
+                            break;
+                        case 'q':
+                            board[fileIndex, 7 - r] = new Pieces.Queen(new Point(fileIndex, 7 - r), false);
+                            break;
+                        case 'r':
+                            board[fileIndex, 7 - r] = new Pieces.Rook(new Point(fileIndex, 7 - r), false);
+                            break;
+                        case 'b':
+                            board[fileIndex, 7 - r] = new Pieces.Bishop(new Point(fileIndex, 7 - r), false);
+                            break;
+                        case 'n':
+                            board[fileIndex, 7 - r] = new Pieces.Knight(new Point(fileIndex, 7 - r), false);
+                            break;
+                        case 'p':
+                            board[fileIndex, 7 - r] = new Pieces.Pawn(new Point(fileIndex, 7 - r), false);
+                            break;
+                        default:
+                            if (pieceChar is > '0' and <= '9')
+                            {
+                                // char - '0' gets numeric value of ASCII number
+                                // Leaves the specified number of squares as null
+                                fileIndex += pieceChar - '0' - 1; 
+                                // Subtract 1 as fileIndex gets incremented by 1 as well later
+                            }
+                            else
+                            {
+                                throw new FormatException($"{pieceChar} is not a valid piece character");
+                            }
+                            break;
+                    }
+                    fileIndex++;
+                }
+                if (fileIndex != 8)
+                {
+                    throw new FormatException("Each rank in a board definition must contain definitions for 8 files");
+                }
+            }
+
+            bool currentTurnWhite = fields[1] == "w" || (fields[1] == "b" ? false
+                : throw new FormatException("Current turn specifier must be either w or b"));
+
+            bool whiteKingside = false;
+            bool whiteQueenside = false;
+            bool blackKingside = false;
+            bool blackQueenside = false;
+            foreach (char castleSpecifier in fields[2])
+            {
+                switch (castleSpecifier)
+                {
+                    case 'K':
+                        whiteKingside = true;
+                        break;
+                    case 'Q':
+                        whiteQueenside = true;
+                        break;
+                    case 'k':
+                        blackKingside = true;
+                        break;
+                    case 'q':
+                        blackQueenside = true;
+                        break;
+                    case '-': break;
+                    default:
+                        throw new FormatException($"{castleSpecifier} is not a valid castling specifier");
+                }
+            }
+
+            Point? enPassant = fields[3] == "-" ? null : fields[3].FromChessCoordinate();
+
+            int staleMoves = int.Parse(fields[4]);
+            // Forsyth–Edwards doesn't define what the previous moves were, so just use a filler value
+            List<(Point, Point)> moves = new(Enumerable.Repeat(default((Point, Point)), (int.Parse(fields[5]) - 1) * 2));
+            if (!currentTurnWhite)
+            {
+                // Current turn is black, so add an extra half-move
+                moves.Add(default);
+            }
+
+            return new ChessGame(board, currentTurnWhite, moves, new(), enPassant,
+                whiteKingside, whiteQueenside, blackKingside, blackQueenside, staleMoves, new(), null);
         }
     }
 }
