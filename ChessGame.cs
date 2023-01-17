@@ -258,8 +258,11 @@ namespace Chess
                 pieceMoved = true;
                 _ = piece.Move(Board, destination, true);
                 // Take pawn after en passant
+                if (Board[destination.X, source.Y] is not null)
+                {
                 CapturedPieces.Add(Board[destination.X, source.Y]!);
                 Board[destination.X, source.Y] = null;
+            }
             }
             else
             {
