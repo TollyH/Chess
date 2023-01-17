@@ -607,15 +607,9 @@ namespace Chess
             Point? enPassant = fields[3] == "-" ? null : fields[3].FromChessCoordinate();
 
             int staleMoves = int.Parse(fields[4]);
-            // Forsyth–Edwards doesn't define what the previous moves were, so just use a filler value
-            List<(Point, Point)> moves = new(Enumerable.Repeat(default((Point, Point)), (int.Parse(fields[5]) - 1) * 2));
-            if (!currentTurnWhite)
-            {
-                // Current turn is black, so add an extra half-move
-                moves.Add(default);
-            }
 
-            return new ChessGame(board, currentTurnWhite, moves, new(), enPassant,
+            // Forsyth–Edwards doesn't define what the previous moves were, so they moves list starts empty
+            return new ChessGame(board, currentTurnWhite, new(), new(), enPassant,
                 whiteKingside, whiteQueenside, blackKingside, blackQueenside, staleMoves, new(), null);
         }
     }
