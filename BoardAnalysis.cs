@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -374,7 +375,7 @@ namespace Chess
         /// <returns>An array of all possible moves, with information on board value and ability to checkmate</returns>
         public static async Task<PossibleMove[]> EvaluatePossibleMoves(ChessGame game, int maxDepth, CancellationToken cancellationToken)
         {
-            List<PossibleMove> possibleMoves = new();
+            ConcurrentBag<PossibleMove> possibleMoves = new();
             int targetLength = 0;
 
             foreach (Pieces.Piece? piece in game.Board)
