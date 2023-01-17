@@ -5,13 +5,17 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Chess"
         mc:Ignorable="d"
-        Title="Chess" Height="770" Width="750" Loaded="Window_Loaded" SizeChanged="Window_SizeChanged" MouseMove="Window_MouseMove" MouseDown="Window_MouseDown" MouseUp="Window_MouseUp" MouseLeave="Window_MouseLeave" Closing="Window_Closing">
+        Title="Chess" Height="770" Width="960" Loaded="Window_Loaded" SizeChanged="Window_SizeChanged" MouseMove="Window_MouseMove" MouseDown="Window_MouseDown" MouseUp="Window_MouseUp" MouseLeave="Window_MouseLeave" Closing="Window_Closing">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
-        <Menu>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="210px"/>
+        </Grid.ColumnDefinitions>
+        <Menu Grid.ColumnSpan="2">
             <MenuItem Header="_Game" Margin="2">
                 <MenuItem Header="_New Game (2 Players)" Click="NewGame_Click"/>
                 <MenuItem Header="New Game (1 Player - _White)" Click="NewGameCpuWhite_Click"/>
@@ -204,5 +208,10 @@
             </Border>
             <Canvas Grid.Column="1" Grid.Row="1" x:Name="chessGameCanvas" Margin="1"/>
         </Grid>
+        <Border Grid.Row="1" Grid.Column="1" BorderBrush="Black" BorderThickness="1,0,0,0" ScrollViewer.HorizontalScrollBarVisibility="Auto">
+            <ScrollViewer x:Name="movesScroll">
+                <StackPanel x:Name="movesPanel"/>
+            </ScrollViewer>
+        </Border>
     </Grid>
 </Window>

@@ -43,13 +43,14 @@ namespace Chess
         public Pieces.King BlackKing { get; }
 
         public bool CurrentTurnWhite { get; private set; }
-        public bool GameOver => EndingStates.Contains(DetermineGameState());
+        public bool GameOver { get; private set; }
         public bool AwaitingPromotionResponse { get; private set; }
 
         /// <summary>
         /// A list of the moves made this game as (sourcePosition, destinationPosition)
         /// </summary>
         public List<(Point, Point)> Moves { get; }
+        public List<string> MoveText { get; }
         public List<Pieces.Piece> CapturedPieces { get; }
 
         public Point? EnPassantSquare { get; private set; }
@@ -69,12 +70,14 @@ namespace Chess
         public ChessGame()
         {
             CurrentTurnWhite = true;
+            GameOver = false;
             AwaitingPromotionResponse = false;
 
             WhiteKing = new Pieces.King(new Point(4, 0), true);
             BlackKing = new Pieces.King(new Point(4, 7), false);
 
             Moves = new List<(Point, Point)>();
+            MoveText = new List<string>();
             CapturedPieces = new List<Pieces.Piece>();
 
             EnPassantSquare = null;
@@ -104,7 +107,7 @@ namespace Chess
         /// <summary>
         /// Create a new instance of a chess game, setting each game parameter to a non-default value
         /// </summary>
-        public ChessGame(Pieces.Piece?[,] board, bool currentTurnWhite, List<(Point, Point)> moves,
+        public ChessGame(Pieces.Piece?[,] board, bool currentTurnWhite, bool gameOver, List<(Point, Point)> moves, List<string> moveText,
             List<Pieces.Piece> capturedPieces, Point? enPassantSquare, bool whiteMayCastleKingside, bool whiteMayCastleQueenside,
             bool blackMayCastleKingside, bool blackMayCastleQueenside, int staleMoveCounter, Dictionary<string, int> boardCounts,
             string? initialState)
@@ -132,7 +135,9 @@ namespace Chess
             }
 
             CurrentTurnWhite = currentTurnWhite;
+            GameOver = gameOver;
             Moves = moves;
+            MoveText = moveText;
             CapturedPieces = capturedPieces;
             EnPassantSquare = enPassantSquare;
             WhiteMayCastleKingside = whiteMayCastleKingside;
@@ -159,7 +164,7 @@ namespace Chess
                 }
             }
 
-            return new ChessGame(boardClone, CurrentTurnWhite, new(Moves),
+            return new ChessGame(boardClone, CurrentTurnWhite, GameOver, new(Moves), new(MoveText),
                 CapturedPieces.Select(c => c.Clone()).ToList(), EnPassantSquare, WhiteMayCastleKingside,
                 WhiteMayCastleQueenside, BlackMayCastleKingside, BlackMayCastleQueenside, StaleMoveCounter,
                 new(BoardCounts), InitialState);
@@ -240,9 +245,13 @@ namespace Chess
         /// If a pawn is promoted, should it automatically become a queen (<see langword="true"/>),
         /// or should the user be prompted for a promotion type (<see langword="false"/>)
         /// </param>
+        /// <param name="updateMoveText">
+        /// Whether the move should update the game move text. This should usually be <see langword="true"/>,
+        /// but may be set to <see langword="false"/> for performance optimisations in clone games for analysis.
+        /// </param>
         /// <returns><see langword="true"/> if the move was valid and executed, <see langword="false"/> otherwise</returns>
         /// <remarks>This method will check if the move is completely valid, unless <paramref name="forceMove"/> is <see langword="true"/>. No other validity checks are required.</remarks>
-        public bool MovePiece(Point source, Point destination, bool forceMove = false, bool autoQueen = true)
+        public bool MovePiece(Point source, Point destination, bool forceMove = false, bool autoQueen = true, bool updateMoveText = true)
         {
             if (!forceMove && GameOver)
             {
@@ -257,6 +266,13 @@ namespace Chess
             if (!forceMove && piece.IsWhite != CurrentTurnWhite)
             {
                 return false;
+            }
+
+            // Used for generating new move text
+            ChessGame? oldGame = null;
+            if (updateMoveText)
+            {
+                oldGame = Clone();
             }
 
             bool pieceMoved;
@@ -400,6 +416,78 @@ namespace Chess
                 }
 
                 CurrentTurnWhite = !CurrentTurnWhite;
+                GameOver = EndingStates.Contains(DetermineGameState());
+
+                if (updateMoveText)
+                {
+                    string newMove = destination.ToChessCoordinate();
+                    if (oldGame!.Board[source.X, source.Y] is Pieces.Pawn)
+                    {
+                        if (oldGame!.Board[destination.X, destination.Y] is not null)
+                        {
+                            newMove = source.ToChessCoordinate()[0] + "x" + newMove;
+                        }
+                        if (destination.Y == (piece.IsWhite ? 7 : 0))
+                        {
+                            newMove += "=" + piece.SymbolLetter;
+                        }
+                    }
+                    else
+                    {
+                        bool castle = false;
+                        if (piece is Pieces.King && source.X == 4)
+                        {
+                            if (destination.X == 6)
+                            {
+                                castle = true;
+                                newMove = "O-O";
+                            }
+                            else if (destination.X == 2)
+                            {
+                                castle = true;
+                                newMove = "O-O-O";
+                            }
+                        }
+                        if (oldGame!.Board[destination.X, destination.Y] is not null)
+                        {
+                            newMove = 'x' + newMove;
+                        }
+
+                        // Disambiguate moving piece if two pieces of the same type can reach destination
+                        IEnumerable<Pieces.Piece> canReachDest = oldGame.Board.OfType<Pieces.Piece>().Where(
+                            p => piece.GetType() == p.GetType() && p.Position != source && p.IsWhite == piece.IsWhite
+                                && p.GetValidMoves(oldGame.Board, true).Contains(destination));
+                        if (canReachDest.Any())
+                        {
+                            string coordinate = source.ToChessCoordinate();
+                            if (canReachDest.Where(p => p.Position.Y == source.Y).Any())
+                            {
+                                newMove = coordinate[1] + newMove;
+                            }
+                            if (canReachDest.Where(p => p.Position.X == source.X).Any())
+                            {
+                                newMove = coordinate[0] + newMove;
+                            }
+                        }
+                        if (!castle)
+                        {
+                            newMove = piece.SymbolLetter + newMove;
+                        }
+                    }
+
+                    GameState state = DetermineGameState();
+                    if (state is GameState.CheckWhite or GameState.CheckBlack)
+                    {
+                        newMove += '+';
+                    }
+                    else if (state is GameState.CheckMateWhite or GameState.CheckMateBlack)
+                    {
+                        newMove += '#';
+                    }
+
+                    MoveText.Add(newMove);
+                }
+
                 return true;
             }
 
@@ -609,8 +697,8 @@ namespace Chess
             int staleMoves = int.Parse(fields[4]);
 
             // Forsyth–Edwards doesn't define what the previous moves were, so they moves list starts empty
-            return new ChessGame(board, currentTurnWhite, new(), new(), enPassant,
-                whiteKingside, whiteQueenside, blackKingside, blackQueenside, staleMoves, new(), null);
+            return new ChessGame(board, currentTurnWhite, EndingStates.Contains(BoardAnalysis.DetermineGameState(board, currentTurnWhite)),
+                new(), new(), new(), enPassant, whiteKingside, whiteQueenside, blackKingside, blackQueenside, staleMoves, new(), null);
         }
     }
 }

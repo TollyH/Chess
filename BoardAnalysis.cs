@@ -394,7 +394,7 @@ namespace Chess
                         Point thisPosition = piece.Position;
                         Point thisValidMove = validMove;
                         ChessGame gameClone = game.Clone();
-                        _ = gameClone.MovePiece(piece.Position, validMove, true);
+                        _ = gameClone.MovePiece(piece.Position, validMove, true, updateMoveText: false);
 
                         Thread processThread = new(() =>
                         {
@@ -497,7 +497,7 @@ namespace Chess
                     foreach (Point validMove in GetValidMovesForEval(game, piece))
                     {
                         ChessGame gameClone = game.Clone();
-                        _ = gameClone.MovePiece(piece.Position, validMove, true);
+                        _ = gameClone.MovePiece(piece.Position, validMove, true, updateMoveText: false);
                         PossibleMove potentialMove = MinimaxMove(gameClone, alpha, beta, depth + 1, maxDepth, cancellationToken);
                         if (cancellationToken.IsCancellationRequested)
                         {

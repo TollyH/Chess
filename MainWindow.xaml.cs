@@ -84,6 +84,21 @@ namespace Chess
                 }
             }
 
+            movesPanel.Children.Clear();
+            for (int i = 0; i < game.MoveText.Count; i += 2)
+            {
+                string text = $"{(i / 2) + 1}. {game.MoveText[i]}";
+                if (i + 1 < game.MoveText.Count)
+                {
+                    text += $" {game.MoveText[i + 1]}";
+                }
+                _ = movesPanel.Children.Add(new Label()
+                {
+                    Content = text,
+                    FontSize = 18
+                });
+            }
+
             GameState state = game.DetermineGameState();
 
             if (state is GameState.CheckMateWhite or GameState.CheckMateBlack)
@@ -346,6 +361,7 @@ namespace Chess
 
                 _ = game.MovePiece(bestMove.Source, bestMove.Destination, true);
                 UpdateGameDisplay();
+                movesScroll.ScrollToBottom();
                 // Turn has been inverted already but we have value for the now old turn
                 UpdateEvaluationMeter(bestMove, !game.CurrentTurnWhite);
                 PushEndgameMessage();
@@ -428,6 +444,7 @@ namespace Chess
                     currentBestMove = null;
                     UpdateCursor();
                     UpdateGameDisplay();
+                    movesScroll.ScrollToBottom();
                     PushEndgameMessage();
                     await CheckComputerMove();
                     return;
@@ -483,6 +500,7 @@ namespace Chess
                     currentBestMove = null;
                     UpdateCursor();
                     UpdateGameDisplay();
+                    movesScroll.ScrollToBottom();
                     PushEndgameMessage();
                     await CheckComputerMove();
                     return;
