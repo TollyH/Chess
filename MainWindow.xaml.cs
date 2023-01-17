@@ -380,6 +380,8 @@ namespace Chess
             manuallyEvaluating = false;
             grabbedPiece = null;
             highlightGrabbedMoves = false;
+            whiteEvaluation.Content = "?";
+            blackEvaluation.Content = "?";
             UpdateGameDisplay();
             UpdateCursor();
             await CheckComputerMove();
