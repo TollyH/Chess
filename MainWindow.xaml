@@ -25,6 +25,7 @@
                 <MenuItem Header="Custom _Game..." Click="CustomGame_Click"/>
                 <Separator/>
                 <MenuItem Header="Export to _PGN" Click="PGNExport_Click"/>
+                <MenuItem Header="Copy _FEN to Clipboard" Click="FENCopy_Click"/>
             </MenuItem>
             <MenuItem Header="_Settings" Margin="2">
                 <MenuItem x:Name="autoQueenItem" Header="Automatically Promote Pawns to _Queen" Click="SettingsCheckItem_Click" IsCheckable="True"/>

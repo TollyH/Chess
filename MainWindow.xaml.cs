@@ -717,5 +717,10 @@ namespace Chess
             config.FlipBoard = flipBoardItem.IsChecked;
             UpdateGameDisplay();
         }
+
+        private void FENCopy_Click(object sender, RoutedEventArgs e)
+        {
+            Clipboard.SetText(game.ToString());
+        }
     }
 }
