@@ -722,5 +722,13 @@ namespace Chess
         {
             Clipboard.SetText(game.ToString());
         }
+
+        private void CustomiseItem_Click(object sender, RoutedEventArgs e)
+        {
+            _ = new Customisation(config).ShowDialog();
+            rectSizeReference.Fill = new SolidColorBrush(config.DarkSquareColor);
+            chessBoardBackground.Background = new SolidColorBrush(config.LightSquareColor);
+            UpdateGameDisplay();
+        }
     }
 }
