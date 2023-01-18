@@ -423,7 +423,8 @@ namespace Chess
                     string newMove = destination.ToChessCoordinate();
                     if (oldGame!.Board[source.X, source.Y] is Pieces.Pawn)
                     {
-                        if (oldGame!.Board[destination.X, destination.Y] is not null)
+                        if (oldGame!.Board[destination.X, destination.Y] is not null
+                            || destination == oldGame.EnPassantSquare)
                         {
                             newMove = source.ToChessCoordinate()[0] + "x" + newMove;
                         }
