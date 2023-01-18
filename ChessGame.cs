@@ -613,7 +613,8 @@ namespace Chess
             // Include initial state if not a standard chess game
             if (InitialState != "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
             {
-                pgn += $"[SetUp \"1\"]\n[FEN \"{InitialState}\"]\n\n";
+                // Strip last newline
+                pgn = pgn[..^1] + $"[SetUp \"1\"]\n[FEN \"{InitialState}\"]\n\n";
             }
 
             string compiledMoveText = "";
