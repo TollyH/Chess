@@ -9,6 +9,7 @@ namespace Chess
     {
         public bool AutoQueen { get; set; }
         public bool UseSymbolsOnMoveList { get; set; }
+        public bool FlipBoard { get; set; }
 
         public Color LightSquareColor { get; set; }
         public Color DarkSquareColor { get; set; }
@@ -29,6 +30,7 @@ namespace Chess
         {
             AutoQueen = false;
             UseSymbolsOnMoveList = false;
+            FlipBoard = false;
 
             LightSquareColor = Brushes.White.Color;
             DarkSquareColor = Color.FromRgb(191, 130, 69);
@@ -47,13 +49,14 @@ namespace Chess
         }
 
         [JsonConstructor]
-        public Settings(bool autoQueen, bool useSymbolsOnMoveList, Color lightSquareColor, Color darkSquareColor,
+        public Settings(bool autoQueen, bool useSymbolsOnMoveList, bool flipBoard, Color lightSquareColor, Color darkSquareColor,
             Color defaultPieceColor, Color checkedKingColor, Color selectedPieceColor, Color checkMateHighlightColor,
             Color lastMoveSourceColor, Color lastMoveDestinationColor, Color bestMoveSourceColor, Color bestMoveDestinationColor,
             Color availableMoveColor, Color availableCaptureColor, Color availableEnPassantColor, Color availableCastleColor)
         {
             AutoQueen = autoQueen;
             UseSymbolsOnMoveList = useSymbolsOnMoveList;
+            FlipBoard = flipBoard;
             LightSquareColor = lightSquareColor;
             DarkSquareColor = darkSquareColor;
             DefaultPieceColor = defaultPieceColor;

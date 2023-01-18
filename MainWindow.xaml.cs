@@ -53,6 +53,7 @@ namespace Chess
             chessBoardBackground.Background = new SolidColorBrush(config.LightSquareColor);
             autoQueenItem.IsChecked = config.AutoQueen;
             moveListSymbolsItem.IsChecked = config.UseSymbolsOnMoveList;
+            flipBoardItem.IsChecked = config.FlipBoard;
         }
 
         public void UpdateGameDisplay()
@@ -63,6 +64,8 @@ namespace Chess
             }
             chessGameCanvas.Children.Clear();
             pieceViews.Clear();
+
+            bool boardFlipped = config.FlipBoard && ((!game.CurrentTurnWhite && !blackIsComputer) || (whiteIsComputer && !blackIsComputer));
 
             tileWidth = chessGameCanvas.ActualWidth / game.Board.GetLength(0);
             tileHeight = chessGameCanvas.ActualHeight / game.Board.GetLength(1);
@@ -94,6 +97,65 @@ namespace Chess
                 else if (!blackIsComputer)
                 {
                     blackEvaluation.Content = "?";
+                }
+            }
+
+            if (boardFlipped)
+            {
+                Grid.SetColumn(whiteEvaluationView, 2);
+                Grid.SetRow(whiteEvaluationView, 0);
+                Grid.SetColumn(blackEvaluationView, 0);
+                Grid.SetRow(blackEvaluationView, 2);
+
+                Grid.SetColumn(whiteCapturesView, 0);
+                Grid.SetRow(whiteCapturesView, 0);
+                Grid.SetColumn(blackCapturesView, 2);
+                Grid.SetRow(blackCapturesView, 2);
+
+                foreach (UIElement child in ranksLeft.Children)
+                {
+                    DockPanel.SetDock(child, Dock.Bottom);
+                }
+                foreach (UIElement child in ranksRight.Children)
+                {
+                    DockPanel.SetDock(child, Dock.Bottom);
+                }
+                foreach (UIElement child in filesTop.Children)
+                {
+                    DockPanel.SetDock(child, Dock.Right);
+                }
+                foreach (UIElement child in filesBottom.Children)
+                {
+                    DockPanel.SetDock(child, Dock.Right);
+                }
+            }
+            else
+            {
+                Grid.SetColumn(whiteEvaluationView, 0);
+                Grid.SetRow(whiteEvaluationView, 2);
+                Grid.SetColumn(blackEvaluationView, 2);
+                Grid.SetRow(blackEvaluationView, 0);
+
+                Grid.SetColumn(whiteCapturesView, 2);
+                Grid.SetRow(whiteCapturesView, 2);
+                Grid.SetColumn(blackCapturesView, 0);
+                Grid.SetRow(blackCapturesView, 0);
+
+                foreach (UIElement child in ranksLeft.Children)
+                {
+                    DockPanel.SetDock(child, Dock.Top);
+                }
+                foreach (UIElement child in ranksRight.Children)
+                {
+                    DockPanel.SetDock(child, Dock.Top);
+                }
+                foreach (UIElement child in filesTop.Children)
+                {
+                    DockPanel.SetDock(child, Dock.Left);
+                }
+                foreach (UIElement child in filesBottom.Children)
+                {
+                    DockPanel.SetDock(child, Dock.Left);
                 }
             }
 
@@ -134,8 +196,8 @@ namespace Chess
                     Fill = new SolidColorBrush(config.CheckMateHighlightColor)
                 };
                 _ = chessGameCanvas.Children.Add(mateHighlight);
-                Canvas.SetBottom(mateHighlight, kingPosition.Y * tileHeight);
-                Canvas.SetLeft(mateHighlight, kingPosition.X * tileWidth);
+                Canvas.SetBottom(mateHighlight, (boardFlipped ? 7 - kingPosition.Y : kingPosition.Y) * tileHeight);
+                Canvas.SetLeft(mateHighlight, (boardFlipped ? 7 - kingPosition.X : kingPosition.X) * tileWidth);
             }
 
             if (game.Moves.Count > 0)
@@ -149,8 +211,8 @@ namespace Chess
                     Fill = new SolidColorBrush(config.LastMoveSourceColor)
                 };
                 _ = chessGameCanvas.Children.Add(sourceMoveHighlight);
-                Canvas.SetBottom(sourceMoveHighlight, lastMoveSource.Y * tileHeight);
-                Canvas.SetLeft(sourceMoveHighlight, lastMoveSource.X * tileWidth);
+                Canvas.SetBottom(sourceMoveHighlight, (boardFlipped ? 7 - lastMoveSource.Y : lastMoveSource.Y) * tileHeight);
+                Canvas.SetLeft(sourceMoveHighlight, (boardFlipped ? 7 - lastMoveSource.X : lastMoveSource.X) * tileWidth);
 
                 Rectangle destinationMoveHighlight = new()
                 {
@@ -159,8 +221,8 @@ namespace Chess
                     Fill = new SolidColorBrush(config.LastMoveDestinationColor)
                 };
                 _ = chessGameCanvas.Children.Add(destinationMoveHighlight);
-                Canvas.SetBottom(destinationMoveHighlight, lastMoveDestination.Y * tileHeight);
-                Canvas.SetLeft(destinationMoveHighlight, lastMoveDestination.X * tileWidth);
+                Canvas.SetBottom(destinationMoveHighlight, (boardFlipped ? 7 - lastMoveDestination.Y : lastMoveDestination.Y) * tileHeight);
+                Canvas.SetLeft(destinationMoveHighlight, (boardFlipped ? 7 - lastMoveDestination.X : lastMoveDestination.X) * tileWidth);
 
             }
 
@@ -175,8 +237,10 @@ namespace Chess
                     Fill = new SolidColorBrush(config.BestMoveSourceColor)
                 };
                 _ = chessGameCanvas.Children.Add(bestMoveSrcHighlight);
-                Canvas.SetBottom(bestMoveSrcHighlight, currentBestMove.Value.Source.Y * tileHeight);
-                Canvas.SetLeft(bestMoveSrcHighlight, currentBestMove.Value.Source.X * tileWidth);
+                Canvas.SetBottom(bestMoveSrcHighlight,
+                    (boardFlipped ? 7 - currentBestMove.Value.Source.Y : currentBestMove.Value.Source.Y) * tileHeight);
+                Canvas.SetLeft(bestMoveSrcHighlight,
+                    (boardFlipped ? 7 - currentBestMove.Value.Source.X : currentBestMove.Value.Source.X) * tileWidth);
 
                 Rectangle bestMoveDstHighlight = new()
                 {
@@ -185,8 +249,10 @@ namespace Chess
                     Fill = new SolidColorBrush(config.BestMoveDestinationColor)
                 };
                 _ = chessGameCanvas.Children.Add(bestMoveDstHighlight);
-                Canvas.SetBottom(bestMoveDstHighlight, currentBestMove.Value.Destination.Y * tileHeight);
-                Canvas.SetLeft(bestMoveDstHighlight, currentBestMove.Value.Destination.X * tileWidth);
+                Canvas.SetBottom(bestMoveDstHighlight,
+                    (boardFlipped ? 7 - currentBestMove.Value.Destination.Y : currentBestMove.Value.Destination.Y) * tileHeight);
+                Canvas.SetLeft(bestMoveDstHighlight,
+                    (boardFlipped ? 7 - currentBestMove.Value.Destination.X : currentBestMove.Value.Destination.X) * tileWidth);
             }
 
             if (grabbedPiece is not null && highlightGrabbedMoves)
@@ -210,8 +276,8 @@ namespace Chess
                         Fill = fillBrush
                     };
                     _ = chessGameCanvas.Children.Add(newRect);
-                    Canvas.SetBottom(newRect, validMove.Y * tileHeight);
-                    Canvas.SetLeft(newRect, validMove.X * tileWidth);
+                    Canvas.SetBottom(newRect, (boardFlipped ? 7 - validMove.Y : validMove.Y) * tileHeight);
+                    Canvas.SetLeft(newRect, (boardFlipped ? 7 - validMove.X : validMove.X) * tileWidth);
                 }
             }
 
@@ -228,8 +294,10 @@ namespace Chess
                     Fill = new SolidColorBrush(config.AvailableEnPassantColor)
                 };
                 _ = chessGameCanvas.Children.Add(enPassantHighlight);
-                Canvas.SetBottom(enPassantHighlight, game.EnPassantSquare.Value.Y * tileHeight);
-                Canvas.SetLeft(enPassantHighlight, game.EnPassantSquare.Value.X * tileWidth);
+                Canvas.SetBottom(enPassantHighlight,
+                    (boardFlipped ? 7 - game.EnPassantSquare.Value.Y : game.EnPassantSquare.Value.Y) * tileHeight);
+                Canvas.SetLeft(enPassantHighlight,
+                    (boardFlipped ? 7 - game.EnPassantSquare.Value.X : game.EnPassantSquare.Value.X) * tileWidth);
             }
 
             else if (grabbedPiece is Pieces.King && highlightGrabbedMoves)
@@ -244,8 +312,8 @@ namespace Chess
                         Fill = new SolidColorBrush(config.AvailableCastleColor)
                     };
                     _ = chessGameCanvas.Children.Add(castleHighlight);
-                    Canvas.SetBottom(castleHighlight, yPos * tileHeight);
-                    Canvas.SetLeft(castleHighlight, 6 * tileWidth);
+                    Canvas.SetBottom(castleHighlight, (boardFlipped ? 7 - yPos : yPos) * tileHeight);
+                    Canvas.SetLeft(castleHighlight, (boardFlipped ? 1 : 6) * tileWidth);
                 }
                 if (game.IsCastlePossible(false))
                 {
@@ -256,8 +324,8 @@ namespace Chess
                         Fill = new SolidColorBrush(config.AvailableCastleColor)
                     };
                     _ = chessGameCanvas.Children.Add(castleHighlight);
-                    Canvas.SetBottom(castleHighlight, yPos * tileHeight);
-                    Canvas.SetLeft(castleHighlight, 2 * tileWidth);
+                    Canvas.SetBottom(castleHighlight, (boardFlipped ? 7 - yPos : yPos) * tileHeight);
+                    Canvas.SetLeft(castleHighlight, (boardFlipped ? 5 : 2) * tileWidth);
                 }
             }
 
@@ -295,8 +363,8 @@ namespace Chess
                         };
                         pieceViews[piece] = newPiece;
                         _ = chessGameCanvas.Children.Add(newPiece);
-                        Canvas.SetBottom(newPiece, y * tileHeight);
-                        Canvas.SetLeft(newPiece, x * tileWidth);
+                        Canvas.SetBottom(newPiece, (boardFlipped ? 7 - y : y) * tileHeight);
+                        Canvas.SetLeft(newPiece, (boardFlipped ? 7 - x : x) * tileWidth);
                     }
                 }
             }
@@ -393,8 +461,10 @@ namespace Chess
 
         private System.Drawing.Point GetCoordFromCanvasPoint(Point position)
         {
+            bool boardFlipped = config.FlipBoard && ((!game.CurrentTurnWhite && !blackIsComputer) || (whiteIsComputer && !blackIsComputer));
             // Canvas coordinates are relative to top-left, whereas chess' are from bottom-left, so y is inverted
-            return new System.Drawing.Point((int)(position.X / tileWidth), (int)((chessGameCanvas.ActualHeight - position.Y) / tileHeight));
+            return new System.Drawing.Point((int)((boardFlipped ? chessGameCanvas.ActualWidth - position.X : position.X) / tileWidth),
+                (int)((!boardFlipped ? chessGameCanvas.ActualHeight - position.Y : position.Y) / tileHeight));
         }
 
         private Pieces.Piece? GetPieceAtCanvasPoint(Point position)
@@ -407,7 +477,7 @@ namespace Chess
             System.Drawing.Point coord = GetCoordFromCanvasPoint(position);
             return coord.X < 0 || coord.Y < 0 || coord.X >= game.Board.GetLength(0) || coord.Y >= game.Board.GetLength(1)
                 ? null
-                : game.Board[coord.X, coord.Y];
+                    : game.Board[coord.X, coord.Y];
         }
 
         private async Task NewGame()
@@ -644,6 +714,7 @@ namespace Chess
         {
             config.AutoQueen = autoQueenItem.IsChecked;
             config.UseSymbolsOnMoveList = moveListSymbolsItem.IsChecked;
+            config.FlipBoard = flipBoardItem.IsChecked;
             UpdateGameDisplay();
         }
     }

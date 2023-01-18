@@ -29,6 +29,7 @@
             <MenuItem Header="_Settings" Margin="2">
                 <MenuItem x:Name="autoQueenItem" Header="Automatically Promote Pawns to _Queen" Click="SettingsCheckItem_Click" IsCheckable="True"/>
                 <MenuItem x:Name="moveListSymbolsItem" Header="Use Piece _Symbols on the Move List" Click="SettingsCheckItem_Click" IsCheckable="True"/>
+                <MenuItem x:Name="flipBoardItem" Header="_Flip the Board on Black's Turn" Click="SettingsCheckItem_Click" IsCheckable="True"/>
             </MenuItem>
         </Menu>
         <Grid Grid.Row="1">
@@ -42,7 +43,7 @@
                 <RowDefinition Height="12*"/>
                 <RowDefinition Height="1*"/>
             </Grid.RowDefinitions>
-            <StackPanel Grid.Column="1" Grid.Row="0" Orientation="Horizontal">
+            <DockPanel x:Name="filesTop" Grid.Column="1" Grid.Row="0">
                 <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
                     <Label Content="a"/>
                 </Viewbox>
@@ -67,34 +68,34 @@
                 <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
                     <Label Content="h"/>
                 </Viewbox>
-            </StackPanel>
-            <StackPanel Grid.Column="0" Grid.Row="1" Orientation="Vertical">
-                <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}">
+            </DockPanel>
+            <DockPanel x:Name="ranksLeft" Grid.Column="0" Grid.Row="1">
+                <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}" DockPanel.Dock="Top">
                     <Label Content="8"/>
                 </Viewbox>
-                <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}">
+                <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}" DockPanel.Dock="Top">
                     <Label Content="7"/>
                 </Viewbox>
-                <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}">
+                <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}" DockPanel.Dock="Top">
                     <Label Content="6"/>
                 </Viewbox>
-                <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}">
+                <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}" DockPanel.Dock="Top">
                     <Label Content="5"/>
                 </Viewbox>
-                <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}">
+                <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}" DockPanel.Dock="Top">
                     <Label Content="4"/>
                 </Viewbox>
-                <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}">
+                <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}" DockPanel.Dock="Top">
                     <Label Content="3"/>
                 </Viewbox>
-                <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}">
+                <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}" DockPanel.Dock="Top">
                     <Label Content="2"/>
                 </Viewbox>
-                <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}">
+                <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}" DockPanel.Dock="Top">
                     <Label Content="1"/>
                 </Viewbox>
-            </StackPanel>
-            <StackPanel Grid.Column="1" Grid.Row="2" Orientation="Horizontal">
+            </DockPanel>
+            <DockPanel x:Name="filesBottom" Grid.Column="1" Grid.Row="2">
                 <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
                     <Label Content="a"/>
                 </Viewbox>
@@ -119,43 +120,43 @@
                 <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
                     <Label Content="h"/>
                 </Viewbox>
-            </StackPanel>
-            <StackPanel Grid.Column="2" Grid.Row="1" Orientation="Vertical">
-                <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}">
+            </DockPanel>
+            <DockPanel x:Name="ranksRight" Grid.Column="2" Grid.Row="1">
+                <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}" DockPanel.Dock="Top">
                     <Label Content="8"/>
                 </Viewbox>
-                <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}">
+                <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}" DockPanel.Dock="Top">
                     <Label Content="7"/>
                 </Viewbox>
-                <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}">
+                <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}" DockPanel.Dock="Top">
                     <Label Content="6"/>
                 </Viewbox>
-                <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}">
+                <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}" DockPanel.Dock="Top">
                     <Label Content="5"/>
                 </Viewbox>
-                <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}">
+                <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}" DockPanel.Dock="Top">
                     <Label Content="4"/>
                 </Viewbox>
-                <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}">
+                <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}" DockPanel.Dock="Top">
                     <Label Content="3"/>
                 </Viewbox>
-                <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}">
+                <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}" DockPanel.Dock="Top">
                     <Label Content="2"/>
                 </Viewbox>
-                <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}">
+                <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}" DockPanel.Dock="Top">
                     <Label Content="1"/>
                 </Viewbox>
-            </StackPanel>
-            <Viewbox Grid.Column="0" Grid.Row="2">
+            </DockPanel>
+            <Viewbox x:Name="whiteEvaluationView" Grid.Column="0" Grid.Row="2">
                 <Label x:Name="whiteEvaluation" Content="?" Foreground="Navy" MouseUp="evaluation_MouseUp"/>
             </Viewbox>
-            <Viewbox Grid.Column="2" Grid.Row="0">
+            <Viewbox x:Name="blackEvaluationView" Grid.Column="2" Grid.Row="0">
                 <Label x:Name="blackEvaluation" Content="?" Foreground="Navy" MouseUp="evaluation_MouseUp"/>
             </Viewbox>
-            <Viewbox Grid.Column="0" Grid.Row="0">
+            <Viewbox x:Name="blackCapturesView" Grid.Column="0" Grid.Row="0">
                 <Label x:Name="blackCaptures" Content="0" Foreground="Crimson"/>
             </Viewbox>
-            <Viewbox Grid.Column="2" Grid.Row="2">
+            <Viewbox x:Name="whiteCapturesView" Grid.Column="2" Grid.Row="2">
                 <Label x:Name="whiteCaptures" Content="0" Foreground="Crimson"/>
             </Viewbox>
             <Border Grid.Column="1" Grid.Row="1" BorderBrush="Black" BorderThickness="1">
