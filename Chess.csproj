@@ -5,6 +5,10 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
+    <Company>Tolly Hill</Company>
+    <Authors>Tolly Hill</Authors>
+    <Copyright>Copyright © 2023  Ptolemy Hill</Copyright>
+    <Description>Chess game written in C# with WPF</Description>
   </PropertyGroup>
 
   <ItemGroup>
