@@ -16,6 +16,8 @@ namespace Chess
         public System.Drawing.Point? EnPassantSquare { get; private set; }
 
         public ChessGame? GeneratedGame { get; private set; }
+        public bool WhiteIsComputer { get; private set; }
+        public bool BlackIsComputer { get; private set; }
 
         private Pieces.King? whiteKing = null;
         private Pieces.King? blackKing = null;
@@ -135,6 +137,8 @@ namespace Chess
 
         private void startButton_Click(object sender, RoutedEventArgs e)
         {
+            WhiteIsComputer = computerSelectWhite.IsChecked ?? false;
+            BlackIsComputer = computerSelectBlack.IsChecked ?? false;
             bool currentTurnWhite = turnSelectWhite.IsChecked ?? false;
             // For the PGN standard, if black moves first then a single move "..." is added to the start of the move text list
             GeneratedGame = new ChessGame(Board, currentTurnWhite,
@@ -238,6 +242,8 @@ namespace Chess
 
         private void submitFenButton_Click(object sender, RoutedEventArgs e)
         {
+            WhiteIsComputer = computerSelectWhite.IsChecked ?? false;
+            BlackIsComputer = computerSelectBlack.IsChecked ?? false;
             try
             {
                 GeneratedGame = ChessGame.FromForsythEdwards(fenInput.Text);

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Chess"
         mc:Ignorable="d"
-        Title="Custom Game Setup" Width="720" Height="510" MouseUp="Window_MouseUp" Loaded="Window_Loaded">
+        Title="Custom Game Setup" Width="720" Height="510" MouseUp="Window_MouseUp" Loaded="Window_Loaded" WindowStyle="ToolWindow">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
@@ -196,8 +196,14 @@
                 <RadioButton x:Name="pieceSelectPawn" Margin="5,2,5,5" Content="Pawn" GroupName="Piece"/>
                 <Separator/>
                 <Label Content="Current Turn" Margin="5" Padding="0,0,0,0" FontSize="14"/>
-                <RadioButton x:Name="turnSelectWhite" Margin="5,2,5,2" Content="White" GroupName="CurrentTurn" IsChecked="True"/>
-                <RadioButton x:Name="turnSelectBlack" Margin="5,2,5,5" Content="Black" GroupName="CurrentTurn"/>
+                <Grid>
+                    <RadioButton x:Name="turnSelectWhite" Margin="5,2,5,2" Content="White" GroupName="CurrentTurn" IsChecked="True"/>
+                    <CheckBox x:Name="computerSelectWhite" Margin="5,2,10,2" HorizontalAlignment="Right" Content="Computer Player" IsChecked="False"/>
+                </Grid>
+                <Grid>
+                    <RadioButton x:Name="turnSelectBlack" Margin="5,2,5,5" Content="Black" GroupName="CurrentTurn"/>
+                    <CheckBox x:Name="computerSelectBlack" Margin="5,2,10,2" HorizontalAlignment="Right" Content="Computer Player" IsChecked="False"/>
+                </Grid>
                 <Separator/>
                 <Label Content="Castling Status" Margin="5" Padding="0,0,0,0" FontSize="14"/>
                 <CheckBox x:Name="castleWhiteKingside" Margin="5,2,5,2" Content="White May Castle Kingside" IsEnabled="False"/>

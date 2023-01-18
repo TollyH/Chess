@@ -595,15 +595,23 @@ namespace Chess
         private async void CustomGame_Click(object sender, RoutedEventArgs e)
         {
             manuallyEvaluating = false;
-            grabbedPiece = null;
-            highlightGrabbedMoves = false;
             cancelMoveComputation.Cancel();
             cancelMoveComputation = new CancellationTokenSource();
             CustomGame customDialog = new();
             _ = customDialog.ShowDialog();
-            game = customDialog.GeneratedGame ?? game;
-            UpdateGameDisplay();
-            PushEndgameMessage();
+            if (customDialog.GeneratedGame is not null)
+            {
+                game = customDialog.GeneratedGame;
+                whiteIsComputer = customDialog.WhiteIsComputer;
+                blackIsComputer = customDialog.BlackIsComputer;
+                grabbedPiece = null;
+                highlightGrabbedMoves = false;
+                currentBestMove = null;
+                whiteEvaluation.Content = "?";
+                blackEvaluation.Content = "?";
+                UpdateGameDisplay();
+                PushEndgameMessage();
+            }
             await CheckComputerMove();
         }
     }
