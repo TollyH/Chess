@@ -26,6 +26,10 @@
                 <Separator/>
                 <MenuItem Header="Export to _PGN" Click="PGNExport_Click"/>
             </MenuItem>
+            <MenuItem Header="_Settings" Margin="2">
+                <MenuItem x:Name="autoQueenItem" Header="Automatically Promote Pawns to _Queen" Click="SettingsCheckItem_Click" IsCheckable="True"/>
+                <MenuItem x:Name="moveListSymbolsItem" Header="Use Piece _Symbols on the Move List" Click="SettingsCheckItem_Click" IsCheckable="True"/>
+            </MenuItem>
         </Menu>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
@@ -155,7 +159,7 @@
                 <Label x:Name="whiteCaptures" Content="0" Foreground="Crimson"/>
             </Viewbox>
             <Border Grid.Column="1" Grid.Row="1" BorderBrush="Black" BorderThickness="1">
-                <Grid>
+                <Grid x:Name="chessBoardBackground">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="1*"/>
                         <RowDefinition Height="1*"/>
@@ -177,37 +181,37 @@
                         <ColumnDefinition Width="1*"/>
                     </Grid.ColumnDefinitions>
                     <Rectangle x:Name="rectSizeReference" Fill="#FFBF8245" Grid.Column="0" Grid.Row="1"/>
-                    <Rectangle Fill="#FFBF8245" Grid.Column="0" Grid.Row="3"/>
-                    <Rectangle Fill="#FFBF8245" Grid.Column="0" Grid.Row="5"/>
-                    <Rectangle Fill="#FFBF8245" Grid.Column="0" Grid.Row="7"/>
-                    <Rectangle Fill="#FFBF8245" Grid.Column="1" Grid.Row="0"/>
-                    <Rectangle Fill="#FFBF8245" Grid.Column="1" Grid.Row="2"/>
-                    <Rectangle Fill="#FFBF8245" Grid.Column="1" Grid.Row="4"/>
-                    <Rectangle Fill="#FFBF8245" Grid.Column="1" Grid.Row="6"/>
-                    <Rectangle Fill="#FFBF8245" Grid.Column="2" Grid.Row="1"/>
-                    <Rectangle Fill="#FFBF8245" Grid.Column="2" Grid.Row="3"/>
-                    <Rectangle Fill="#FFBF8245" Grid.Column="2" Grid.Row="5"/>
-                    <Rectangle Fill="#FFBF8245" Grid.Column="2" Grid.Row="7"/>
-                    <Rectangle Fill="#FFBF8245" Grid.Column="3" Grid.Row="0"/>
-                    <Rectangle Fill="#FFBF8245" Grid.Column="3" Grid.Row="2"/>
-                    <Rectangle Fill="#FFBF8245" Grid.Column="3" Grid.Row="4"/>
-                    <Rectangle Fill="#FFBF8245" Grid.Column="3" Grid.Row="6"/>
-                    <Rectangle Fill="#FFBF8245" Grid.Column="4" Grid.Row="1"/>
-                    <Rectangle Fill="#FFBF8245" Grid.Column="4" Grid.Row="3"/>
-                    <Rectangle Fill="#FFBF8245" Grid.Column="4" Grid.Row="5"/>
-                    <Rectangle Fill="#FFBF8245" Grid.Column="4" Grid.Row="7"/>
-                    <Rectangle Fill="#FFBF8245" Grid.Column="5" Grid.Row="0"/>
-                    <Rectangle Fill="#FFBF8245" Grid.Column="5" Grid.Row="2"/>
-                    <Rectangle Fill="#FFBF8245" Grid.Column="5" Grid.Row="4"/>
-                    <Rectangle Fill="#FFBF8245" Grid.Column="5" Grid.Row="6"/>
-                    <Rectangle Fill="#FFBF8245" Grid.Column="6" Grid.Row="1"/>
-                    <Rectangle Fill="#FFBF8245" Grid.Column="6" Grid.Row="3"/>
-                    <Rectangle Fill="#FFBF8245" Grid.Column="6" Grid.Row="5"/>
-                    <Rectangle Fill="#FFBF8245" Grid.Column="6" Grid.Row="7"/>
-                    <Rectangle Fill="#FFBF8245" Grid.Column="7" Grid.Row="0"/>
-                    <Rectangle Fill="#FFBF8245" Grid.Column="7" Grid.Row="2"/>
-                    <Rectangle Fill="#FFBF8245" Grid.Column="7" Grid.Row="4"/>
-                    <Rectangle Fill="#FFBF8245" Grid.Column="7" Grid.Row="6"/>
+                    <Rectangle Fill="{Binding Fill, ElementName=rectSizeReference}" Grid.Column="0" Grid.Row="3"/>
+                    <Rectangle Fill="{Binding Fill, ElementName=rectSizeReference}" Grid.Column="0" Grid.Row="5"/>
+                    <Rectangle Fill="{Binding Fill, ElementName=rectSizeReference}" Grid.Column="0" Grid.Row="7"/>
+                    <Rectangle Fill="{Binding Fill, ElementName=rectSizeReference}" Grid.Column="1" Grid.Row="0"/>
+                    <Rectangle Fill="{Binding Fill, ElementName=rectSizeReference}" Grid.Column="1" Grid.Row="2"/>
+                    <Rectangle Fill="{Binding Fill, ElementName=rectSizeReference}" Grid.Column="1" Grid.Row="4"/>
+                    <Rectangle Fill="{Binding Fill, ElementName=rectSizeReference}" Grid.Column="1" Grid.Row="6"/>
+                    <Rectangle Fill="{Binding Fill, ElementName=rectSizeReference}" Grid.Column="2" Grid.Row="1"/>
+                    <Rectangle Fill="{Binding Fill, ElementName=rectSizeReference}" Grid.Column="2" Grid.Row="3"/>
+                    <Rectangle Fill="{Binding Fill, ElementName=rectSizeReference}" Grid.Column="2" Grid.Row="5"/>
+                    <Rectangle Fill="{Binding Fill, ElementName=rectSizeReference}" Grid.Column="2" Grid.Row="7"/>
+                    <Rectangle Fill="{Binding Fill, ElementName=rectSizeReference}" Grid.Column="3" Grid.Row="0"/>
+                    <Rectangle Fill="{Binding Fill, ElementName=rectSizeReference}" Grid.Column="3" Grid.Row="2"/>
+                    <Rectangle Fill="{Binding Fill, ElementName=rectSizeReference}" Grid.Column="3" Grid.Row="4"/>
+                    <Rectangle Fill="{Binding Fill, ElementName=rectSizeReference}" Grid.Column="3" Grid.Row="6"/>
+                    <Rectangle Fill="{Binding Fill, ElementName=rectSizeReference}" Grid.Column="4" Grid.Row="1"/>
+                    <Rectangle Fill="{Binding Fill, ElementName=rectSizeReference}" Grid.Column="4" Grid.Row="3"/>
+                    <Rectangle Fill="{Binding Fill, ElementName=rectSizeReference}" Grid.Column="4" Grid.Row="5"/>
+                    <Rectangle Fill="{Binding Fill, ElementName=rectSizeReference}" Grid.Column="4" Grid.Row="7"/>
+                    <Rectangle Fill="{Binding Fill, ElementName=rectSizeReference}" Grid.Column="5" Grid.Row="0"/>
+                    <Rectangle Fill="{Binding Fill, ElementName=rectSizeReference}" Grid.Column="5" Grid.Row="2"/>
+                    <Rectangle Fill="{Binding Fill, ElementName=rectSizeReference}" Grid.Column="5" Grid.Row="4"/>
+                    <Rectangle Fill="{Binding Fill, ElementName=rectSizeReference}" Grid.Column="5" Grid.Row="6"/>
+                    <Rectangle Fill="{Binding Fill, ElementName=rectSizeReference}" Grid.Column="6" Grid.Row="1"/>
+                    <Rectangle Fill="{Binding Fill, ElementName=rectSizeReference}" Grid.Column="6" Grid.Row="3"/>
+                    <Rectangle Fill="{Binding Fill, ElementName=rectSizeReference}" Grid.Column="6" Grid.Row="5"/>
+                    <Rectangle Fill="{Binding Fill, ElementName=rectSizeReference}" Grid.Column="6" Grid.Row="7"/>
+                    <Rectangle Fill="{Binding Fill, ElementName=rectSizeReference}" Grid.Column="7" Grid.Row="0"/>
+                    <Rectangle Fill="{Binding Fill, ElementName=rectSizeReference}" Grid.Column="7" Grid.Row="2"/>
+                    <Rectangle Fill="{Binding Fill, ElementName=rectSizeReference}" Grid.Column="7" Grid.Row="4"/>
+                    <Rectangle Fill="{Binding Fill, ElementName=rectSizeReference}" Grid.Column="7" Grid.Row="6"/>
                 </Grid>
             </Border>
             <Canvas Grid.Column="1" Grid.Row="1" x:Name="chessGameCanvas" Margin="1"/>

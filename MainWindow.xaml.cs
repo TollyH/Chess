@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,6 +19,7 @@ namespace Chess
     public partial class MainWindow : Window
     {
         private ChessGame game = new();
+        private readonly Settings config;
 
         private Pieces.Piece? grabbedPiece = null;
         /// <summary>
@@ -39,7 +42,17 @@ namespace Chess
 
         public MainWindow()
         {
+            string jsonPath = System.IO.Path.Join(AppDomain.CurrentDomain.BaseDirectory, "chess-settings.json");
+            config = File.Exists(jsonPath)
+                ? JsonConvert.DeserializeObject<Settings>(File.ReadAllText(jsonPath)) ?? new Settings()
+                : new Settings();
+
             InitializeComponent();
+
+            rectSizeReference.Fill = new SolidColorBrush(config.DarkSquareColor);
+            chessBoardBackground.Background = new SolidColorBrush(config.LightSquareColor);
+            autoQueenItem.IsChecked = config.AutoQueen;
+            moveListSymbolsItem.IsChecked = config.UseSymbolsOnMoveList;
         }
 
         public void UpdateGameDisplay()
@@ -88,9 +101,19 @@ namespace Chess
             for (int i = 0; i < game.MoveText.Count; i += 2)
             {
                 string text = $"{(i / 2) + 1}. {game.MoveText[i]}";
+                if (config.UseSymbolsOnMoveList)
+                {
+                    text = text.Replace('K', '♔').Replace('Q', '♕').Replace('R', '♖')
+                        .Replace('B', '♗').Replace('N', '♘');
+                }
                 if (i + 1 < game.MoveText.Count)
                 {
                     text += $" {game.MoveText[i + 1]}";
+                    if (config.UseSymbolsOnMoveList)
+                    {
+                        text = text.Replace('K', '♚').Replace('Q', '♛').Replace('R', '♜')
+                            .Replace('B', '♝').Replace('N', '♞');
+                    }
                 }
                 _ = movesPanel.Children.Add(new Label()
                 {
@@ -108,7 +131,7 @@ namespace Chess
                 {
                     Width = tileWidth,
                     Height = tileHeight,
-                    Fill = Brushes.IndianRed
+                    Fill = new SolidColorBrush(config.CheckMateHighlightColor)
                 };
                 _ = chessGameCanvas.Children.Add(mateHighlight);
                 Canvas.SetBottom(mateHighlight, kingPosition.Y * tileHeight);
@@ -123,7 +146,7 @@ namespace Chess
                 {
                     Width = tileWidth,
                     Height = tileHeight,
-                    Fill = Brushes.CadetBlue
+                    Fill = new SolidColorBrush(config.LastMoveSourceColor)
                 };
                 _ = chessGameCanvas.Children.Add(sourceMoveHighlight);
                 Canvas.SetBottom(sourceMoveHighlight, lastMoveSource.Y * tileHeight);
@@ -133,7 +156,7 @@ namespace Chess
                 {
                     Width = tileWidth,
                     Height = tileHeight,
-                    Fill = Brushes.Cyan
+                    Fill = new SolidColorBrush(config.LastMoveDestinationColor)
                 };
                 _ = chessGameCanvas.Children.Add(destinationMoveHighlight);
                 Canvas.SetBottom(destinationMoveHighlight, lastMoveDestination.Y * tileHeight);
@@ -149,7 +172,7 @@ namespace Chess
                 {
                     Width = tileWidth,
                     Height = tileHeight,
-                    Fill = Brushes.LightGreen
+                    Fill = new SolidColorBrush(config.BestMoveSourceColor)
                 };
                 _ = chessGameCanvas.Children.Add(bestMoveSrcHighlight);
                 Canvas.SetBottom(bestMoveSrcHighlight, currentBestMove.Value.Source.Y * tileHeight);
@@ -159,7 +182,7 @@ namespace Chess
                 {
                     Width = tileWidth,
                     Height = tileHeight,
-                    Fill = Brushes.Green
+                    Fill = new SolidColorBrush(config.BestMoveDestinationColor)
                 };
                 _ = chessGameCanvas.Children.Add(bestMoveDstHighlight);
                 Canvas.SetBottom(bestMoveDstHighlight, currentBestMove.Value.Destination.Y * tileHeight);
@@ -173,11 +196,11 @@ namespace Chess
                     Brush fillBrush;
                     if (game.Board[validMove.X, validMove.Y] is not null)
                     {
-                        fillBrush = Brushes.Red;
+                        fillBrush = new SolidColorBrush(config.AvailableCaptureColor);
                     }
                     else
                     {
-                        fillBrush = Brushes.Yellow;
+                        fillBrush = new SolidColorBrush(config.AvailableMoveColor);
                     }
 
                     Rectangle newRect = new()
@@ -202,7 +225,7 @@ namespace Chess
                 {
                     Width = tileWidth,
                     Height = tileHeight,
-                    Fill = Brushes.OrangeRed
+                    Fill = new SolidColorBrush(config.AvailableEnPassantColor)
                 };
                 _ = chessGameCanvas.Children.Add(enPassantHighlight);
                 Canvas.SetBottom(enPassantHighlight, game.EnPassantSquare.Value.Y * tileHeight);
@@ -218,7 +241,7 @@ namespace Chess
                     {
                         Width = tileWidth,
                         Height = tileHeight,
-                        Fill = Brushes.MediumPurple
+                        Fill = new SolidColorBrush(config.AvailableCastleColor)
                     };
                     _ = chessGameCanvas.Children.Add(castleHighlight);
                     Canvas.SetBottom(castleHighlight, yPos * tileHeight);
@@ -230,7 +253,7 @@ namespace Chess
                     {
                         Width = tileWidth,
                         Height = tileHeight,
-                        Fill = Brushes.MediumPurple
+                        Fill = new SolidColorBrush(config.AvailableCastleColor)
                     };
                     _ = chessGameCanvas.Children.Add(castleHighlight);
                     Canvas.SetBottom(castleHighlight, yPos * tileHeight);
@@ -248,15 +271,15 @@ namespace Chess
                         Brush foregroundBrush;
                         if (piece is Pieces.King && ((piece.IsWhite && state == GameState.CheckWhite) || (!piece.IsWhite && state == GameState.CheckBlack)))
                         {
-                            foregroundBrush = Brushes.Red;
+                            foregroundBrush = new SolidColorBrush(config.CheckedKingColor);
                         }
                         else if (highlightGrabbedMoves && piece == grabbedPiece)
                         {
-                            foregroundBrush = Brushes.Blue;
+                            foregroundBrush = new SolidColorBrush(config.SelectedPieceColor);
                         }
                         else
                         {
-                            foregroundBrush = Brushes.Black;
+                            foregroundBrush = new SolidColorBrush(config.DefaultPieceColor);
                         }
 
                         Viewbox newPiece = new()
@@ -436,7 +459,7 @@ namespace Chess
             if (grabbedPiece is not null && highlightGrabbedMoves)
             {
                 System.Drawing.Point destination = GetCoordFromCanvasPoint(mousePos);
-                bool success = game.MovePiece(grabbedPiece.Position, destination, autoQueen: false);
+                bool success = game.MovePiece(grabbedPiece.Position, destination, autoQueen: config.AutoQueen);
                 if (success)
                 {
                     highlightGrabbedMoves = false;
@@ -492,7 +515,7 @@ namespace Chess
                     UpdateGameDisplay();
                     return;
                 }
-                bool success = game.MovePiece(grabbedPiece.Position, destination, autoQueen: false);
+                bool success = game.MovePiece(grabbedPiece.Position, destination, autoQueen: config.AutoQueen);
                 if (success)
                 {
                     grabbedPiece = null;
@@ -581,6 +604,8 @@ namespace Chess
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             cancelMoveComputation.Cancel();
+            string jsonPath = System.IO.Path.Join(AppDomain.CurrentDomain.BaseDirectory, "chess-settings.json");
+            File.WriteAllText(jsonPath, JsonConvert.SerializeObject(config));
         }
 
         private async void PGNExport_Click(object sender, RoutedEventArgs e)
@@ -613,6 +638,13 @@ namespace Chess
                 PushEndgameMessage();
             }
             await CheckComputerMove();
+        }
+
+        private void SettingsCheckItem_Click(object sender, RoutedEventArgs e)
+        {
+            config.AutoQueen = autoQueenItem.IsChecked;
+            config.UseSymbolsOnMoveList = moveListSymbolsItem.IsChecked;
+            UpdateGameDisplay();
         }
     }
 }
