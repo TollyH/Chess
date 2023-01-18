@@ -1,32 +1,16 @@
-﻿<Window x:Class="Chess.MainWindow"
+﻿<Window x:Class="Chess.CustomGame"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Chess"
         mc:Ignorable="d"
-        Title="Chess" Height="770" Width="960" Loaded="Window_Loaded" SizeChanged="Window_SizeChanged" MouseMove="Window_MouseMove" MouseDown="Window_MouseDown" MouseUp="Window_MouseUp" MouseLeave="Window_MouseLeave" Closing="Window_Closing">
+        Title="Custom Game Setup" Width="720" Height="510" MouseUp="Window_MouseUp" Loaded="Window_Loaded">
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="1*"/>
-        </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="210px"/>
         </Grid.ColumnDefinitions>
-        <Menu Grid.ColumnSpan="2">
-            <MenuItem Header="_Game" Margin="2">
-                <MenuItem Header="_New Game (2 Players)" Click="NewGame_Click"/>
-                <MenuItem Header="New Game (1 Player - _White)" Click="NewGameCpuWhite_Click"/>
-                <MenuItem Header="New Game (1 Player - _Black)" Click="NewGameCpuBlack_Click"/>
-                <MenuItem Header="New Game (0 Player - _Computer Only)" Click="NewGameCpuOnly_Click"/>
-                <Separator/>
-                <MenuItem Header="Custom _Game..." Click="CustomGame_Click"/>
-                <Separator/>
-                <MenuItem Header="Export to _PGN" Click="PGNExport_Click"/>
-            </MenuItem>
-        </Menu>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
@@ -142,18 +126,6 @@
                     <Label Content="1"/>
                 </Viewbox>
             </StackPanel>
-            <Viewbox Grid.Column="0" Grid.Row="2">
-                <Label x:Name="whiteEvaluation" Content="?" Foreground="Navy" MouseUp="evaluation_MouseUp"/>
-            </Viewbox>
-            <Viewbox Grid.Column="2" Grid.Row="0">
-                <Label x:Name="blackEvaluation" Content="?" Foreground="Navy" MouseUp="evaluation_MouseUp"/>
-            </Viewbox>
-            <Viewbox Grid.Column="0" Grid.Row="0">
-                <Label x:Name="blackCaptures" Content="0" Foreground="Crimson"/>
-            </Viewbox>
-            <Viewbox Grid.Column="2" Grid.Row="2">
-                <Label x:Name="whiteCaptures" Content="0" Foreground="Crimson"/>
-            </Viewbox>
             <Border Grid.Column="1" Grid.Row="1" BorderBrush="Black" BorderThickness="1">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -210,12 +182,41 @@
                     <Rectangle Fill="#FFBF8245" Grid.Column="7" Grid.Row="6"/>
                 </Grid>
             </Border>
-            <Canvas Grid.Column="1" Grid.Row="1" x:Name="chessGameCanvas" Margin="1"/>
+            <Canvas x:Name="chessGameCanvas" Grid.Column="1" Grid.Row="1" Margin="1"/>
         </Grid>
-        <Border Grid.Row="1" Grid.Column="1" BorderBrush="Black" BorderThickness="1,0,0,0" ScrollViewer.HorizontalScrollBarVisibility="Auto">
-            <ScrollViewer x:Name="movesScroll">
-                <StackPanel x:Name="movesPanel"/>
-            </ScrollViewer>
+        <Border Grid.Column="1" BorderBrush="Black" BorderThickness="1,0,0,0">
+            <StackPanel>
+                <Label Content="Piece Selection (Click on Board)" Margin="5,5,5,1" Padding="0,0,0,0" FontSize="14"/>
+                <Label Content="Left Click = White, Right Click = Black" Margin="5,1,5,5" Padding="0,0,0,0" FontSize="11"/>
+                <RadioButton x:Name="pieceSelectKing" Margin="5,2,5,2" Content="King" GroupName="Piece" IsChecked="True"/>
+                <RadioButton x:Name="pieceSelectQueen" Margin="5,2,5,2" Content="Queen" GroupName="Piece"/>
+                <RadioButton x:Name="pieceSelectRook" Margin="5,2,5,2" Content="Rook" GroupName="Piece"/>
+                <RadioButton x:Name="pieceSelectBishop" Margin="5,2,5,2" Content="Bishop" GroupName="Piece"/>
+                <RadioButton x:Name="pieceSelectKnight" Margin="5,2,5,2" Content="Knight" GroupName="Piece"/>
+                <RadioButton x:Name="pieceSelectPawn" Margin="5,2,5,5" Content="Pawn" GroupName="Piece"/>
+                <Separator/>
+                <Label Content="Current Turn" Margin="5" Padding="0,0,0,0" FontSize="14"/>
+                <RadioButton x:Name="turnSelectWhite" Margin="5,2,5,2" Content="White" GroupName="CurrentTurn" IsChecked="True"/>
+                <RadioButton x:Name="turnSelectBlack" Margin="5,2,5,5" Content="Black" GroupName="CurrentTurn"/>
+                <Separator/>
+                <Label Content="Castling Status" Margin="5" Padding="0,0,0,0" FontSize="14"/>
+                <CheckBox x:Name="castleWhiteKingside" Margin="5,2,5,2" Content="White May Castle Kingside" IsEnabled="False"/>
+                <CheckBox x:Name="castleWhiteQueenside" Margin="5,2,5,2" Content="White May Castle Queenside" IsEnabled="False"/>
+                <CheckBox x:Name="castleBlackKingside" Margin="5,2,5,2" Content="Black May Castle Kingside" IsEnabled="False"/>
+                <CheckBox x:Name="castleBlackQueenside" Margin="5,2,5,5" Content="Black May Castle Queenside" IsEnabled="False"/>
+                <Separator/>
+                <Label Content="En Passant Square" Margin="5" Padding="0,0,0,0" FontSize="14"/>
+                <CheckBox x:Name="enPassantSelect" Margin="5,2,5,5" Content="Select Square With Left Click"/>
+                <Button x:Name="clearEnPassantButton" Content="Clear Square" Margin="5,2,5,5" HorizontalAlignment="Left" Padding="5,1,5,1" Click="clearEnPassantButton_Click"/>
+            </StackPanel>
         </Border>
+        <Button x:Name="startButton" Content="Start" Grid.Column="1" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="7" Width="50" IsEnabled="False" Click="startButton_Click"/>
+        <Button x:Name="importButton" Content="Load Forsyth–Edwards" Grid.Column="1" VerticalAlignment="Bottom" HorizontalAlignment="Left" Padding="10,1,10,1" Margin="7" Click="importButton_Click"/>
+        <Grid x:Name="importOverlay" Grid.ColumnSpan="2" Background="White" Visibility="Collapsed">
+            <Label Content="Enter a Forsyth–Edwards Notation board position string:" Margin="10" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="16"/>
+            <TextBox x:Name="fenInput" Margin="12,45,12,10" VerticalAlignment="Top" FontSize="15" Text="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"/>
+            <Button x:Name="submitFenButton" Content="Submit" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="10" Width="64" Click="submitFenButton_Click"/>
+            <Button x:Name="cancelFenButton" Content="Cancel" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="10,10,84,10" Width="64" Click="cancelFenButton_Click"/>
+        </Grid>
     </Grid>
 </Window>

@@ -583,9 +583,28 @@ namespace Chess
             cancelMoveComputation.Cancel();
         }
 
-        private void PGNExport_Click(object sender, RoutedEventArgs e)
+        private async void PGNExport_Click(object sender, RoutedEventArgs e)
         {
+            manuallyEvaluating = false;
+            cancelMoveComputation.Cancel();
+            cancelMoveComputation = new CancellationTokenSource();
             _ = new PGNExport(game, whiteIsComputer, blackIsComputer).ShowDialog();
+            await CheckComputerMove();
+        }
+
+        private async void CustomGame_Click(object sender, RoutedEventArgs e)
+        {
+            manuallyEvaluating = false;
+            grabbedPiece = null;
+            highlightGrabbedMoves = false;
+            cancelMoveComputation.Cancel();
+            cancelMoveComputation = new CancellationTokenSource();
+            CustomGame customDialog = new();
+            _ = customDialog.ShowDialog();
+            game = customDialog.GeneratedGame ?? game;
+            UpdateGameDisplay();
+            PushEndgameMessage();
+            await CheckComputerMove();
         }
     }
 }
