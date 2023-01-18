@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Chess"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        Title="Export Game to PGN" SizeToContent="WidthAndHeight">
+        Title="Export Game to PGN" SizeToContent="WidthAndHeight" WindowStyle="ToolWindow">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
