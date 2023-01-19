@@ -70,8 +70,8 @@ namespace Chess
             return new BoardAnalysis.PossibleMove(bestMove[..2].FromChessCoordinate(), bestMove[2..4].FromChessCoordinate(),
                 blackMateFound ? double.PositiveInfinity : whiteMateFound ? double.NegativeInfinity : game.CurrentTurnWhite ? moveValue : -moveValue,
                 // Multiply mate depth by 2 as PossibleMove expects depth in half-moves, engine gives it in full-moves
-                whiteMateFound, blackMateFound, whiteMateFound ? (int)moveValue * 2 : 0,
-                blackMateFound ? (int)moveValue * 2 : 0);
+                whiteMateFound, blackMateFound, whiteMateFound ? Math.Abs((int)moveValue) * 2 : 0,
+                blackMateFound ? Math.Abs((int)moveValue) * 2 : 0, promotionType);
         }
     }
 }
