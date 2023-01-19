@@ -34,6 +34,8 @@ namespace Chess
         private BoardAnalysis.PossibleMove? currentBestMove = null;
         private bool manuallyEvaluating = false;
 
+        private bool updateDepthSliders = false;
+
         private readonly Dictionary<Pieces.Piece, Viewbox> pieceViews = new();
 
         private CancellationTokenSource cancelMoveComputation = new();
@@ -53,7 +55,7 @@ namespace Chess
                 ? JsonConvert.DeserializeObject<Settings>(File.ReadAllText(jsonPath)) ?? new Settings()
                 : new Settings();
 
-            if (config.ExternalEngine)
+            if (config.ExternalEngineWhite || config.ExternalEngineBlack)
             {
                 foreach (string filename in Directory.EnumerateFiles(AppDomain.CurrentDomain.BaseDirectory, "*.exe"))
                 {
@@ -72,7 +74,11 @@ namespace Chess
             autoQueenItem.IsChecked = config.AutoQueen;
             moveListSymbolsItem.IsChecked = config.UseSymbolsOnMoveList;
             flipBoardItem.IsChecked = config.FlipBoard;
-            externalEngineItem.IsChecked = config.ExternalEngine;
+            externalEngineWhiteItem.IsChecked = config.ExternalEngineWhite;
+            externalEngineBlackItem.IsChecked = config.ExternalEngineBlack;
+            whiteDepthItem.Value = config.ExternalEngineWhiteDepth;
+            blackDepthItem.Value = config.ExternalEngineBlackDepth;
+            updateDepthSliders = true;
         }
 
         public void UpdateGameDisplay()
@@ -460,9 +466,11 @@ namespace Chess
         private async Task<BoardAnalysis.PossibleMove> GetEngineMove(CancellationToken cancellationToken)
         {
             BoardAnalysis.PossibleMove? bestMove = null;
-            if (enginePath is not null)
+            if (enginePath is not null && ((config.ExternalEngineWhite && game.CurrentTurnWhite)
+                || (config.ExternalEngineBlack && !game.CurrentTurnWhite)))
             {
-                bestMove = await CommunicateUCI.GetBestMove(game, enginePath, 24, cancellationToken);
+                bestMove = await CommunicateUCI.GetBestMove(game, enginePath,
+                    game.CurrentTurnWhite ? config.ExternalEngineWhiteDepth : config.ExternalEngineBlackDepth, cancellationToken);
             }
             if (cancellationToken.IsCancellationRequested)
             {
@@ -755,9 +763,10 @@ namespace Chess
             config.AutoQueen = autoQueenItem.IsChecked;
             config.UseSymbolsOnMoveList = moveListSymbolsItem.IsChecked;
             config.FlipBoard = flipBoardItem.IsChecked;
-            config.ExternalEngine = externalEngineItem.IsChecked;
+            config.ExternalEngineWhite = externalEngineWhiteItem.IsChecked;
+            config.ExternalEngineBlack = externalEngineBlackItem.IsChecked;
 
-            if (config.ExternalEngine)
+            if (config.ExternalEngineWhite || config.ExternalEngineBlack)
             {
                 foreach (string filename in Directory.EnumerateFiles(AppDomain.CurrentDomain.BaseDirectory, "*.exe"))
                 {
@@ -786,6 +795,24 @@ namespace Chess
             rectSizeReference.Fill = new SolidColorBrush(config.DarkSquareColor);
             chessBoardBackground.Background = new SolidColorBrush(config.LightSquareColor);
             UpdateGameDisplay();
+        }
+
+        private void whiteDepthBackingSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (!updateDepthSliders)
+            {
+                return;
+            }
+            config.ExternalEngineWhiteDepth = (uint)whiteDepthItem.Value;
+        }
+
+        private void blackDepthBackingSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (!updateDepthSliders)
+            {
+                return;
+            }
+            config.ExternalEngineBlackDepth = (uint)blackDepthItem.Value;
         }
     }
 }

@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Chess"
+        xmlns:sm="clr-namespace:SliderMenu"
         mc:Ignorable="d"
         Title="Chess" Height="770" Width="960" Loaded="Window_Loaded" SizeChanged="Window_SizeChanged" MouseMove="Window_MouseMove" MouseDown="Window_MouseDown" MouseUp="Window_MouseUp" MouseLeave="Window_MouseLeave" Closing="Window_Closing">
     <Grid>
@@ -31,11 +32,46 @@
                 <MenuItem x:Name="autoQueenItem" Header="Automatically Promote Pawns to _Queen" Click="SettingsCheckItem_Click" IsCheckable="True"/>
                 <MenuItem x:Name="moveListSymbolsItem" Header="Use Piece _Symbols on the Move List" Click="SettingsCheckItem_Click" IsCheckable="True"/>
                 <MenuItem x:Name="flipBoardItem" Header="_Flip the Board on Black's Turn" Click="SettingsCheckItem_Click" IsCheckable="True"/>
-                <MenuItem x:Name="externalEngineItem" Header="_Use External Engine Executable" Click="SettingsCheckItem_Click" IsCheckable="True"/>
+                <Separator/>
+                <MenuItem x:Name="externalEngineWhiteItem" Header="Use External Engine Executable for _White" Click="SettingsCheckItem_Click" IsCheckable="True"/>
+                <MenuItem x:Name="externalEngineBlackItem" Header="Use External Engine Executable for _Black" Click="SettingsCheckItem_Click" IsCheckable="True"/>
+                <MenuItem Header="External Engine Search _Depth for White">
+                    <sm:SliderMenuItem x:Name="whiteDepthItem">
+                        <MenuItem Header="1" sm:SliderMenuItem.Value="1"/>
+                        <MenuItem Header="2" sm:SliderMenuItem.Value="2"/>
+                        <MenuItem Header="4" sm:SliderMenuItem.Value="4"/>
+                        <MenuItem Header="8" sm:SliderMenuItem.Value="8"/>
+                        <MenuItem Header="12" sm:SliderMenuItem.Value="12"/>
+                        <MenuItem Header="16" sm:SliderMenuItem.Value="16"/>
+                        <MenuItem Header="24" sm:SliderMenuItem.Value="24"/>
+                        <MenuItem Header="32" sm:SliderMenuItem.Value="32"/>
+                        <MenuItem Header="44" sm:SliderMenuItem.Value="44"/>
+                        <MenuItem Header="50" sm:SliderMenuItem.Value="50"/>
+                        <MenuItem Header="64" sm:SliderMenuItem.Value="64"/>
+                    </sm:SliderMenuItem>
+                </MenuItem>
+                <MenuItem Header="External _Engine Search Depth for Black">
+                    <sm:SliderMenuItem x:Name="blackDepthItem">
+                        <MenuItem Header="1" sm:SliderMenuItem.Value="1"/>
+                        <MenuItem Header="2" sm:SliderMenuItem.Value="2"/>
+                        <MenuItem Header="4" sm:SliderMenuItem.Value="4"/>
+                        <MenuItem Header="8" sm:SliderMenuItem.Value="8"/>
+                        <MenuItem Header="12" sm:SliderMenuItem.Value="12"/>
+                        <MenuItem Header="16" sm:SliderMenuItem.Value="16"/>
+                        <MenuItem Header="24" sm:SliderMenuItem.Value="24"/>
+                        <MenuItem Header="32" sm:SliderMenuItem.Value="32"/>
+                        <MenuItem Header="44" sm:SliderMenuItem.Value="44"/>
+                        <MenuItem Header="50" sm:SliderMenuItem.Value="50"/>
+                        <MenuItem Header="64" sm:SliderMenuItem.Value="64"/>
+                    </sm:SliderMenuItem>
+                </MenuItem>
                 <Separator/>
                 <MenuItem Header="Customise..." Click="CustomiseItem_Click"/>
             </MenuItem>
         </Menu>
+        <!-- Because SliderMenuItem lacks a ValueChanged event, bind its value to invisible Slider so we can listen to its ValueChanged event -->
+        <Slider x:Name="whiteDepthBackingSlider" Visibility="Collapsed" Minimum="1" Maximum="64" Value="{Binding Value, ElementName=whiteDepthItem}" ValueChanged="whiteDepthBackingSlider_ValueChanged"/>
+        <Slider x:Name="blackDepthBackingSlider" Visibility="Collapsed" Minimum="1" Maximum="64" Value="{Binding Value, ElementName=blackDepthItem}" ValueChanged="blackDepthBackingSlider_ValueChanged"/>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
