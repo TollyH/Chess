@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -37,6 +38,11 @@ namespace Chess
 
         private CancellationTokenSource cancelMoveComputation = new();
 
+        /// <summary>
+        /// <see langword="null"/> if an engine isn't found and built-in one should be used
+        /// </summary>
+        private string? enginePath = null;
+
         double tileWidth;
         double tileHeight;
 
@@ -47,6 +53,18 @@ namespace Chess
                 ? JsonConvert.DeserializeObject<Settings>(File.ReadAllText(jsonPath)) ?? new Settings()
                 : new Settings();
 
+            if (config.ExternalEngine)
+            {
+                foreach (string filename in Directory.EnumerateFiles(AppDomain.CurrentDomain.BaseDirectory, "*.exe"))
+                {
+                    if (System.IO.Path.GetFileNameWithoutExtension(filename) != Process.GetCurrentProcess().ProcessName)
+                    {
+                        enginePath = filename;
+                        break;
+                    }
+                }
+            }
+
             InitializeComponent();
 
             rectSizeReference.Fill = new SolidColorBrush(config.DarkSquareColor);
@@ -54,6 +72,7 @@ namespace Chess
             autoQueenItem.IsChecked = config.AutoQueen;
             moveListSymbolsItem.IsChecked = config.UseSymbolsOnMoveList;
             flipBoardItem.IsChecked = config.FlipBoard;
+            externalEngineItem.IsChecked = config.ExternalEngine;
         }
 
         public void UpdateGameDisplay()
@@ -436,6 +455,20 @@ namespace Chess
         }
 
         /// <summary>
+        /// Get the best move according to either the built-in or external engine, depending on configuration
+        /// </summary>
+        private async Task<BoardAnalysis.PossibleMove> GetEngineMove(CancellationToken cancellationToken)
+        {
+            BoardAnalysis.PossibleMove? bestMove = null;
+            if (enginePath is not null)
+            {
+                bestMove = await CommunicateUCI.GetBestMove(game, enginePath, 24, cancellationToken);
+            }
+            bestMove ??= await BoardAnalysis.EstimateBestPossibleMove(game, 4, cancellationToken);
+            return bestMove.Value;
+        }
+
+        /// <summary>
         /// Perform a computer move if necessary
         /// </summary>
         private async Task CheckComputerMove()
@@ -444,7 +477,7 @@ namespace Chess
             {
                 CancellationToken cancellationToken = cancelMoveComputation.Token;
                 UpdateEvaluationMeter(null, game.CurrentTurnWhite);
-                BoardAnalysis.PossibleMove bestMove = await BoardAnalysis.EstimateBestPossibleMove(game, 4, cancellationToken);
+                BoardAnalysis.PossibleMove bestMove = await GetEngineMove(cancellationToken);
                 if (cancellationToken.IsCancellationRequested)
                 {
                     return;
@@ -631,7 +664,8 @@ namespace Chess
             UpdateCursor();
 
             CancellationToken cancellationToken = cancelMoveComputation.Token;
-            BoardAnalysis.PossibleMove bestMove = await BoardAnalysis.EstimateBestPossibleMove(game, 4, cancellationToken);
+            BoardAnalysis.PossibleMove bestMove = await GetEngineMove(cancellationToken);
+            
             if (cancellationToken.IsCancellationRequested)
             {
                 return;
@@ -715,6 +749,23 @@ namespace Chess
             config.AutoQueen = autoQueenItem.IsChecked;
             config.UseSymbolsOnMoveList = moveListSymbolsItem.IsChecked;
             config.FlipBoard = flipBoardItem.IsChecked;
+            config.ExternalEngine = externalEngineItem.IsChecked;
+
+            if (config.ExternalEngine)
+            {
+                foreach (string filename in Directory.EnumerateFiles(AppDomain.CurrentDomain.BaseDirectory, "*.exe"))
+                {
+                    if (System.IO.Path.GetFileNameWithoutExtension(filename) != Process.GetCurrentProcess().ProcessName)
+                    {
+                        enginePath = filename;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                enginePath = null;
+            }
             UpdateGameDisplay();
         }
 

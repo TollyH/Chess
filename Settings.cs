@@ -10,6 +10,7 @@ namespace Chess
         public bool AutoQueen { get; set; }
         public bool UseSymbolsOnMoveList { get; set; }
         public bool FlipBoard { get; set; }
+        public bool ExternalEngine { get; set; }
 
         public Color LightSquareColor { get; set; }
         public Color DarkSquareColor { get; set; }
@@ -49,14 +50,15 @@ namespace Chess
         }
 
         [JsonConstructor]
-        public Settings(bool autoQueen, bool useSymbolsOnMoveList, bool flipBoard, Color lightSquareColor, Color darkSquareColor,
-            Color defaultPieceColor, Color checkedKingColor, Color selectedPieceColor, Color checkMateHighlightColor,
+        public Settings(bool autoQueen, bool useSymbolsOnMoveList, bool flipBoard, bool externalEngine, Color lightSquareColor,
+            Color darkSquareColor, Color defaultPieceColor, Color checkedKingColor, Color selectedPieceColor, Color checkMateHighlightColor,
             Color lastMoveSourceColor, Color lastMoveDestinationColor, Color bestMoveSourceColor, Color bestMoveDestinationColor,
             Color availableMoveColor, Color availableCaptureColor, Color availableEnPassantColor, Color availableCastleColor)
         {
             AutoQueen = autoQueen;
             UseSymbolsOnMoveList = useSymbolsOnMoveList;
             FlipBoard = flipBoard;
+            ExternalEngine = externalEngine;
             LightSquareColor = lightSquareColor;
             DarkSquareColor = darkSquareColor;
             DefaultPieceColor = defaultPieceColor;
