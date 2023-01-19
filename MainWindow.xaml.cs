@@ -464,6 +464,10 @@ namespace Chess
             {
                 bestMove = await CommunicateUCI.GetBestMove(game, enginePath, 24, cancellationToken);
             }
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return default;
+            }
             bestMove ??= await BoardAnalysis.EstimateBestPossibleMove(game, 4, cancellationToken);
             return bestMove.Value;
         }
