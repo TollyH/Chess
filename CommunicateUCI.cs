@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -61,7 +63,7 @@ namespace Chess
             string bestMove = lines[^1] == "bestmove (none)"
                 ? "a1a1"
                 : Regex.Match(lines[^1], @"bestmove ((?:[a-h][1-8]){2}[qnbr]?)").Groups[1].Value;
-            Match moveInfo = Regex.Match(lines[^2], @"info .+ score (cp|mate) (-?[0-9]+)");
+            Match moveInfo = Regex.Match(lines[^2], @"info .+ score (cp|mate) (-?[0-9]+) .+ pv ((?:(?:[a-h][1-8]){2}[qnbr]?(?: |$))+)");
             bool mateFound = moveInfo.Groups[1].Value == "mate";
             double moveValue = mateFound ? int.Parse(moveInfo.Groups[2].Value) : int.Parse(moveInfo.Groups[2].Value) / 100d;
             bool whiteMateFound = mateFound && ((game.CurrentTurnWhite && moveValue <= 0) || (!game.CurrentTurnWhite && moveValue > 0));
@@ -80,11 +82,25 @@ namespace Chess
                 };
             }
 
+            List<(Point, Point, Type)> bestLine = new();
+            foreach(string move in moveInfo.Groups[3].Value.Split(' '))
+            {
+                bestLine.Add((move[..2].FromChessCoordinate(), move[2..4].FromChessCoordinate(),
+                    move.Length == 5 ? move[4] switch
+                    {
+                        'q' => typeof(Pieces.Queen),
+                        'n' => typeof(Pieces.Knight),
+                        'b' => typeof(Pieces.Bishop),
+                        'r' => typeof(Pieces.Rook),
+                        _ => typeof(Pieces.Queen)
+                    } : typeof(Pieces.Queen)));
+            }
+
             return new BoardAnalysis.PossibleMove(bestMove[..2].FromChessCoordinate(), bestMove[2..4].FromChessCoordinate(),
                 blackMateFound ? double.PositiveInfinity : whiteMateFound ? double.NegativeInfinity : game.CurrentTurnWhite ? moveValue : -moveValue,
                 // Multiply mate depth by 2 as PossibleMove expects depth in half-moves, engine gives it in full-moves
                 whiteMateFound, blackMateFound, whiteMateFound ? Math.Abs((int)moveValue) * 2 : 0,
-                blackMateFound ? Math.Abs((int)moveValue) * 2 : 0, promotionType);
+                blackMateFound ? Math.Abs((int)moveValue) * 2 : 0, promotionType, bestLine);
         }
     }
 }

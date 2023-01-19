@@ -443,8 +443,11 @@ namespace Chess
             if (bestMove is null)
             {
                 toUpdate.Content = "...";
+                toUpdate.ToolTip = null;
+                return;
             }
-            else if ((bestMove.Value.WhiteMateLocated && !bestMove.Value.BlackMateLocated)
+
+            if ((bestMove.Value.WhiteMateLocated && !bestMove.Value.BlackMateLocated)
                 || bestMove.Value.EvaluatedFutureValue == double.NegativeInfinity)
             {
                 toUpdate.Content = $"-M{(int)Math.Ceiling(bestMove.Value.DepthToWhiteMate / 2d)}";
@@ -458,6 +461,15 @@ namespace Chess
             {
                 toUpdate.Content = bestMove.Value.EvaluatedFutureValue.ToString("+0.00;-0.00;0.00");
             }
+
+            string convertedBestLine = "";
+            ChessGame moveStringGenerator = game.Clone();
+            foreach ((System.Drawing.Point source, System.Drawing.Point destination, Type promotionType) in bestMove.Value.BestLine)
+            {
+                _ = moveStringGenerator.MovePiece(source, destination, true, promotionType);
+                convertedBestLine += " " + moveStringGenerator.MoveText[^1];
+            }
+            toUpdate.ToolTip = convertedBestLine.Trim();
         }
 
         /// <summary>
