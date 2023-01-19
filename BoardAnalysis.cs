@@ -406,7 +406,7 @@ namespace Chess
                         Thread processThread = new(() =>
                         {
                             PossibleMove bestSubMove = MinimaxMove(gameClone,
-                                double.NegativeInfinity, double.PositiveInfinity, 1, maxDepth, cancellationToken, thisLine);
+                                double.NegativeInfinity, double.PositiveInfinity, 1, maxDepth, thisLine, cancellationToken);
                             // Don't include default value in results
                             if (bestSubMove.Source != bestSubMove.Destination)
                             {
@@ -465,7 +465,7 @@ namespace Chess
         }
 
         private static PossibleMove MinimaxMove(ChessGame game, double alpha, double beta, int depth, int maxDepth,
-            CancellationToken cancellationToken, List<(Point, Point, Type)> currentLine)
+            List<(Point, Point, Type)> currentLine, CancellationToken cancellationToken)
         {
             (Point, Point) lastMove = game.Moves.Last();
             if (game.GameOver)
@@ -510,7 +510,7 @@ namespace Chess
                         List<(Point, Point, Type)> newLine = new(currentLine) { (piece.Position, validMove, typeof(Pieces.Queen)) };
                         _ = gameClone.MovePiece(piece.Position, validMove, true,
                             promotionType: typeof(Pieces.Queen), updateMoveText: false);
-                        PossibleMove potentialMove = MinimaxMove(gameClone, alpha, beta, depth + 1, maxDepth, cancellationToken, newLine);
+                        PossibleMove potentialMove = MinimaxMove(gameClone, alpha, beta, depth + 1, maxDepth, newLine, cancellationToken);
                         if (cancellationToken.IsCancellationRequested)
                         {
                             return bestMove;
