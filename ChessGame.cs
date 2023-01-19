@@ -241,9 +241,8 @@ namespace Chess
         /// <summary>
         /// Move a piece on the board from a <paramref name="source"/> coordinate to a <paramref name="destination"/> coordinate.
         /// </summary>
-        /// <param name="autoQueen">
-        /// If a pawn is promoted, should it automatically become a queen (<see langword="true"/>),
-        /// or should the user be prompted for a promotion type (<see langword="false"/>)
+        /// <param name="promotionType">
+        /// If a pawn is promoted, what <see cref="Pieces.Piece"/> should it be promoted to. <see langword="null"/> means the user should be prompted for the type.
         /// </param>
         /// <param name="updateMoveText">
         /// Whether the move should update the game move text. This should usually be <see langword="true"/>,
@@ -251,7 +250,7 @@ namespace Chess
         /// </param>
         /// <returns><see langword="true"/> if the move was valid and executed, <see langword="false"/> otherwise</returns>
         /// <remarks>This method will check if the move is completely valid, unless <paramref name="forceMove"/> is <see langword="true"/>. No other validity checks are required.</remarks>
-        public bool MovePiece(Point source, Point destination, bool forceMove = false, bool autoQueen = true, bool updateMoveText = true)
+        public bool MovePiece(Point source, Point destination, bool forceMove = false, Type? promotionType = null, bool updateMoveText = true)
         {
             if (!forceMove && GameOver)
             {
@@ -348,9 +347,9 @@ namespace Chess
                     }
                     if (destination.Y == (piece.IsWhite ? 7 : 0))
                     {
-                        if (autoQueen)
+                        if (promotionType is not null)
                         {
-                            piece = new Pieces.Queen(piece.Position, piece.IsWhite);
+                            piece = (Pieces.Piece)Activator.CreateInstance(promotionType, piece.Position, piece.IsWhite)!;
                         }
                         else
                         {

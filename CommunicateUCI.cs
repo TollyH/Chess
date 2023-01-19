@@ -67,6 +67,19 @@ namespace Chess
             bool whiteMateFound = mateFound && ((game.CurrentTurnWhite && moveValue <= 0) || (!game.CurrentTurnWhite && moveValue > 0));
             bool blackMateFound = mateFound && ((!game.CurrentTurnWhite && moveValue <= 0) || (game.CurrentTurnWhite && moveValue > 0));
 
+            Type? promotionType = null;
+            if (bestMove.Length == 5)
+            {
+                promotionType = bestMove[4] switch
+                {
+                    'q' => typeof(Pieces.Queen),
+                    'n' => typeof(Pieces.Knight),
+                    'b' => typeof(Pieces.Bishop),
+                    'r' => typeof(Pieces.Rook),
+                    _ => null
+                };
+            }
+
             return new BoardAnalysis.PossibleMove(bestMove[..2].FromChessCoordinate(), bestMove[2..4].FromChessCoordinate(),
                 blackMateFound ? double.PositiveInfinity : whiteMateFound ? double.NegativeInfinity : game.CurrentTurnWhite ? moveValue : -moveValue,
                 // Multiply mate depth by 2 as PossibleMove expects depth in half-moves, engine gives it in full-moves

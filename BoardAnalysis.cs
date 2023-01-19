@@ -314,9 +314,11 @@ namespace Chess
             public bool BlackMateLocated { get; }
             public int DepthToWhiteMate { get; }
             public int DepthToBlackMate { get; }
+            public Type? PromotionType { get; }
 
             public PossibleMove(Point source, Point destination, double evaluatedFutureValue,
-                bool whiteMateLocated, bool blackMateLocated, int depthToWhiteMate, int depthToBlackMate)
+                bool whiteMateLocated, bool blackMateLocated, int depthToWhiteMate, int depthToBlackMate,
+                Type? promotionType)
             {
                 Source = source;
                 Destination = destination;
@@ -325,6 +327,7 @@ namespace Chess
                 BlackMateLocated = blackMateLocated;
                 DepthToWhiteMate = depthToWhiteMate;
                 DepthToBlackMate = depthToBlackMate;
+                PromotionType = promotionType;
             }
         }
 
@@ -336,7 +339,7 @@ namespace Chess
         {
             PossibleMove[] moves = await EvaluatePossibleMoves(game, maxDepth, cancellationToken);
             PossibleMove bestMove = new(default, default,
-                game.CurrentTurnWhite ? double.NegativeInfinity : double.PositiveInfinity, false, false, 0, 0);
+                game.CurrentTurnWhite ? double.NegativeInfinity : double.PositiveInfinity, false, false, 0, 0, typeof(Pieces.Queen));
             foreach (PossibleMove potentialMove in moves)
             {
                 if (game.CurrentTurnWhite)
@@ -394,7 +397,8 @@ namespace Chess
                         Point thisPosition = piece.Position;
                         Point thisValidMove = validMove;
                         ChessGame gameClone = game.Clone();
-                        _ = gameClone.MovePiece(piece.Position, validMove, true, updateMoveText: false);
+                        _ = gameClone.MovePiece(piece.Position, validMove, true,
+                            promotionType: typeof(Pieces.Queen), updateMoveText: false);
 
                         Thread processThread = new(() =>
                         {
@@ -405,7 +409,7 @@ namespace Chess
                             {
                                 possibleMoves.Add(new PossibleMove(thisPosition, thisValidMove, bestSubMove.EvaluatedFutureValue,
                                     bestSubMove.WhiteMateLocated, bestSubMove.BlackMateLocated,
-                                    bestSubMove.DepthToWhiteMate, bestSubMove.DepthToBlackMate));
+                                    bestSubMove.DepthToWhiteMate, bestSubMove.DepthToBlackMate, typeof(Pieces.Queen)));
                             }
                             remainingThreads--;
                         });
@@ -465,25 +469,25 @@ namespace Chess
                 GameState state = game.DetermineGameState();
                 if (state == GameState.CheckMateWhite)
                 {
-                    return new PossibleMove(lastMove.Item1, lastMove.Item2, double.NegativeInfinity, true, false, depth, 0);
+                    return new PossibleMove(lastMove.Item1, lastMove.Item2, double.NegativeInfinity, true, false, depth, 0, typeof(Pieces.Queen));
                 }
                 else if (state == GameState.CheckMateBlack)
                 {
-                    return new PossibleMove(lastMove.Item1, lastMove.Item2, double.PositiveInfinity, false, true, 0, depth);
+                    return new PossibleMove(lastMove.Item1, lastMove.Item2, double.PositiveInfinity, false, true, 0, depth, typeof(Pieces.Queen));
                 }
                 else
                 {
                     // Draw
-                    return new PossibleMove(lastMove.Item1, lastMove.Item2, 0, false, false, 0, 0);
+                    return new PossibleMove(lastMove.Item1, lastMove.Item2, 0, false, false, 0, 0, typeof(Pieces.Queen));
                 }
             }
             if (depth > maxDepth)
             {
-                return new PossibleMove(lastMove.Item1, lastMove.Item2, CalculateBoardValue(game.Board), false, false, 0, 0);
+                return new PossibleMove(lastMove.Item1, lastMove.Item2, CalculateBoardValue(game.Board), false, false, 0, 0, typeof(Pieces.Queen));
             }
 
             PossibleMove bestMove = new(default, default,
-                game.CurrentTurnWhite ? double.NegativeInfinity : double.PositiveInfinity, false, false, 0, 0);
+                game.CurrentTurnWhite ? double.NegativeInfinity : double.PositiveInfinity, false, false, 0, 0, typeof(Pieces.Queen));
 
             foreach (Pieces.Piece? piece in game.Board)
             {
@@ -497,7 +501,8 @@ namespace Chess
                     foreach (Point validMove in GetValidMovesForEval(game, piece))
                     {
                         ChessGame gameClone = game.Clone();
-                        _ = gameClone.MovePiece(piece.Position, validMove, true, updateMoveText: false);
+                        _ = gameClone.MovePiece(piece.Position, validMove, true,
+                            promotionType: typeof(Pieces.Queen), updateMoveText: false);
                         PossibleMove potentialMove = MinimaxMove(gameClone, alpha, beta, depth + 1, maxDepth, cancellationToken);
                         if (cancellationToken.IsCancellationRequested)
                         {
@@ -513,7 +518,7 @@ namespace Chess
                             {
                                 bestMove = new PossibleMove(piece.Position, validMove, potentialMove.EvaluatedFutureValue,
                                     potentialMove.WhiteMateLocated, potentialMove.BlackMateLocated,
-                                    potentialMove.DepthToWhiteMate, potentialMove.DepthToBlackMate);
+                                    potentialMove.DepthToWhiteMate, potentialMove.DepthToBlackMate, typeof(Pieces.Queen));
                             }
                             if (potentialMove.EvaluatedFutureValue >= beta)
                             {
@@ -534,7 +539,7 @@ namespace Chess
                             {
                                 bestMove = new PossibleMove(piece.Position, validMove, potentialMove.EvaluatedFutureValue,
                                     potentialMove.WhiteMateLocated, potentialMove.BlackMateLocated,
-                                    potentialMove.DepthToWhiteMate, potentialMove.DepthToBlackMate);
+                                    potentialMove.DepthToWhiteMate, potentialMove.DepthToBlackMate, typeof(Pieces.Queen));
                             }
                             if (potentialMove.EvaluatedFutureValue <= alpha)
                             {

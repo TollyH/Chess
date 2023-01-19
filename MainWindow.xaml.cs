@@ -487,7 +487,7 @@ namespace Chess
                     return;
                 }
 
-                _ = game.MovePiece(bestMove.Source, bestMove.Destination, true);
+                _ = game.MovePiece(bestMove.Source, bestMove.Destination, true, promotionType: bestMove.PromotionType);
                 UpdateGameDisplay();
                 movesScroll.ScrollToBottom();
                 // Turn has been inverted already but we have value for the now old turn
@@ -566,7 +566,8 @@ namespace Chess
             if (grabbedPiece is not null && highlightGrabbedMoves)
             {
                 System.Drawing.Point destination = GetCoordFromCanvasPoint(mousePos);
-                bool success = game.MovePiece(grabbedPiece.Position, destination, autoQueen: config.AutoQueen);
+                bool success = game.MovePiece(grabbedPiece.Position, destination,
+                    promotionType: config.AutoQueen ? typeof(Pieces.Queen) : null);
                 if (success)
                 {
                     highlightGrabbedMoves = false;
@@ -622,7 +623,8 @@ namespace Chess
                     UpdateGameDisplay();
                     return;
                 }
-                bool success = game.MovePiece(grabbedPiece.Position, destination, autoQueen: config.AutoQueen);
+                bool success = game.MovePiece(grabbedPiece.Position, destination,
+                    promotionType: config.AutoQueen ? typeof(Pieces.Queen) : null);
                 if (success)
                 {
                     grabbedPiece = null;
