@@ -10,7 +10,7 @@ A chess game with a computer player made in C# with WPF
 - Custom position editor with FEN import support
 - A computer player that can play as white, black, both, or neither
 - Support for external chess engines using the UCI protocol (such as Stockfish)
-- Quality of life features such as auto queen promotion and automatic board flipping
+- Quality of life features such as auto queen promotion, automatic board flipping, and line/square highlighting
 - Colour scheme customisation
 
 ---
