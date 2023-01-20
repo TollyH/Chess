@@ -605,7 +605,7 @@ namespace Chess
                 "[Round \"?\"]\n" +
                 $"[White \"{whiteName?.Replace("\\", "\\\\")?.Replace("\"", "\\\"") ?? "?"}\"]\n" +
                 $"[Black \"{blackName?.Replace("\\", "\\\\")?.Replace("\"", "\\\"") ?? "?"}\"]\n" +
-                $"[Result \"{(!GameOver ? "*" : state == GameState.CheckMateBlack ? "1-0" : "0-1")}\"]\n" +
+                $"[Result \"{(!GameOver ? "*" : state == GameState.CheckMateBlack ? "1-0" : state == GameState.CheckMateWhite ? "0-1" : "1/2-1/2")}\"]\n" +
                 $"[WhiteType \"{(whiteIsComputer ? "program" : "human")}\"]\n" +
                 $"[BlackType \"{(blackIsComputer ? "program" : "human")}\"]\n\n";
 
@@ -626,7 +626,7 @@ namespace Chess
                 }
             }
             pgn += compiledMoveText.Trim();
-            pgn += !GameOver ? " *\n\n" : state == GameState.CheckMateBlack ? " 1-0\n\n" : " 0-1\n\n";
+            pgn += !GameOver ? " *\n\n" : state == GameState.CheckMateBlack ? " 1-0\n\n" : state == GameState.CheckMateWhite ? " 0-1\n\n" : " 1/2-1/2\n\n";
 
             return pgn;
         }
