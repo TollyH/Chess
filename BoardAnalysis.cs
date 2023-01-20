@@ -527,7 +527,7 @@ namespace Chess
                                     potentialMove.WhiteMateLocated, potentialMove.BlackMateLocated,
                                     potentialMove.DepthToWhiteMate, potentialMove.DepthToBlackMate, typeof(Pieces.Queen), potentialMove.BestLine);
                             }
-                            if (potentialMove.EvaluatedFutureValue >= beta)
+                            if (potentialMove.EvaluatedFutureValue >= beta && !bestMove.BlackMateLocated)
                             {
                                 return bestMove;
                             }
@@ -548,7 +548,7 @@ namespace Chess
                                     potentialMove.WhiteMateLocated, potentialMove.BlackMateLocated,
                                     potentialMove.DepthToWhiteMate, potentialMove.DepthToBlackMate, typeof(Pieces.Queen), potentialMove.BestLine);
                             }
-                            if (potentialMove.EvaluatedFutureValue <= alpha)
+                            if (potentialMove.EvaluatedFutureValue <= alpha && !bestMove.WhiteMateLocated)
                             {
                                 return bestMove;
                             }
