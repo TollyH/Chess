@@ -28,6 +28,10 @@ namespace Chess
         /// </summary>
         private bool highlightGrabbedMoves = false;
 
+        private HashSet<System.Drawing.Point> squareHighlights = new();
+        private HashSet<(System.Drawing.Point, System.Drawing.Point)> lineHighlights = new();
+        private System.Drawing.Point? mouseDownStartPoint = null;
+
         private bool whiteIsComputer = false;
         private bool blackIsComputer = false;
 
@@ -45,8 +49,8 @@ namespace Chess
         /// </summary>
         private string? enginePath = null;
 
-        double tileWidth;
-        double tileHeight;
+        private double tileWidth;
+        private double tileHeight;
 
         public MainWindow()
         {
@@ -354,6 +358,40 @@ namespace Chess
                 }
             }
 
+            foreach (System.Drawing.Point square in squareHighlights)
+            {
+                Ellipse ellipse = new()
+                {
+                    Fill = new SolidColorBrush(config.SelectedPieceColor),
+                    Opacity = 0.5,
+                    Width = tileWidth * 0.8,
+                    Height = tileHeight * 0.8
+                };
+                _ = chessGameCanvas.Children.Add(ellipse);
+                Canvas.SetBottom(ellipse, ((boardFlipped ? 7 - square.Y : square.Y) * tileHeight) + (tileHeight * 0.1));
+                Canvas.SetLeft(ellipse, (boardFlipped ? 7 - square.X : square.X) * tileWidth + (tileWidth * 0.1));
+            }
+
+            foreach ((System.Drawing.Point lineStart, System.Drawing.Point lineEnd) in lineHighlights)
+            {
+                double arrowLength = Math.Min(tileWidth, tileHeight) / 4;
+                Petzold.Media2D.ArrowLine line = new()
+                {
+                    Stroke = new SolidColorBrush(config.SelectedPieceColor),
+                    Fill = new SolidColorBrush(config.SelectedPieceColor),
+                    Opacity = 0.5,
+                    StrokeThickness = 10,
+                    ArrowLength = arrowLength,
+                    ArrowAngle = 45,
+                    IsArrowClosed = true,
+                    X1 = (boardFlipped ? 7 - lineStart.X : lineStart.X) * tileWidth + (tileWidth / 2),
+                    X2 = (boardFlipped ? 7 - lineEnd.X : lineEnd.X) * tileWidth + (tileWidth / 2),
+                    Y1 = (boardFlipped ? lineStart.Y : 7 - lineStart.Y) * tileHeight + (tileHeight / 2),
+                    Y2 = (boardFlipped ? lineEnd.Y : 7 - lineEnd.Y) * tileHeight + (tileHeight / 2)
+                };
+                _ = chessGameCanvas.Children.Add(line);
+            }
+
             for (int x = 0; x < game.Board.GetLength(0); x++)
             {
                 for (int y = 0; y < game.Board.GetLength(1); y++)
@@ -576,43 +614,52 @@ namespace Chess
 
         private async void Window_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (game.GameOver)
-            {
-                return;
-            }
             Point mousePos = Mouse.GetPosition(chessGameCanvas);
-
-            // If a piece is selected, try to move it
-            if (grabbedPiece is not null && highlightGrabbedMoves)
+            if (e.ChangedButton == MouseButton.Left)
             {
-                System.Drawing.Point destination = GetCoordFromCanvasPoint(mousePos);
-                bool success = game.MovePiece(grabbedPiece.Position, destination,
-                    promotionType: config.AutoQueen ? typeof(Pieces.Queen) : null);
-                if (success)
+                squareHighlights.Clear();
+                lineHighlights.Clear();
+                if (game.GameOver)
                 {
-                    highlightGrabbedMoves = false;
-                    grabbedPiece = null;
-                    currentBestMove = null;
-                    UpdateCursor();
-                    UpdateGameDisplay();
-                    movesScroll.ScrollToBottom();
-                    PushEndgameMessage();
-                    await CheckComputerMove();
                     return;
                 }
-            }
 
-            highlightGrabbedMoves = false;
-            Pieces.Piece? toCheck = GetPieceAtCanvasPoint(mousePos);
-            if (toCheck is not null)
-            {
-                if ((toCheck.IsWhite && game.CurrentTurnWhite && !whiteIsComputer)
-                    || (!toCheck.IsWhite && !game.CurrentTurnWhite && !blackIsComputer))
+                // If a piece is selected, try to move it
+                if (grabbedPiece is not null && highlightGrabbedMoves)
                 {
-                    grabbedPiece = toCheck;
-                    manuallyEvaluating = false;
-                    cancelMoveComputation.Cancel();
-                    cancelMoveComputation = new CancellationTokenSource();
+                    System.Drawing.Point destination = GetCoordFromCanvasPoint(mousePos);
+                    bool success = game.MovePiece(grabbedPiece.Position, destination,
+                        promotionType: config.AutoQueen ? typeof(Pieces.Queen) : null);
+                    if (success)
+                    {
+                        highlightGrabbedMoves = false;
+                        grabbedPiece = null;
+                        currentBestMove = null;
+                        UpdateCursor();
+                        UpdateGameDisplay();
+                        movesScroll.ScrollToBottom();
+                        PushEndgameMessage();
+                        await CheckComputerMove();
+                        return;
+                    }
+                }
+
+                highlightGrabbedMoves = false;
+                Pieces.Piece? toCheck = GetPieceAtCanvasPoint(mousePos);
+                if (toCheck is not null)
+                {
+                    if ((toCheck.IsWhite && game.CurrentTurnWhite && !whiteIsComputer)
+                        || (!toCheck.IsWhite && !game.CurrentTurnWhite && !blackIsComputer))
+                    {
+                        grabbedPiece = toCheck;
+                        manuallyEvaluating = false;
+                        cancelMoveComputation.Cancel();
+                        cancelMoveComputation = new CancellationTokenSource();
+                    }
+                    else
+                    {
+                        grabbedPiece = null;
+                    }
                 }
                 else
                 {
@@ -621,7 +668,7 @@ namespace Chess
             }
             else
             {
-                grabbedPiece = null;
+                mouseDownStartPoint = GetCoordFromCanvasPoint(mousePos);
             }
             UpdateGameDisplay();
             UpdateCursor();
@@ -629,37 +676,59 @@ namespace Chess
 
         private async void Window_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (game.GameOver)
+            if (e.ChangedButton == MouseButton.Left)
             {
-                return;
-            }
-            if (grabbedPiece is not null)
-            {
-                System.Drawing.Point destination = GetCoordFromCanvasPoint(Mouse.GetPosition(chessGameCanvas));
-                if (destination == grabbedPiece.Position)
+                if (game.GameOver)
                 {
-                    highlightGrabbedMoves = true;
-                    UpdateCursor();
-                    UpdateGameDisplay();
                     return;
                 }
-                bool success = game.MovePiece(grabbedPiece.Position, destination,
-                    promotionType: config.AutoQueen ? typeof(Pieces.Queen) : null);
-                if (success)
+                if (grabbedPiece is not null)
                 {
-                    grabbedPiece = null;
-                    highlightGrabbedMoves = false;
-                    currentBestMove = null;
-                    UpdateCursor();
-                    UpdateGameDisplay();
-                    movesScroll.ScrollToBottom();
-                    PushEndgameMessage();
-                    await CheckComputerMove();
-                    return;
+                    System.Drawing.Point destination = GetCoordFromCanvasPoint(Mouse.GetPosition(chessGameCanvas));
+                    if (destination == grabbedPiece.Position)
+                    {
+                        highlightGrabbedMoves = true;
+                        UpdateCursor();
+                        UpdateGameDisplay();
+                        return;
+                    }
+                    bool success = game.MovePiece(grabbedPiece.Position, destination,
+                        promotionType: config.AutoQueen ? typeof(Pieces.Queen) : null);
+                    if (success)
+                    {
+                        grabbedPiece = null;
+                        highlightGrabbedMoves = false;
+                        currentBestMove = null;
+                        UpdateCursor();
+                        UpdateGameDisplay();
+                        movesScroll.ScrollToBottom();
+                        PushEndgameMessage();
+                        await CheckComputerMove();
+                        return;
+                    }
+                    else
+                    {
+                        highlightGrabbedMoves = true;
+                    }
+                }
+            }
+            else
+            {
+                Point mousePos = Mouse.GetPosition(chessGameCanvas);
+                System.Drawing.Point onSquare = GetCoordFromCanvasPoint(mousePos);
+                if (mouseDownStartPoint is null || mouseDownStartPoint == onSquare)
+                {
+                    if (!squareHighlights.Add(onSquare))
+                    {
+                        _ = squareHighlights.Remove(onSquare);
+                    }
                 }
                 else
                 {
-                    highlightGrabbedMoves = true;
+                    if (!lineHighlights.Add((mouseDownStartPoint.Value, onSquare)))
+                    {
+                        _ = lineHighlights.Remove((mouseDownStartPoint.Value, onSquare));
+                    }
                 }
             }
             UpdateCursor();
