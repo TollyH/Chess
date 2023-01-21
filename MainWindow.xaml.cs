@@ -675,6 +675,11 @@ namespace Chess
             }
             else
             {
+                if (mousePos.X < 0 || mousePos.Y < 0
+                || mousePos.X > chessGameCanvas.ActualWidth || mousePos.Y > chessGameCanvas.ActualHeight)
+                {
+                    return;
+                }
                 mouseDownStartPoint = GetCoordFromCanvasPoint(mousePos);
             }
             UpdateGameDisplay();
@@ -722,6 +727,11 @@ namespace Chess
             else
             {
                 Point mousePos = Mouse.GetPosition(chessGameCanvas);
+                if (mousePos.X < 0 || mousePos.Y < 0
+                || mousePos.X > chessGameCanvas.ActualWidth || mousePos.Y > chessGameCanvas.ActualHeight)
+                {
+                    return;
+                }
                 System.Drawing.Point onSquare = GetCoordFromCanvasPoint(mousePos);
                 if (mouseDownStartPoint is null || mouseDownStartPoint == onSquare)
                 {
