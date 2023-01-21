@@ -32,6 +32,7 @@
                 <MenuItem x:Name="autoQueenItem" Header="Automatically Promote Pawns to _Queen" Click="SettingsCheckItem_Click" IsCheckable="True"/>
                 <MenuItem x:Name="moveListSymbolsItem" Header="Use Piece _Symbols on the Move List" Click="SettingsCheckItem_Click" IsCheckable="True"/>
                 <MenuItem x:Name="flipBoardItem" Header="_Flip the Board on Black's Turn" Click="SettingsCheckItem_Click" IsCheckable="True"/>
+                <MenuItem x:Name="updateEvalAfterBotItem" Header="Update _Evaluation Meter Automatically After Computer Move" Click="SettingsCheckItem_Click" IsCheckable="True"/>
                 <Separator/>
                 <MenuItem x:Name="externalEngineWhiteItem" Header="Use External Engine Executable for _White" Click="SettingsCheckItem_Click" IsCheckable="True"/>
                 <MenuItem x:Name="externalEngineBlackItem" Header="Use External Engine Executable for _Black" Click="SettingsCheckItem_Click" IsCheckable="True"/>

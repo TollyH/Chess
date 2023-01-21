@@ -10,6 +10,7 @@ namespace Chess
         public bool AutoQueen { get; set; }
         public bool UseSymbolsOnMoveList { get; set; }
         public bool FlipBoard { get; set; }
+        public bool UpdateEvalAfterBot { get; set; }
         public bool ExternalEngineWhite { get; set; }
         public bool ExternalEngineBlack { get; set; }
         public uint ExternalEngineWhiteDepth { get; set; }
@@ -35,6 +36,7 @@ namespace Chess
             AutoQueen = false;
             UseSymbolsOnMoveList = false;
             FlipBoard = false;
+            UpdateEvalAfterBot = true;
             ExternalEngineWhite = false;
             ExternalEngineBlack = false;
             ExternalEngineWhiteDepth = 24;
@@ -57,7 +59,7 @@ namespace Chess
         }
 
         [JsonConstructor]
-        public Settings(bool autoQueen, bool useSymbolsOnMoveList, bool flipBoard, bool externalEngineWhite, bool externalEngineBlack,
+        public Settings(bool autoQueen, bool useSymbolsOnMoveList, bool flipBoard, bool externalEngineWhite, bool externalEngineBlack, bool updateEvalAfterBot,
             uint externalEngineWhiteDepth, uint externalEngineBlackDepth, Color lightSquareColor, Color darkSquareColor, Color defaultPieceColor,
             Color checkedKingColor, Color selectedPieceColor, Color checkMateHighlightColor, Color lastMoveSourceColor, Color lastMoveDestinationColor,
             Color bestMoveSourceColor, Color bestMoveDestinationColor, Color availableMoveColor, Color availableCaptureColor, Color availableEnPassantColor,
@@ -66,6 +68,7 @@ namespace Chess
             AutoQueen = autoQueen;
             UseSymbolsOnMoveList = useSymbolsOnMoveList;
             FlipBoard = flipBoard;
+            UpdateEvalAfterBot = updateEvalAfterBot;
             ExternalEngineWhite = externalEngineWhite;
             ExternalEngineBlack = externalEngineBlack;
             ExternalEngineWhiteDepth = externalEngineWhiteDepth;

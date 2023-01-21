@@ -78,6 +78,7 @@ namespace Chess
             autoQueenItem.IsChecked = config.AutoQueen;
             moveListSymbolsItem.IsChecked = config.UseSymbolsOnMoveList;
             flipBoardItem.IsChecked = config.FlipBoard;
+            updateEvalAfterBotItem.IsChecked = config.UpdateEvalAfterBot;
             externalEngineWhiteItem.IsChecked = config.ExternalEngineWhite;
             externalEngineBlackItem.IsChecked = config.ExternalEngineBlack;
             whiteDepthItem.Value = config.ExternalEngineWhiteDepth;
@@ -538,7 +539,10 @@ namespace Chess
             while (!game.GameOver && ((game.CurrentTurnWhite && whiteIsComputer) || (!game.CurrentTurnWhite && blackIsComputer)))
             {
                 CancellationToken cancellationToken = cancelMoveComputation.Token;
-                UpdateEvaluationMeter(null, game.CurrentTurnWhite);
+                if (config.UpdateEvalAfterBot)
+                {
+                    UpdateEvaluationMeter(null, game.CurrentTurnWhite);
+                }
                 BoardAnalysis.PossibleMove bestMove = await GetEngineMove(cancellationToken);
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -548,8 +552,11 @@ namespace Chess
                 _ = game.MovePiece(bestMove.Source, bestMove.Destination, true, promotionType: bestMove.PromotionType);
                 UpdateGameDisplay();
                 movesScroll.ScrollToBottom();
-                // Turn has been inverted already but we have value for the now old turn
-                UpdateEvaluationMeter(bestMove, !game.CurrentTurnWhite);
+                if (config.UpdateEvalAfterBot)
+                {
+                    // Turn has been inverted already but we have value for the now old turn
+                    UpdateEvaluationMeter(bestMove, !game.CurrentTurnWhite);
+                }
                 PushEndgameMessage();
             }
         }
@@ -844,6 +851,7 @@ namespace Chess
             config.AutoQueen = autoQueenItem.IsChecked;
             config.UseSymbolsOnMoveList = moveListSymbolsItem.IsChecked;
             config.FlipBoard = flipBoardItem.IsChecked;
+            config.UpdateEvalAfterBot = updateEvalAfterBotItem.IsChecked;
             config.ExternalEngineWhite = externalEngineWhiteItem.IsChecked;
             config.ExternalEngineBlack = externalEngineBlackItem.IsChecked;
 
