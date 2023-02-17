@@ -106,7 +106,7 @@ namespace Chess
 
             if (blackKing is null || blackKing.Position != new System.Drawing.Point(4, 7))
             {
-                castleWhiteKingside.IsChecked = false;
+                castleBlackKingside.IsChecked = false;
                 castleBlackKingside.IsEnabled = false;
                 castleBlackQueenside.IsChecked = false;
                 castleBlackQueenside.IsEnabled = false;
