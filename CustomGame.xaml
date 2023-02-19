@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Chess"
         mc:Ignorable="d"
-        Title="Custom Game Setup" Width="720" Height="510" MouseUp="Window_MouseUp" Loaded="Window_Loaded" WindowStyle="ToolWindow">
+        Title="Custom Game Setup" Width="720" Height="510" MouseUp="Window_MouseUp" Loaded="Window_Loaded" WindowStyle="ToolWindow" SizeChanged="Window_SizeChanged">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>

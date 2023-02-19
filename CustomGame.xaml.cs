@@ -260,5 +260,10 @@ namespace Chess
         {
             importOverlay.Visibility = Visibility.Hidden;
         }
+
+        private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            UpdateBoard();
+        }
     }
 }
