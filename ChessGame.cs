@@ -275,7 +275,7 @@ namespace Chess
             }
 
             bool pieceMoved;
-            int homeY = CurrentTurnWhite ? 0 : 7;
+            int homeY = CurrentTurnWhite ? 0 : Board.GetLength(1) - 1;
             if (piece is Pieces.King && source.X == 4 && destination.Y == homeY
                 && ((destination.X == 6 && (forceMove || IsCastlePossible(true)))
                     || (destination.X == 2 && (forceMove || IsCastlePossible(false)))))
@@ -284,7 +284,7 @@ namespace Chess
                 pieceMoved = true;
                 _ = piece.Move(Board, destination, true);
 
-                int rookXPos = destination.X == 2 ? 0 : 7;
+                int rookXPos = destination.X == 2 ? 0 : Board.GetLength(0) - 1;
                 int newRookXPos = destination.X == 2 ? 3 : 5;
                 _ = Board[rookXPos, homeY]!.Move(Board, new Point(newRookXPos, homeY), true);
                 Board[newRookXPos, homeY] = Board[rookXPos, homeY];
@@ -345,7 +345,7 @@ namespace Chess
                     {
                         EnPassantSquare = new Point(source.X, source.Y + (piece.IsWhite ? 1 : -1));
                     }
-                    if (destination.Y == (piece.IsWhite ? 7 : 0))
+                    if (destination.Y == (piece.IsWhite ? Board.GetLength(1) - 1 : 0))
                     {
                         if (promotionType is not null)
                         {
@@ -427,7 +427,7 @@ namespace Chess
                         {
                             newMove = source.ToChessCoordinate()[0] + "x" + newMove;
                         }
-                        if (destination.Y == (piece.IsWhite ? 7 : 0))
+                        if (destination.Y == (piece.IsWhite ? Board.GetLength(1) - 1 : 0))
                         {
                             newMove += "=" + piece.SymbolLetter;
                         }

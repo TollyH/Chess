@@ -203,7 +203,7 @@ namespace Chess
         /// </remarks>
         public static bool IsCastlePossible(Pieces.Piece?[,] board, bool currentTurnWhite, bool kingside)
         {
-            int yPos = currentTurnWhite ? 0 : 7;
+            int yPos = currentTurnWhite ? 0 : board.GetLength(1) - 1;
             if (IsKingReachable(board, currentTurnWhite, new Point(4, yPos)))
             {
                 return false;
@@ -442,7 +442,7 @@ namespace Chess
 
             if (piece is Pieces.King)
             {
-                int homeY = game.CurrentTurnWhite ? 0 : 7;
+                int homeY = game.CurrentTurnWhite ? 0 : game.Board.GetLength(1) - 1;
                 if (game.IsCastlePossible(true))
                 {
                     _ = allValidMoves.Add(new Point(6, homeY));
