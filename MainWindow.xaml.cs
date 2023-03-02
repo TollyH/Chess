@@ -899,6 +899,22 @@ namespace Chess
             UpdateGameDisplay();
         }
 
+        private async void UndoMove_Click(object sender, RoutedEventArgs e)
+        {
+            if (game.PreviousGameState is not null
+                && ((game.CurrentTurnWhite && !whiteIsComputer) || (!game.CurrentTurnWhite && !blackIsComputer)))
+            {
+                game = game.PreviousGameState;
+                if (whiteIsComputer ||  blackIsComputer)
+                {
+                    // Reverse two moves if the opponent is computer controlled
+                    game = game.PreviousGameState!;
+                }
+                UpdateGameDisplay();
+                await CheckComputerMove();
+            }
+        }
+
         private void whiteDepthBackingSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (!updateDepthSliders)

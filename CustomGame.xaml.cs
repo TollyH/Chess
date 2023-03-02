@@ -145,7 +145,7 @@ namespace Chess
                 ChessGame.EndingStates.Contains(BoardAnalysis.DetermineGameState(Board, currentTurnWhite)),
                 new(), currentTurnWhite ? new() : new() { "..." }, new(), EnPassantSquare, castleWhiteKingside.IsChecked ?? false,
                 castleWhiteQueenside.IsChecked ?? false, castleBlackKingside.IsChecked ?? false,
-                castleBlackQueenside.IsChecked ?? false, 0, new(), null);
+                castleBlackQueenside.IsChecked ?? false, 0, new(), null, null);
             Close();
         }
 

@@ -23,6 +23,8 @@
                 <MenuItem Header="New Game (1 Player - _Black)" Click="NewGameCpuBlack_Click"/>
                 <MenuItem Header="New Game (0 Player - _Computer Only)" Click="NewGameCpuOnly_Click"/>
                 <Separator/>
+                <MenuItem Header="_Undo Move" Click="UndoMove_Click"/>
+                <Separator/>
                 <MenuItem Header="Custom _Game..." Click="CustomGame_Click"/>
                 <Separator/>
                 <MenuItem Header="Export to _PGN" Click="PGNExport_Click"/>

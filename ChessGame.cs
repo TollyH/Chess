@@ -51,6 +51,7 @@ namespace Chess
         /// </summary>
         public List<(Point, Point)> Moves { get; }
         public List<string> MoveText { get; }
+        public ChessGame? PreviousGameState { get; private set; }
         public List<Pieces.Piece> CapturedPieces { get; }
 
         public Point? EnPassantSquare { get; private set; }
@@ -110,7 +111,7 @@ namespace Chess
         public ChessGame(Pieces.Piece?[,] board, bool currentTurnWhite, bool gameOver, List<(Point, Point)> moves, List<string> moveText,
             List<Pieces.Piece> capturedPieces, Point? enPassantSquare, bool whiteMayCastleKingside, bool whiteMayCastleQueenside,
             bool blackMayCastleKingside, bool blackMayCastleQueenside, int staleMoveCounter, Dictionary<string, int> boardCounts,
-            string? initialState)
+            string? initialState, ChessGame? previousGameState)
         {
             if (board.GetLength(0) != 8 || board.GetLength(1) != 8)
             {
@@ -148,6 +149,7 @@ namespace Chess
             BoardCounts = boardCounts;
 
             InitialState = initialState ?? ToString();
+            PreviousGameState = previousGameState;
         }
 
         /// <summary>
@@ -167,7 +169,7 @@ namespace Chess
             return new ChessGame(boardClone, CurrentTurnWhite, GameOver, new(Moves), new(MoveText),
                 CapturedPieces.Select(c => c.Clone()).ToList(), EnPassantSquare, WhiteMayCastleKingside,
                 WhiteMayCastleQueenside, BlackMayCastleKingside, BlackMayCastleQueenside, StaleMoveCounter,
-                new(BoardCounts), InitialState);
+                new(BoardCounts), InitialState, PreviousGameState?.Clone());
         }
 
         /// <summary>
@@ -245,7 +247,7 @@ namespace Chess
         /// If a pawn is promoted, what <see cref="Pieces.Piece"/> should it be promoted to. <see langword="null"/> means the user should be prompted for the type.
         /// </param>
         /// <param name="updateMoveText">
-        /// Whether the move should update the game move text. This should usually be <see langword="true"/>,
+        /// Whether the move should update the game move text and update <see cref="PreviousGameState"/>. This should usually be <see langword="true"/>,
         /// but may be set to <see langword="false"/> for performance optimisations in clone games for analysis.
         /// </param>
         /// <returns><see langword="true"/> if the move was valid and executed, <see langword="false"/> otherwise</returns>
@@ -267,11 +269,12 @@ namespace Chess
                 return false;
             }
 
-            // Used for generating new move text
+            // Used for generating new move text and move undoing
             ChessGame? oldGame = null;
             if (updateMoveText)
             {
                 oldGame = Clone();
+                PreviousGameState = oldGame;
             }
 
             bool pieceMoved;
@@ -750,7 +753,7 @@ namespace Chess
             // For the PGN standard, if black moves first then a single move "..." is added to the start of the move text list
             return new ChessGame(board, currentTurnWhite, EndingStates.Contains(BoardAnalysis.DetermineGameState(board, currentTurnWhite)),
                 new(), currentTurnWhite ? new() : new() { "..." }, new(), enPassant, whiteKingside, whiteQueenside, blackKingside, blackQueenside,
-                staleMoves, new(), null);
+                staleMoves, new(), null, null);
         }
     }
 }
