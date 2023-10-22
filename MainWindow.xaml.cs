@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -207,11 +208,16 @@ namespace Chess
                             .Replace('B', '♝').Replace('N', '♞');
                     }
                 }
-                _ = movesPanel.Children.Add(new Label()
+
+                Label label = new Label()
                 {
                     Content = text,
                     FontSize = 18
-                });
+                };
+
+                label.SetValue(AutomationProperties.AutomationIdProperty, "MainWindow_GameMove_Text");
+
+                _ = movesPanel.Children.Add(label);
             }
 
             GameState state = game.DetermineGameState();

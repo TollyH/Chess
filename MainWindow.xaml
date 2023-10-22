@@ -16,19 +16,21 @@
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="210px"/>
         </Grid.ColumnDefinitions>
-        <Menu Grid.ColumnSpan="2">
+        <Menu Grid.ColumnSpan="2" 
+            AutomationProperties.AutomationId="MainWindow_ApplicationCommands_Menu"
+            AutomationProperties.Name="Application Commands">
             <MenuItem Header="_Game" Margin="2">
-                <MenuItem Header="_New Game (2 Players)" Click="NewGame_Click"/>
-                <MenuItem Header="New Game (1 Player - _White)" Click="NewGameCpuWhite_Click"/>
-                <MenuItem Header="New Game (1 Player - _Black)" Click="NewGameCpuBlack_Click"/>
-                <MenuItem Header="New Game (0 Player - _Computer Only)" Click="NewGameCpuOnly_Click"/>
+                <MenuItem Header="_New Game (2 Players)" Click="NewGame_Click" AutomationProperties.AutomationId="MainWindow_NewGameTwoPlayersCommand_MenuItem"/>
+                <MenuItem Header="New Game (1 Player - _White)" Click="NewGameCpuWhite_Click" AutomationProperties.AutomationId="MainWindow_NewGameOnePlayerWhiteCommand_MenuItem"/>
+                <MenuItem Header="New Game (1 Player - _Black)" Click="NewGameCpuBlack_Click" AutomationProperties.AutomationId="MainWindow_NewGameOnePlayerBlackCommand_MenuItem"/>
+                <MenuItem Header="New Game (0 Player - _Computer Only)" Click="NewGameCpuOnly_Click" AutomationProperties.AutomationId="MainWindow_NewGameComputerOnlyCommand_MenuItem"/>
                 <Separator/>
-                <MenuItem Header="_Undo Move" Click="UndoMove_Click"/>
+                <MenuItem Header="_Undo Move" Click="UndoMove_Click" AutomationProperties.AutomationId="MainWindow_UndoMoveCommand_MenuItem"/>
                 <Separator/>
-                <MenuItem Header="Custom _Game..." Click="CustomGame_Click"/>
+                <MenuItem Header="Custom _Game..." Click="CustomGame_Click" AutomationProperties.AutomationId="MainWindow_CustomGameCommand_MenuItem"/>
                 <Separator/>
-                <MenuItem Header="Export to _PGN" Click="PGNExport_Click"/>
-                <MenuItem Header="Copy _FEN to Clipboard" Click="FENCopy_Click"/>
+                <MenuItem Header="Export to _PGN" Click="PGNExport_Click" AutomationProperties.AutomationId="MainWindow_ExportToPGNCommand_MenuItem"/>
+                <MenuItem Header="Copy _FEN to Clipboard" Click="FENCopy_Click" AutomationProperties.AutomationId="MainWindow_CopyFENCommand_MenuItem"/>
             </MenuItem>
             <MenuItem Header="_Settings" Margin="2">
                 <MenuItem x:Name="autoQueenItem" Header="Automatically Promote Pawns to _Queen" Click="SettingsCheckItem_Click" IsCheckable="True"/>
@@ -69,7 +71,7 @@
                     </sm:SliderMenuItem>
                 </MenuItem>
                 <Separator/>
-                <MenuItem Header="Customise..." Click="CustomiseItem_Click"/>
+                <MenuItem Header="Customise..." Click="CustomiseItem_Click" AutomationProperties.AutomationId="MainWindow_CustomizeCommand_MenuItem"/>
             </MenuItem>
         </Menu>
         <!-- Because SliderMenuItem lacks a ValueChanged event, bind its value to invisible Slider so we can listen to its ValueChanged event -->
@@ -88,106 +90,106 @@
             </Grid.RowDefinitions>
             <DockPanel x:Name="filesTop" Grid.Column="1" Grid.Row="0">
                 <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
-                    <Label Content="a"/>
+                    <Label Content="a" AutomationProperties.AutomationId="MainWindow_File_Text"/>
                 </Viewbox>
                 <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
-                    <Label Content="b"/>
+                    <Label Content="b" AutomationProperties.AutomationId="MainWindow_File_Text"/>
                 </Viewbox>
                 <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
-                    <Label Content="c"/>
+                    <Label Content="c" AutomationProperties.AutomationId="MainWindow_File_Text"/>
                 </Viewbox>
                 <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
-                    <Label Content="d"/>
+                    <Label Content="d" AutomationProperties.AutomationId="MainWindow_File_Text"/>
                 </Viewbox>
                 <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
-                    <Label Content="e"/>
+                    <Label Content="e" AutomationProperties.AutomationId="MainWindow_File_Text"/>
                 </Viewbox>
                 <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
-                    <Label Content="f"/>
+                    <Label Content="f" AutomationProperties.AutomationId="MainWindow_File_Text"/>
                 </Viewbox>
                 <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
-                    <Label Content="g"/>
+                    <Label Content="g" AutomationProperties.AutomationId="MainWindow_File_Text"/>
                 </Viewbox>
                 <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
-                    <Label Content="h"/>
+                    <Label Content="h" AutomationProperties.AutomationId="MainWindow_File_Text"/>
                 </Viewbox>
             </DockPanel>
             <DockPanel x:Name="ranksLeft" Grid.Column="0" Grid.Row="1">
                 <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}" DockPanel.Dock="Top">
-                    <Label Content="8"/>
+                    <Label Content="8" AutomationProperties.AutomationId="MainWindow_Rank_Text"/>
                 </Viewbox>
                 <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}" DockPanel.Dock="Top">
-                    <Label Content="7"/>
+                    <Label Content="7" AutomationProperties.AutomationId="MainWindow_Rank_Text"/>
                 </Viewbox>
                 <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}" DockPanel.Dock="Top">
-                    <Label Content="6"/>
+                    <Label Content="6" AutomationProperties.AutomationId="MainWindow_Rank_Text"/>
                 </Viewbox>
                 <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}" DockPanel.Dock="Top">
-                    <Label Content="5"/>
+                    <Label Content="5" AutomationProperties.AutomationId="MainWindow_Rank_Text"/>
                 </Viewbox>
                 <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}" DockPanel.Dock="Top">
-                    <Label Content="4"/>
+                    <Label Content="4" AutomationProperties.AutomationId="MainWindow_Rank_Text"/>
                 </Viewbox>
                 <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}" DockPanel.Dock="Top">
-                    <Label Content="3"/>
+                    <Label Content="3" AutomationProperties.AutomationId="MainWindow_Rank_Text"/>
                 </Viewbox>
                 <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}" DockPanel.Dock="Top">
-                    <Label Content="2"/>
+                    <Label Content="2" AutomationProperties.AutomationId="MainWindow_Rank_Text"/>
                 </Viewbox>
                 <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}" DockPanel.Dock="Top">
-                    <Label Content="1"/>
+                    <Label Content="1" AutomationProperties.AutomationId="MainWindow_Rank_Text"/>
                 </Viewbox>
             </DockPanel>
             <DockPanel x:Name="filesBottom" Grid.Column="1" Grid.Row="2">
                 <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
-                    <Label Content="a"/>
+                    <Label Content="a" AutomationProperties.AutomationId="MainWindow_File_Text"/>
                 </Viewbox>
                 <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
-                    <Label Content="b"/>
+                    <Label Content="b" AutomationProperties.AutomationId="MainWindow_File_Text"/>
                 </Viewbox>
                 <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
-                    <Label Content="c"/>
+                    <Label Content="c" AutomationProperties.AutomationId="MainWindow_File_Text"/>
                 </Viewbox>
                 <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
-                    <Label Content="d"/>
+                    <Label Content="d" AutomationProperties.AutomationId="MainWindow_File_Text"/>
                 </Viewbox>
                 <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
-                    <Label Content="e"/>
+                    <Label Content="e" AutomationProperties.AutomationId="MainWindow_File_Text"/>
                 </Viewbox>
                 <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
-                    <Label Content="f"/>
+                    <Label Content="f" AutomationProperties.AutomationId="MainWindow_File_Text"/>
                 </Viewbox>
                 <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
-                    <Label Content="g"/>
+                    <Label Content="g" AutomationProperties.AutomationId="MainWindow_File_Text"/>
                 </Viewbox>
                 <Viewbox Width="{Binding ActualWidth, ElementName=rectSizeReference, Mode=OneWay}">
-                    <Label Content="h"/>
+                    <Label Content="h" AutomationProperties.AutomationId="MainWindow_File_Text"/>
                 </Viewbox>
             </DockPanel>
             <DockPanel x:Name="ranksRight" Grid.Column="2" Grid.Row="1">
                 <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}" DockPanel.Dock="Top">
-                    <Label Content="8"/>
+                    <Label Content="8" AutomationProperties.AutomationId="MainWindow_Rank_Text"/>
                 </Viewbox>
                 <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}" DockPanel.Dock="Top">
-                    <Label Content="7"/>
+                    <Label Content="7" AutomationProperties.AutomationId="MainWindow_Rank_Text"/>
                 </Viewbox>
                 <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}" DockPanel.Dock="Top">
-                    <Label Content="6"/>
+                    <Label Content="6" AutomationProperties.AutomationId="MainWindow_Rank_Text"/>
                 </Viewbox>
                 <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}" DockPanel.Dock="Top">
-                    <Label Content="5"/>
+                    <Label Content="5" AutomationProperties.AutomationId="MainWindow_Rank_Text"/>
                 </Viewbox>
                 <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}" DockPanel.Dock="Top">
-                    <Label Content="4"/>
+                    <Label Content="4" AutomationProperties.AutomationId="MainWindow_Rank_Text"/>
                 </Viewbox>
                 <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}" DockPanel.Dock="Top">
-                    <Label Content="3"/>
+                    <Label Content="3" AutomationProperties.AutomationId="MainWindow_Rank_Text"/>
                 </Viewbox>
                 <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}" DockPanel.Dock="Top">
-                    <Label Content="2"/>
+                    <Label Content="2" AutomationProperties.AutomationId="MainWindow_Rank_Text"/>
                 </Viewbox>
                 <Viewbox Height="{Binding ActualHeight, ElementName=rectSizeReference, Mode=OneWay}" DockPanel.Dock="Top">
-                    <Label Content="1"/>
+                    <Label Content="1" AutomationProperties.AutomationId="MainWindow_Rank_Text"/>
                 </Viewbox>
             </DockPanel>
             <Viewbox x:Name="whiteEvaluationView" Grid.Column="0" Grid.Row="2">
@@ -261,7 +263,9 @@
             <Canvas Grid.Column="1" Grid.Row="1" x:Name="chessGameCanvas" Margin="1"/>
         </Grid>
         <Border Grid.Row="1" Grid.Column="1" BorderBrush="Black" BorderThickness="1,0,0,0" ScrollViewer.HorizontalScrollBarVisibility="Auto">
-            <ScrollViewer x:Name="movesScroll">
+            <ScrollViewer x:Name="movesScroll" 
+                AutomationProperties.AutomationId="MainWindow_GameMoves_ScrollViewer"
+                AutomationProperties.Name="Game Moves">
                 <StackPanel x:Name="movesPanel"/>
             </ScrollViewer>
         </Border>
