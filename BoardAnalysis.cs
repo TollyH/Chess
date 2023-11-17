@@ -398,7 +398,7 @@ namespace Chess
                         remainingThreads++;
                         Point thisPosition = piece.Position;
                         Point thisValidMove = validMove;
-                        ChessGame gameClone = game.Clone();
+                        ChessGame gameClone = game.Clone(false);
                         List<(Point, Point, Type)> thisLine = new() { (piece.Position, validMove, typeof(Pieces.Queen)) };
                         _ = gameClone.MovePiece(piece.Position, validMove, true,
                             promotionType: typeof(Pieces.Queen), updateMoveText: false);
@@ -506,7 +506,7 @@ namespace Chess
 
                     foreach (Point validMove in GetValidMovesForEval(game, piece))
                     {
-                        ChessGame gameClone = game.Clone();
+                        ChessGame gameClone = game.Clone(false);
                         List<(Point, Point, Type)> newLine = new(currentLine) { (piece.Position, validMove, typeof(Pieces.Queen)) };
                         _ = gameClone.MovePiece(piece.Position, validMove, true,
                             promotionType: typeof(Pieces.Queen), updateMoveText: false);

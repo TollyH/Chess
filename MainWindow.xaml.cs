@@ -505,7 +505,7 @@ namespace Chess
             }
 
             string convertedBestLine = "";
-            ChessGame moveStringGenerator = game.Clone();
+            ChessGame moveStringGenerator = game.Clone(false);
             foreach ((System.Drawing.Point source, System.Drawing.Point destination, Type promotionType) in bestMove.Value.BestLine)
             {
                 _ = moveStringGenerator.MovePiece(source, destination, true, promotionType);

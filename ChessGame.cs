@@ -155,7 +155,7 @@ namespace Chess
         /// <summary>
         /// Create a deep copy of all parameters to this chess game
         /// </summary>
-        public ChessGame Clone()
+        public ChessGame Clone(bool clonePreviousState)
         {
             Pieces.Piece?[,] boardClone = new Pieces.Piece?[Board.GetLength(0), Board.GetLength(1)];
             for (int x = 0; x < boardClone.GetLength(0); x++)
@@ -169,7 +169,8 @@ namespace Chess
             return new ChessGame(boardClone, CurrentTurnWhite, GameOver, new(Moves), new(MoveText),
                 CapturedPieces.Select(c => c.Clone()).ToList(), EnPassantSquare, WhiteMayCastleKingside,
                 WhiteMayCastleQueenside, BlackMayCastleKingside, BlackMayCastleQueenside, StaleMoveCounter,
-                new(BoardCounts), InitialState, PreviousGameState?.Clone());
+                new(BoardCounts), InitialState,
+                clonePreviousState ? PreviousGameState?.Clone(true) : PreviousGameState);
         }
 
         /// <summary>
@@ -273,7 +274,7 @@ namespace Chess
             ChessGame? oldGame = null;
             if (updateMoveText)
             {
-                oldGame = Clone();
+                oldGame = Clone(true);
                 PreviousGameState = oldGame;
             }
 
