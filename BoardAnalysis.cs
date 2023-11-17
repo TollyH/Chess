@@ -417,6 +417,14 @@ namespace Chess
                             remainingThreads--;
                         });
                         processThread.Start();
+
+                        await Task.Run(async () =>
+                        {
+                            while (remainingThreads >= Environment.ProcessorCount || cancellationToken.IsCancellationRequested)
+                            {
+                                await Task.Delay(50);
+                            }
+                        }, cancellationToken);
                     }
                 }
             }
