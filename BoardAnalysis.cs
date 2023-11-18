@@ -416,8 +416,15 @@ namespace Chess
             {
                 return Array.Empty<PossibleMove>();
             }
-            // Remove default moves from return value
-            return (await Task.WhenAll(evaluationTasks)).Where(m => m.Source != m.Destination).ToArray();
+            try
+            {
+                // Remove default moves from return value
+                return (await Task.WhenAll(evaluationTasks)).Where(m => m.Source != m.Destination).ToArray();
+            }
+            catch (TaskCanceledException)
+            {
+                return Array.Empty<PossibleMove>();
+            }
         }
 
         private static HashSet<Point> GetValidMovesForEval(ChessGame game, Pieces.Piece piece)
