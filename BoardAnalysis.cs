@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -16,7 +15,7 @@ namespace Chess
         /// <param name="board">The state of the board to check</param>
         /// <param name="isWhite">Is the king to check white?</param>
         /// <param name="target">Override the position of the king to check</param>
-        /// <remarks><paramref name="target"/> should always be given if checking a not-yet-peformed king move, as the king's internally stored position will be incorrect.</remarks>
+        /// <remarks><paramref name="target"/> should always be given if checking a not-yet-performed king move, as the king's internally stored position will be incorrect.</remarks>
         public static bool IsKingReachable(Pieces.Piece?[,] board, bool isWhite, Point? target = null)
         {
             target ??= board.OfType<Pieces.King>().Where(x => x.IsWhite == isWhite).First().Position;
@@ -381,8 +380,7 @@ namespace Chess
         /// <returns>An array of all possible moves, with information on board value and ability to checkmate</returns>
         public static async Task<PossibleMove[]> EvaluatePossibleMoves(ChessGame game, int maxDepth, CancellationToken cancellationToken)
         {
-            ConcurrentBag<PossibleMove> possibleMoves = new();
-            int remainingThreads = 0;
+            List<Task<PossibleMove>> evaluationTasks = new();
 
             foreach (Pieces.Piece? piece in game.Board)
             {
@@ -395,53 +393,31 @@ namespace Chess
 
                     foreach (Point validMove in GetValidMovesForEval(game, piece))
                     {
-                        remainingThreads++;
-                        Point thisPosition = piece.Position;
-                        Point thisValidMove = validMove;
-                        ChessGame gameClone = game.Clone(false);
-                        List<(Point, Point, Type)> thisLine = new() { (piece.Position, validMove, typeof(Pieces.Queen)) };
-                        _ = gameClone.MovePiece(piece.Position, validMove, true,
-                            promotionType: typeof(Pieces.Queen), updateMoveText: false);
-
-                        Thread processThread = new(() =>
+                        Point thisMove = validMove;
+                        evaluationTasks.Add(Task.Run(() =>
                         {
+                            ChessGame gameClone = game.Clone(false);
+                            List<(Point, Point, Type)> thisLine = new() { (piece.Position, thisMove, typeof(Pieces.Queen)) };
+                            _ = gameClone.MovePiece(piece.Position, thisMove, true,
+                                promotionType: typeof(Pieces.Queen), updateMoveText: false);
+
                             PossibleMove bestSubMove = MinimaxMove(gameClone,
                                 double.NegativeInfinity, double.PositiveInfinity, 1, maxDepth, thisLine, cancellationToken);
-                            // Don't include default value in results
-                            if (bestSubMove.Source != bestSubMove.Destination)
-                            {
-                                possibleMoves.Add(new PossibleMove(thisPosition, thisValidMove, bestSubMove.EvaluatedFutureValue,
-                                    bestSubMove.WhiteMateLocated, bestSubMove.BlackMateLocated,
-                                    bestSubMove.DepthToWhiteMate, bestSubMove.DepthToBlackMate, typeof(Pieces.Queen), bestSubMove.BestLine));
-                            }
-                            remainingThreads--;
-                        });
-                        processThread.Start();
 
-                        await Task.Run(async () =>
-                        {
-                            while (remainingThreads >= Environment.ProcessorCount || cancellationToken.IsCancellationRequested)
-                            {
-                                await Task.Delay(50);
-                            }
-                        }, cancellationToken);
+                            return new PossibleMove(piece.Position, thisMove, bestSubMove.EvaluatedFutureValue,
+                                bestSubMove.WhiteMateLocated, bestSubMove.BlackMateLocated,
+                                bestSubMove.DepthToWhiteMate, bestSubMove.DepthToBlackMate, typeof(Pieces.Queen), bestSubMove.BestLine);
+                        }, cancellationToken));
                     }
                 }
             }
-
-            await Task.Run(async () =>
-            {
-                while (remainingThreads > 0 || cancellationToken.IsCancellationRequested)
-                {
-                    await Task.Delay(50);
-                }
-            }, cancellationToken);
 
             if (cancellationToken.IsCancellationRequested)
             {
                 return Array.Empty<PossibleMove>();
             }
-            return possibleMoves.ToArray();
+            // Remove default moves from return value
+            return (await Task.WhenAll(evaluationTasks)).Where(m => m.Source != m.Destination).ToArray();
         }
 
         private static HashSet<Point> GetValidMovesForEval(ChessGame game, Pieces.Piece piece)
