@@ -766,8 +766,8 @@ namespace Chess
 
         private async void evaluation_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (currentBestMove is not null || (game.CurrentTurnWhite && whiteIsComputer)
-                || (!game.CurrentTurnWhite && blackIsComputer))
+            if (currentBestMove is not null || game.GameOver
+                || (game.CurrentTurnWhite && whiteIsComputer) || (!game.CurrentTurnWhite && blackIsComputer))
             {
                 return;
             }
