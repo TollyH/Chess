@@ -910,6 +910,16 @@ namespace Chess
                     // Reverse two moves if the opponent is computer controlled
                     game = game.PreviousGameState!;
                 }
+
+                grabbedPiece = null;
+                highlightGrabbedMoves = false;
+                currentBestMove = null;
+                whiteEvaluation.Content = "?";
+                blackEvaluation.Content = "?";
+                manuallyEvaluating = false;
+                cancelMoveComputation.Cancel();
+                cancelMoveComputation = new CancellationTokenSource();
+
                 UpdateGameDisplay();
                 await CheckComputerMove();
             }
