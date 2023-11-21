@@ -530,7 +530,7 @@ namespace Chess
             {
                 return default;
             }
-            bestMove ??= await BoardAnalysis.EstimateBestPossibleMove(game, 4, cancellationToken);
+            bestMove ??= await BoardAnalysis.EstimateBestPossibleMove(game, 4, true, cancellationToken);
             return bestMove.Value;
         }
 
