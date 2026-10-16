@@ -402,7 +402,7 @@ namespace Chess
                         {
                             ChessGame gameClone = game.Clone(false);
                             List<(Point, Point, Type)> thisLine = new() { (piece.Position, thisMove, typeof(Pieces.Queen)) };
-                            _ = gameClone.MovePiece(piece.Position, thisMove, true,
+                            _ = gameClone.MovePiece(piece.Position, thisMove, forceMove: true,
                                 promotionType: typeof(Pieces.Queen), updateMoveText: false);
 
                             PossibleMove bestSubMove = MinimaxMove(gameClone,
@@ -509,7 +509,7 @@ namespace Chess
                     {
                         ChessGame gameClone = game.Clone(false);
                         List<(Point, Point, Type)> newLine = new(currentLine) { (piece.Position, validMove, typeof(Pieces.Queen)) };
-                        _ = gameClone.MovePiece(piece.Position, validMove, true,
+                        _ = gameClone.MovePiece(piece.Position, validMove, forceMove: true,
                             promotionType: typeof(Pieces.Queen), updateMoveText: false);
                         PossibleMove potentialMove = MinimaxMove(gameClone, alpha, beta, depth + 1, maxDepth, newLine, cancellationToken);
                         if (cancellationToken.IsCancellationRequested)

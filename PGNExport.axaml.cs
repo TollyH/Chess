@@ -1,7 +1,11 @@
 ﻿using Microsoft.Win32;
 using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Windows;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Interactivity;
+using Avalonia.Platform.Storage;
 
 namespace Chess
 {
@@ -35,25 +39,26 @@ namespace Chess
             }
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private async void Button_Click(object sender, RoutedEventArgs e)
         {
-            SaveFileDialog saveDialog = new()
+            IStorageFile? file = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions()
             {
-                AddExtension = true,
-                DefaultExt = ".pgn",
-                Filter = "Portable Game Notation|*.pgn",
-                CheckPathExists = true
-            };
-            if (!saveDialog.ShowDialog() ?? true)
+                DefaultExtension = ".pgn",
+                FileTypeChoices = new List<FilePickerFileType>()
+                {
+                    new("Portable Game Notation") { Patterns = new List<string>() { "*.pgn"} }
+                }
+            });
+            if (file is null)
             {
                 return;
             }
-            string eventName = eventNameBox.Text.Trim();
-            string locationName = locationNameBox.Text.Trim();
-            DateOnly? date = dateBox.SelectedDate is null ? null : DateOnly.FromDateTime(dateBox.SelectedDate.Value);
-            string whiteName = whiteNameBox.Text.Trim();
-            string blackName = blackNameBox.Text.Trim();
-            File.WriteAllText(saveDialog.FileName, game.ToPGN(eventName != "" ? eventName : null,
+            string eventName = eventNameBox.Text?.Trim() ?? "";
+            string locationName = locationNameBox.Text?.Trim() ?? "";
+            DateOnly? date = dateBox.SelectedDate is null ? null : DateOnly.FromDateTime(dateBox.SelectedDate.Value.DateTime);
+            string whiteName = whiteNameBox.Text?.Trim() ?? "";
+            string blackName = blackNameBox.Text?.Trim() ?? "";
+            File.WriteAllText(file.Path.LocalPath, game.ToPGN(eventName != "" ? eventName : null,
                 locationName != "" ? locationName : null, date, whiteName != "" ? whiteName : "Player",
                 blackName != "" ? blackName : "Player", whiteIsComputer, blackIsComputer));
             Close();

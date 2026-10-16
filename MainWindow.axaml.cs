@@ -6,11 +6,15 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Shapes;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Shapes;
+using Avalonia.Input;
+using Avalonia.Input.Platform;
+using Avalonia.Interactivity;
+using Avalonia.Media;
+using Petzold.Media2D;
 
 namespace Chess
 {
@@ -30,7 +34,7 @@ namespace Chess
 
         private HashSet<System.Drawing.Point> squareHighlights = new();
         private HashSet<(System.Drawing.Point, System.Drawing.Point)> lineHighlights = new();
-        private System.Drawing.Point? mouseDownStartPoint = null;
+        private System.Drawing.Point? PointerPressedStartPoint = null;
 
         private bool whiteIsComputer = false;
         private bool blackIsComputer = false;
@@ -88,35 +92,30 @@ namespace Chess
 
         public void UpdateGameDisplay()
         {
-            if (game.AwaitingPromotionResponse)
-            {
-                return;
-            }
             chessGameCanvas.Children.Clear();
             pieceViews.Clear();
 
             bool boardFlipped = config.FlipBoard && ((!game.CurrentTurnWhite && !blackIsComputer) || (whiteIsComputer && !blackIsComputer));
 
-            tileWidth = chessGameCanvas.ActualWidth / game.Board.GetLength(0);
-            tileHeight = chessGameCanvas.ActualHeight / game.Board.GetLength(1);
+            tileWidth = chessGameCanvas.Bounds.Width / game.Board.GetLength(0);
+            tileHeight = chessGameCanvas.Bounds.Height / game.Board.GetLength(1);
 
             whiteCaptures.Content = 0;
-            whiteCaptures.ToolTip = "";
+            string tooltip = "";
             foreach (Pieces.Piece capturedPiece in game.CapturedPieces.Where(p => p.IsWhite))
             {
                 whiteCaptures.Content = (int)whiteCaptures.Content + 1;
-                whiteCaptures.ToolTip = (string)whiteCaptures.ToolTip + capturedPiece.Name + "\r\n";
+                tooltip += capturedPiece.Name + "\r\n";
             }
-            whiteCaptures.ToolTip = ((string)whiteCaptures.ToolTip).TrimEnd();
+            ToolTip.SetTip(whiteCaptures, tooltip.TrimEnd());
 
             blackCaptures.Content = 0;
-            blackCaptures.ToolTip = "";
             foreach (Pieces.Piece capturedPiece in game.CapturedPieces.Where(p => !p.IsWhite))
             {
                 blackCaptures.Content = (int)blackCaptures.Content + 1;
-                blackCaptures.ToolTip = (string)blackCaptures.ToolTip + capturedPiece.Name + "\r\n";
+                tooltip += capturedPiece.Name + "\r\n";
             }
-            blackCaptures.ToolTip = ((string)blackCaptures.ToolTip).TrimEnd();
+            ToolTip.SetTip(whiteCaptures, tooltip.TrimEnd());
 
             if (currentBestMove is null && !manuallyEvaluating)
             {
@@ -142,19 +141,19 @@ namespace Chess
                 Grid.SetColumn(blackCapturesView, 2);
                 Grid.SetRow(blackCapturesView, 2);
 
-                foreach (UIElement child in ranksLeft.Children)
+                foreach (Control child in ranksLeft.Children)
                 {
                     DockPanel.SetDock(child, Dock.Bottom);
                 }
-                foreach (UIElement child in ranksRight.Children)
+                foreach (Control child in ranksRight.Children)
                 {
                     DockPanel.SetDock(child, Dock.Bottom);
                 }
-                foreach (UIElement child in filesTop.Children)
+                foreach (Control child in filesTop.Children)
                 {
                     DockPanel.SetDock(child, Dock.Right);
                 }
-                foreach (UIElement child in filesBottom.Children)
+                foreach (Control child in filesBottom.Children)
                 {
                     DockPanel.SetDock(child, Dock.Right);
                 }
@@ -171,19 +170,19 @@ namespace Chess
                 Grid.SetColumn(blackCapturesView, 0);
                 Grid.SetRow(blackCapturesView, 0);
 
-                foreach (UIElement child in ranksLeft.Children)
+                foreach (Control child in ranksLeft.Children)
                 {
                     DockPanel.SetDock(child, Dock.Top);
                 }
-                foreach (UIElement child in ranksRight.Children)
+                foreach (Control child in ranksRight.Children)
                 {
                     DockPanel.SetDock(child, Dock.Top);
                 }
-                foreach (UIElement child in filesTop.Children)
+                foreach (Control child in filesTop.Children)
                 {
                     DockPanel.SetDock(child, Dock.Left);
                 }
-                foreach (UIElement child in filesBottom.Children)
+                foreach (Control child in filesBottom.Children)
                 {
                     DockPanel.SetDock(child, Dock.Left);
                 }
@@ -207,7 +206,7 @@ namespace Chess
                             .Replace('B', '♝').Replace('N', '♞');
                     }
                 }
-                _ = movesPanel.Children.Add(new Label()
+                movesPanel.Children.Add(new Label()
                 {
                     Content = text,
                     FontSize = 18
@@ -228,7 +227,7 @@ namespace Chess
                     Height = tileHeight,
                     Fill = new SolidColorBrush(config.CheckMateHighlightColor)
                 };
-                _ = chessGameCanvas.Children.Add(mateHighlight);
+                chessGameCanvas.Children.Add(mateHighlight);
                 Canvas.SetBottom(mateHighlight, (boardFlipped ? boardMaxY - kingPosition.Y : kingPosition.Y) * tileHeight);
                 Canvas.SetLeft(mateHighlight, (boardFlipped ? boardMaxX - kingPosition.X : kingPosition.X) * tileWidth);
             }
@@ -243,7 +242,7 @@ namespace Chess
                     Height = tileHeight,
                     Fill = new SolidColorBrush(config.LastMoveSourceColor)
                 };
-                _ = chessGameCanvas.Children.Add(sourceMoveHighlight);
+                chessGameCanvas.Children.Add(sourceMoveHighlight);
                 Canvas.SetBottom(sourceMoveHighlight, (boardFlipped ? boardMaxY - lastMoveSource.Y : lastMoveSource.Y) * tileHeight);
                 Canvas.SetLeft(sourceMoveHighlight, (boardFlipped ? boardMaxX - lastMoveSource.X : lastMoveSource.X) * tileWidth);
 
@@ -253,7 +252,7 @@ namespace Chess
                     Height = tileHeight,
                     Fill = new SolidColorBrush(config.LastMoveDestinationColor)
                 };
-                _ = chessGameCanvas.Children.Add(destinationMoveHighlight);
+                chessGameCanvas.Children.Add(destinationMoveHighlight);
                 Canvas.SetBottom(destinationMoveHighlight, (boardFlipped ? boardMaxY - lastMoveDestination.Y : lastMoveDestination.Y) * tileHeight);
                 Canvas.SetLeft(destinationMoveHighlight, (boardFlipped ? boardMaxX - lastMoveDestination.X : lastMoveDestination.X) * tileWidth);
 
@@ -269,7 +268,7 @@ namespace Chess
                     Height = tileHeight,
                     Fill = new SolidColorBrush(config.BestMoveSourceColor)
                 };
-                _ = chessGameCanvas.Children.Add(bestMoveSrcHighlight);
+                chessGameCanvas.Children.Add(bestMoveSrcHighlight);
                 Canvas.SetBottom(bestMoveSrcHighlight,
                     (boardFlipped ? boardMaxY - currentBestMove.Value.Source.Y : currentBestMove.Value.Source.Y) * tileHeight);
                 Canvas.SetLeft(bestMoveSrcHighlight,
@@ -281,7 +280,7 @@ namespace Chess
                     Height = tileHeight,
                     Fill = new SolidColorBrush(config.BestMoveDestinationColor)
                 };
-                _ = chessGameCanvas.Children.Add(bestMoveDstHighlight);
+                chessGameCanvas.Children.Add(bestMoveDstHighlight);
                 Canvas.SetBottom(bestMoveDstHighlight,
                     (boardFlipped ? boardMaxY - currentBestMove.Value.Destination.Y : currentBestMove.Value.Destination.Y) * tileHeight);
                 Canvas.SetLeft(bestMoveDstHighlight,
@@ -308,7 +307,7 @@ namespace Chess
                         Height = tileHeight,
                         Fill = fillBrush
                     };
-                    _ = chessGameCanvas.Children.Add(newRect);
+                    chessGameCanvas.Children.Add(newRect);
                     Canvas.SetBottom(newRect, (boardFlipped ? boardMaxY - validMove.Y : validMove.Y) * tileHeight);
                     Canvas.SetLeft(newRect, (boardFlipped ? boardMaxX - validMove.X : validMove.X) * tileWidth);
                 }
@@ -326,7 +325,7 @@ namespace Chess
                     Height = tileHeight,
                     Fill = new SolidColorBrush(config.AvailableEnPassantColor)
                 };
-                _ = chessGameCanvas.Children.Add(enPassantHighlight);
+                chessGameCanvas.Children.Add(enPassantHighlight);
                 Canvas.SetBottom(enPassantHighlight,
                     (boardFlipped ? boardMaxY - game.EnPassantSquare.Value.Y : game.EnPassantSquare.Value.Y) * tileHeight);
                 Canvas.SetLeft(enPassantHighlight,
@@ -344,7 +343,7 @@ namespace Chess
                         Height = tileHeight,
                         Fill = new SolidColorBrush(config.AvailableCastleColor)
                     };
-                    _ = chessGameCanvas.Children.Add(castleHighlight);
+                    chessGameCanvas.Children.Add(castleHighlight);
                     Canvas.SetBottom(castleHighlight, (boardFlipped ? boardMaxY - yPos : yPos) * tileHeight);
                     Canvas.SetLeft(castleHighlight, (boardFlipped ? 1 : 6) * tileWidth);
                 }
@@ -356,7 +355,7 @@ namespace Chess
                         Height = tileHeight,
                         Fill = new SolidColorBrush(config.AvailableCastleColor)
                     };
-                    _ = chessGameCanvas.Children.Add(castleHighlight);
+                    chessGameCanvas.Children.Add(castleHighlight);
                     Canvas.SetBottom(castleHighlight, (boardFlipped ? boardMaxY - yPos : yPos) * tileHeight);
                     Canvas.SetLeft(castleHighlight, (boardFlipped ? 5 : 2) * tileWidth);
                 }
@@ -371,7 +370,7 @@ namespace Chess
                     Width = tileWidth * 0.8,
                     Height = tileHeight * 0.8
                 };
-                _ = chessGameCanvas.Children.Add(ellipse);
+                chessGameCanvas.Children.Add(ellipse);
                 Canvas.SetBottom(ellipse, ((boardFlipped ? boardMaxY - square.Y : square.Y) * tileHeight) + (tileHeight * 0.1));
                 Canvas.SetLeft(ellipse, (boardFlipped ? boardMaxX - square.X : square.X) * tileWidth + (tileWidth * 0.1));
             }
@@ -379,21 +378,21 @@ namespace Chess
             foreach ((System.Drawing.Point lineStart, System.Drawing.Point lineEnd) in lineHighlights)
             {
                 double arrowLength = Math.Min(tileWidth, tileHeight) / 4;
-                Petzold.Media2D.ArrowLine line = new()
+                ArrowLine line = new()
                 {
                     Stroke = new SolidColorBrush(config.SelectedPieceColor),
-                    Fill = new SolidColorBrush(config.SelectedPieceColor),
                     Opacity = 0.5,
                     StrokeThickness = 10,
                     ArrowLength = arrowLength,
-                    ArrowAngle = 45,
+                    ArrowAngle = 0.785,
                     IsArrowClosed = true,
+                    ArrowEnds = ArrowEnds.End,
                     X1 = (boardFlipped ? boardMaxX - lineStart.X : lineStart.X) * tileWidth + (tileWidth / 2),
                     X2 = (boardFlipped ? boardMaxX - lineEnd.X : lineEnd.X) * tileWidth + (tileWidth / 2),
                     Y1 = (boardFlipped ? lineStart.Y : boardMaxY - lineStart.Y) * tileHeight + (tileHeight / 2),
                     Y2 = (boardFlipped ? lineEnd.Y : boardMaxY - lineEnd.Y) * tileHeight + (tileHeight / 2)
                 };
-                _ = chessGameCanvas.Children.Add(line);
+                chessGameCanvas.Children.Add(line);
             }
 
             for (int x = 0; x < game.Board.GetLength(0); x++)
@@ -429,7 +428,7 @@ namespace Chess
                             Height = tileHeight
                         };
                         pieceViews[piece] = newPiece;
-                        _ = chessGameCanvas.Children.Add(newPiece);
+                        chessGameCanvas.Children.Add(newPiece);
                         Canvas.SetBottom(newPiece, (boardFlipped ? boardMaxY - y : y) * tileHeight);
                         Canvas.SetLeft(newPiece, (boardFlipped ? boardMaxX - x : x) * tileWidth);
                     }
@@ -437,36 +436,36 @@ namespace Chess
             }
         }
 
-        private void UpdateCursor()
+        private void UpdateCursor(Point mousePos)
         {
             if (game.GameOver)
             {
-                Mouse.OverrideCursor = Cursors.Arrow;
+                Cursor = new Cursor(StandardCursorType.Arrow);
                 return;
             }
             if (grabbedPiece is not null && !highlightGrabbedMoves)
             {
-                Mouse.OverrideCursor = Cursors.ScrollAll;
+                Cursor = new Cursor(StandardCursorType.SizeAll);
                 return;
             }
-            Pieces.Piece? checkPiece = GetPieceAtCanvasPoint(Mouse.GetPosition(chessGameCanvas));
+            Pieces.Piece? checkPiece = GetPieceAtCanvasPoint(mousePos);
             if (checkPiece is not null && ((checkPiece.IsWhite && game.CurrentTurnWhite && !whiteIsComputer)
                 || (!checkPiece.IsWhite && !game.CurrentTurnWhite && !blackIsComputer)))
             {
-                Mouse.OverrideCursor = Cursors.Hand;
+                Cursor = new Cursor(StandardCursorType.Hand);
                 return;
             }
-            Mouse.OverrideCursor = Cursors.Arrow;
+            Cursor = new Cursor(StandardCursorType.Arrow);
         }
 
         /// <summary>
         /// If the game has ended, alert the user how it ended, otherwise do nothing
         /// </summary>
-        private void PushEndgameMessage()
+        private async Task PushEndgameMessage()
         {
             if (game.GameOver)
             {
-                _ = MessageBox.Show(game.DetermineGameState() switch
+                await new MessageBox(game.DetermineGameState() switch
                 {
                     GameState.CheckMateWhite => "Black wins by checkmate!",
                     GameState.CheckMateBlack => "White wins by checkmate!",
@@ -475,7 +474,7 @@ namespace Chess
                     GameState.DrawThreeFold => "Game drawn as the same position has occured three times",
                     GameState.DrawFiftyMove => "Game drawn as fifty moves have occured without a capture or a pawn movement",
                     _ => "Game over"
-                }, "Game Over", MessageBoxButton.OK, MessageBoxImage.Information);
+                }, "Game Over", MessageBoxButton.OK, MessageBoxImage.Information).ShowDialog(this);
             }
         }
 
@@ -485,7 +484,7 @@ namespace Chess
             if (bestMove is null)
             {
                 toUpdate.Content = "...";
-                toUpdate.ToolTip = null;
+                ToolTip.SetTip(toUpdate, null);
                 return;
             }
 
@@ -508,10 +507,10 @@ namespace Chess
             ChessGame moveStringGenerator = game.Clone(false);
             foreach ((System.Drawing.Point source, System.Drawing.Point destination, Type promotionType) in bestMove.Value.BestLine)
             {
-                _ = moveStringGenerator.MovePiece(source, destination, true, promotionType);
+                _ = moveStringGenerator.MovePiece(source, destination, forceMove: true, promotionType: promotionType);
                 convertedBestLine += " " + moveStringGenerator.MoveText[^1];
             }
-            toUpdate.ToolTip = convertedBestLine.Trim();
+            ToolTip.SetTip(toUpdate, convertedBestLine.Trim());
         }
 
         /// <summary>
@@ -552,15 +551,15 @@ namespace Chess
                     return;
                 }
 
-                _ = game.MovePiece(bestMove.Source, bestMove.Destination, true, promotionType: bestMove.PromotionType);
+                _ = game.MovePiece(bestMove.Source, bestMove.Destination, forceMove: true, promotionType: bestMove.PromotionType);
                 UpdateGameDisplay();
-                movesScroll.ScrollToBottom();
+                movesScroll.ScrollToEnd();
                 if (config.UpdateEvalAfterBot)
                 {
                     // Turn has been inverted already but we have value for the now old turn
                     UpdateEvaluationMeter(bestMove, !game.CurrentTurnWhite);
                 }
-                PushEndgameMessage();
+                await PushEndgameMessage();
             }
         }
 
@@ -568,14 +567,14 @@ namespace Chess
         {
             bool boardFlipped = config.FlipBoard && ((!game.CurrentTurnWhite && !blackIsComputer) || (whiteIsComputer && !blackIsComputer));
             // Canvas coordinates are relative to top-left, whereas chess' are from bottom-left, so y is inverted
-            return new System.Drawing.Point((int)((boardFlipped ? chessGameCanvas.ActualWidth - position.X : position.X) / tileWidth),
-                (int)((!boardFlipped ? chessGameCanvas.ActualHeight - position.Y : position.Y) / tileHeight));
+            return new System.Drawing.Point((int)((boardFlipped ? chessGameCanvas.Bounds.Width - position.X : position.X) / tileWidth),
+                (int)((!boardFlipped ? chessGameCanvas.Bounds.Height - position.Y : position.Y) / tileHeight));
         }
 
         private Pieces.Piece? GetPieceAtCanvasPoint(Point position)
         {
             if (position.X < 0 || position.Y < 0
-                || position.X > chessGameCanvas.ActualWidth || position.Y > chessGameCanvas.ActualHeight)
+                || position.X > chessGameCanvas.Bounds.Width || position.Y > chessGameCanvas.Bounds.Height)
             {
                 return null;
             }
@@ -597,8 +596,20 @@ namespace Chess
             whiteEvaluation.Content = "?";
             blackEvaluation.Content = "?";
             UpdateGameDisplay();
-            UpdateCursor();
+            UpdateCursor(new Point());
             await CheckComputerMove();
+        }
+
+        private async Task<Type?> GetPromotionType(System.Drawing.Point destination)
+        {
+            if (grabbedPiece is Pieces.Pawn &&
+                destination.Y == (grabbedPiece.IsWhite ? game.Board.GetLength(1) - 1 : 0))
+            {
+                return config.AutoQueen
+                    ? typeof(Pieces.Queen)
+                    : await new PromotionPrompt(grabbedPiece.IsWhite).ShowDialog<Type>(this);
+            }
+            return null;
         }
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
@@ -612,20 +623,21 @@ namespace Chess
             UpdateGameDisplay();
         }
 
-        private void Window_MouseMove(object sender, MouseEventArgs e)
+        private void Window_PointerMoved(object sender, PointerEventArgs e)
         {
+            Point mousePos = e.GetPosition(chessGameCanvas);
             if (grabbedPiece is not null && !highlightGrabbedMoves)
             {
-                Canvas.SetBottom(pieceViews[grabbedPiece], chessGameCanvas.ActualHeight - Mouse.GetPosition(chessGameCanvas).Y - (tileHeight / 2));
-                Canvas.SetLeft(pieceViews[grabbedPiece], Mouse.GetPosition(chessGameCanvas).X - (tileWidth / 2));
+                Canvas.SetBottom(pieceViews[grabbedPiece], chessGameCanvas.Bounds.Height - mousePos.Y - (tileHeight / 2));
+                Canvas.SetLeft(pieceViews[grabbedPiece], mousePos.X - (tileWidth / 2));
             }
-            UpdateCursor();
+            UpdateCursor(mousePos);
         }
 
-        private async void Window_MouseDown(object sender, MouseButtonEventArgs e)
+        private async void Window_PointerPressed(object sender, PointerPressedEventArgs e)
         {
-            Point mousePos = Mouse.GetPosition(chessGameCanvas);
-            if (e.ChangedButton == MouseButton.Left)
+            Point mousePos = e.GetPosition(chessGameCanvas);
+            if (e.Properties.PointerUpdateKind == PointerUpdateKind.LeftButtonPressed)
             {
                 squareHighlights.Clear();
                 lineHighlights.Clear();
@@ -638,17 +650,18 @@ namespace Chess
                 if (grabbedPiece is not null && highlightGrabbedMoves)
                 {
                     System.Drawing.Point destination = GetCoordFromCanvasPoint(mousePos);
+
                     bool success = game.MovePiece(grabbedPiece.Position, destination,
-                        promotionType: config.AutoQueen ? typeof(Pieces.Queen) : null);
+                        promotionType: await GetPromotionType(destination));
                     if (success)
                     {
                         highlightGrabbedMoves = false;
                         grabbedPiece = null;
                         currentBestMove = null;
-                        UpdateCursor();
+                        UpdateCursor(mousePos);
                         UpdateGameDisplay();
-                        movesScroll.ScrollToBottom();
-                        PushEndgameMessage();
+                        movesScroll.ScrollToEnd();
+                        await PushEndgameMessage();
                         await CheckComputerMove();
                         return;
                     }
@@ -679,19 +692,20 @@ namespace Chess
             else
             {
                 if (mousePos.X < 0 || mousePos.Y < 0
-                || mousePos.X > chessGameCanvas.ActualWidth || mousePos.Y > chessGameCanvas.ActualHeight)
+                || mousePos.X > chessGameCanvas.Bounds.Width || mousePos.Y > chessGameCanvas.Bounds.Height)
                 {
                     return;
                 }
-                mouseDownStartPoint = GetCoordFromCanvasPoint(mousePos);
+                PointerPressedStartPoint = GetCoordFromCanvasPoint(mousePos);
             }
             UpdateGameDisplay();
-            UpdateCursor();
+            UpdateCursor(mousePos);
         }
 
-        private async void Window_MouseUp(object sender, MouseButtonEventArgs e)
+        private async void Window_PointerReleased(object sender, PointerReleasedEventArgs e)
         {
-            if (e.ChangedButton == MouseButton.Left)
+            Point mousePos = e.GetPosition(chessGameCanvas);
+            if (e.Properties.PointerUpdateKind == PointerUpdateKind.LeftButtonReleased)
             {
                 if (game.GameOver)
                 {
@@ -699,25 +713,25 @@ namespace Chess
                 }
                 if (grabbedPiece is not null)
                 {
-                    System.Drawing.Point destination = GetCoordFromCanvasPoint(Mouse.GetPosition(chessGameCanvas));
+                    System.Drawing.Point destination = GetCoordFromCanvasPoint(mousePos);
                     if (destination == grabbedPiece.Position)
                     {
                         highlightGrabbedMoves = true;
-                        UpdateCursor();
+                        UpdateCursor(mousePos);
                         UpdateGameDisplay();
                         return;
                     }
                     bool success = game.MovePiece(grabbedPiece.Position, destination,
-                        promotionType: config.AutoQueen ? typeof(Pieces.Queen) : null);
+                        promotionType: await GetPromotionType(destination));
                     if (success)
                     {
                         grabbedPiece = null;
                         highlightGrabbedMoves = false;
                         currentBestMove = null;
-                        UpdateCursor();
+                        UpdateCursor(mousePos);
                         UpdateGameDisplay();
-                        movesScroll.ScrollToBottom();
-                        PushEndgameMessage();
+                        movesScroll.ScrollToEnd();
+                        await PushEndgameMessage();
                         await CheckComputerMove();
                         return;
                     }
@@ -729,14 +743,13 @@ namespace Chess
             }
             else
             {
-                Point mousePos = Mouse.GetPosition(chessGameCanvas);
                 if (mousePos.X < 0 || mousePos.Y < 0
-                || mousePos.X > chessGameCanvas.ActualWidth || mousePos.Y > chessGameCanvas.ActualHeight)
+                || mousePos.X > chessGameCanvas.Bounds.Width || mousePos.Y > chessGameCanvas.Bounds.Height)
                 {
                     return;
                 }
                 System.Drawing.Point onSquare = GetCoordFromCanvasPoint(mousePos);
-                if (mouseDownStartPoint is null || mouseDownStartPoint == onSquare)
+                if (PointerPressedStartPoint is null || PointerPressedStartPoint == onSquare)
                 {
                     if (!squareHighlights.Add(onSquare))
                     {
@@ -745,17 +758,17 @@ namespace Chess
                 }
                 else
                 {
-                    if (!lineHighlights.Add((mouseDownStartPoint.Value, onSquare)))
+                    if (!lineHighlights.Add((PointerPressedStartPoint.Value, onSquare)))
                     {
-                        _ = lineHighlights.Remove((mouseDownStartPoint.Value, onSquare));
+                        _ = lineHighlights.Remove((PointerPressedStartPoint.Value, onSquare));
                     }
                 }
             }
-            UpdateCursor();
+            UpdateCursor(mousePos);
             UpdateGameDisplay();
         }
 
-        private void Window_MouseLeave(object sender, MouseEventArgs e)
+        private void Window_PointerExited(object sender, PointerEventArgs e)
         {
             if (grabbedPiece is not null)
             {
@@ -764,7 +777,7 @@ namespace Chess
             UpdateGameDisplay();
         }
 
-        private async void evaluation_MouseUp(object sender, MouseButtonEventArgs e)
+        private async void evaluation_PointerReleased(object sender, PointerReleasedEventArgs e)
         {
             if (currentBestMove is not null || game.GameOver
                 || (game.CurrentTurnWhite && whiteIsComputer) || (!game.CurrentTurnWhite && blackIsComputer))
@@ -776,11 +789,11 @@ namespace Chess
             highlightGrabbedMoves = false;
             UpdateEvaluationMeter(null, game.CurrentTurnWhite);
             UpdateGameDisplay();
-            UpdateCursor();
+            UpdateCursor(e.GetPosition(chessGameCanvas));
 
             CancellationToken cancellationToken = cancelMoveComputation.Token;
             BoardAnalysis.PossibleMove bestMove = await GetEngineMove(cancellationToken);
-            
+
             if (cancellationToken.IsCancellationRequested)
             {
                 return;
@@ -820,7 +833,7 @@ namespace Chess
             await NewGame();
         }
 
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void Window_Closing(object sender, WindowClosingEventArgs e)
         {
             cancelMoveComputation.Cancel();
             string jsonPath = System.IO.Path.Join(AppDomain.CurrentDomain.BaseDirectory, "chess-settings.json");
@@ -832,7 +845,7 @@ namespace Chess
             manuallyEvaluating = false;
             cancelMoveComputation.Cancel();
             cancelMoveComputation = new CancellationTokenSource();
-            _ = new PGNExport(game, whiteIsComputer, blackIsComputer).ShowDialog();
+            await new PGNExport(game, whiteIsComputer, blackIsComputer).ShowDialog(this);
             await CheckComputerMove();
         }
 
@@ -842,7 +855,7 @@ namespace Chess
             cancelMoveComputation.Cancel();
             cancelMoveComputation = new CancellationTokenSource();
             CustomGame customDialog = new();
-            _ = customDialog.ShowDialog();
+            await customDialog.ShowDialog(this);
             if (customDialog.GeneratedGame is not null)
             {
                 game = customDialog.GeneratedGame;
@@ -854,7 +867,7 @@ namespace Chess
                 whiteEvaluation.Content = "?";
                 blackEvaluation.Content = "?";
                 UpdateGameDisplay();
-                PushEndgameMessage();
+                await PushEndgameMessage();
             }
             await CheckComputerMove();
         }
@@ -886,14 +899,18 @@ namespace Chess
             UpdateGameDisplay();
         }
 
-        private void FENCopy_Click(object sender, RoutedEventArgs e)
+        private async void FENCopy_Click(object sender, RoutedEventArgs e)
         {
-            Clipboard.SetText(game.ToString());
+            if (Clipboard is null)
+            {
+                return;
+            }
+            await Clipboard.SetTextAsync(game.ToString());
         }
 
-        private void CustomiseItem_Click(object sender, RoutedEventArgs e)
+        private async void CustomiseItem_Click(object sender, RoutedEventArgs e)
         {
-            _ = new Customisation(config).ShowDialog();
+            await new Customisation(config).ShowDialog(this);
             rectSizeReference.Fill = new SolidColorBrush(config.DarkSquareColor);
             chessBoardBackground.Background = new SolidColorBrush(config.LightSquareColor);
             UpdateGameDisplay();
@@ -925,7 +942,7 @@ namespace Chess
             }
         }
 
-        private void whiteDepthBackingSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void whiteDepthBackingSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
         {
             if (!updateDepthSliders)
             {
@@ -934,7 +951,7 @@ namespace Chess
             config.ExternalEngineWhiteDepth = (uint)whiteDepthItem.Value;
         }
 
-        private void blackDepthBackingSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void blackDepthBackingSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
         {
             if (!updateDepthSliders)
             {

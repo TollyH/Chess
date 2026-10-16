@@ -1,9 +1,10 @@
 ﻿using System;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Shapes;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.Shapes;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.Media;
 
 namespace Chess
 {
@@ -36,8 +37,8 @@ namespace Chess
 
         public void UpdateBoard()
         {
-            tileWidth = chessGameCanvas.ActualWidth / Board.GetLength(0);
-            tileHeight = chessGameCanvas.ActualHeight / Board.GetLength(1);
+            tileWidth = chessGameCanvas.Bounds.Width / Board.GetLength(0);
+            tileHeight = chessGameCanvas.Bounds.Height / Board.GetLength(1);
 
             chessGameCanvas.Children.Clear();
 
@@ -49,7 +50,7 @@ namespace Chess
                     Height = tileHeight,
                     Fill = Brushes.OrangeRed
                 };
-                _ = chessGameCanvas.Children.Add(enPassantHighlight);
+                chessGameCanvas.Children.Add(enPassantHighlight);
                 Canvas.SetBottom(enPassantHighlight, EnPassantSquare.Value.Y * tileHeight);
                 Canvas.SetLeft(enPassantHighlight, EnPassantSquare.Value.X * tileWidth);
             }
@@ -71,7 +72,7 @@ namespace Chess
                             Width = tileWidth,
                             Height = tileHeight
                         };
-                        _ = chessGameCanvas.Children.Add(newPiece);
+                        chessGameCanvas.Children.Add(newPiece);
                         Canvas.SetBottom(newPiece, y * tileHeight);
                         Canvas.SetLeft(newPiece, x * tileWidth);
                     }
@@ -151,27 +152,27 @@ namespace Chess
 
         private void importButton_Click(object sender, RoutedEventArgs e)
         {
-            importOverlay.Visibility = Visibility.Visible;
+            importOverlay.IsVisible = true;
         }
 
-        private void Window_MouseUp(object sender, MouseButtonEventArgs e)
+        private void Window_PointerReleased(object sender, PointerReleasedEventArgs e)
         {
-            Point mousePoint = Mouse.GetPosition(chessGameCanvas);
+            Point mousePoint = e.GetPosition(chessGameCanvas);
             if (mousePoint.X < 0 || mousePoint.Y < 0
-                || mousePoint.X > chessGameCanvas.ActualWidth || mousePoint.Y > chessGameCanvas.ActualHeight)
+                || mousePoint.X > chessGameCanvas.Bounds.Width || mousePoint.Y > chessGameCanvas.Bounds.Height)
             {
                 return;
             }
 
             // Canvas coordinates are relative to top-left, whereas chess' are from bottom-left, so y is inverted
             System.Drawing.Point coord = new((int)(mousePoint.X / tileWidth),
-                (int)((chessGameCanvas.ActualHeight - mousePoint.Y) / tileHeight));
+                (int)((chessGameCanvas.Bounds.Height - mousePoint.Y) / tileHeight));
             if (coord.X < 0 || coord.Y < 0 || coord.X >= Board.GetLength(0) || coord.Y >= Board.GetLength(1))
             {
                 return;
             }
 
-            if (e.ChangedButton == MouseButton.Left && (enPassantSelect.IsChecked ?? false))
+            if (e.InitialPressMouseButton == MouseButton.Left && (enPassantSelect.IsChecked ?? false))
             {
                 EnPassantSquare = coord;
             }
@@ -179,7 +180,7 @@ namespace Chess
             {
                 if (Board[coord.X, coord.Y] is null)
                 {
-                    bool white = e.ChangedButton == MouseButton.Left;
+                    bool white = e.InitialPressMouseButton == MouseButton.Left;
                     if (pieceSelectKing.IsChecked ?? false)
                     {
                         // Only allow one king of each colour
@@ -240,25 +241,25 @@ namespace Chess
             UpdateBoard();
         }
 
-        private void submitFenButton_Click(object sender, RoutedEventArgs e)
+        private async void submitFenButton_Click(object sender, RoutedEventArgs e)
         {
             WhiteIsComputer = computerSelectWhite.IsChecked ?? false;
             BlackIsComputer = computerSelectBlack.IsChecked ?? false;
             try
             {
-                GeneratedGame = ChessGame.FromForsythEdwards(fenInput.Text);
+                GeneratedGame = ChessGame.FromForsythEdwards(fenInput?.Text ?? "");
                 Close();
             }
             catch (Exception ex)
             {
-                _ = MessageBox.Show(ex.Message, "Forsyth–Edwards Notation Error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                await new MessageBox(ex.Message, "Forsyth–Edwards Notation Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error).ShowDialog(this);
             }
         }
 
         private void cancelFenButton_Click(object sender, RoutedEventArgs e)
         {
-            importOverlay.Visibility = Visibility.Hidden;
+            importOverlay.IsVisible = false;
         }
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)

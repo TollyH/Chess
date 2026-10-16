@@ -1,5 +1,6 @@
 //------------------------------------------
 // ArrowEnds.cs (c) 2007 by Charles Petzold
+// Modified 2026 for Avalonia by Tolly Hill
 //------------------------------------------
 using System;
 

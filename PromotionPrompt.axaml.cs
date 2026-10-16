@@ -1,5 +1,6 @@
 ﻿using System;
-using System.Windows;
+using Avalonia.Controls;
+using Avalonia.Interactivity;
 
 namespace Chess
 {
@@ -28,25 +29,25 @@ namespace Chess
         private void queenButton_Click(object sender, RoutedEventArgs e)
         {
             ChosenPieceType = typeof(Pieces.Queen);
-            Close();
+            Close(ChosenPieceType);
         }
 
         private void rookButton_Click(object sender, RoutedEventArgs e)
         {
             ChosenPieceType = typeof(Pieces.Rook);
-            Close();
+            Close(ChosenPieceType);
         }
 
         private void bishopButton_Click(object sender, RoutedEventArgs e)
         {
             ChosenPieceType = typeof(Pieces.Bishop);
-            Close();
+            Close(ChosenPieceType);
         }
 
         private void knightButton_Click(object sender, RoutedEventArgs e)
         {
             ChosenPieceType = typeof(Pieces.Knight);
-            Close();
+            Close(ChosenPieceType);
         }
     }
 }

@@ -1,0 +1,16 @@
+<Window x:Class="Chess.MessageBox"
+        xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" SizeToContent="WidthAndHeight">
+    <Grid ColumnDefinitions="Auto 1*" RowDefinitions="1* Auto">
+        <Image x:Name="imageIcon" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5" Width="32" Height="32"/>
+        <TextBlock x:Name="messageText" Grid.Column="1" Grid.Row="0" Margin="5" VerticalAlignment="Center" TextWrapping="WrapWithOverflow" MaxWidth="720"/>
+        <StackPanel Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" Margin="5" Orientation="Horizontal">
+            <Button x:Name="button3" HorizontalContentAlignment="Center" Margin="0,0,5,0" Width="100" IsVisible="False" Content="Yes" Click="Button3_Click"/>
+            <Button x:Name="button2" HorizontalContentAlignment="Center" Margin="0,0,5,0" Width="100" IsVisible="False" Content="Yes" Click="Button2_Click"/>
+            <Button x:Name="button1" HorizontalContentAlignment="Center" Width="100" Content="OK" Click="Button1_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

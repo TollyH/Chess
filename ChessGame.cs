@@ -44,7 +44,6 @@ namespace Chess
 
         public bool CurrentTurnWhite { get; private set; }
         public bool GameOver { get; private set; }
-        public bool AwaitingPromotionResponse { get; private set; }
 
         /// <summary>
         /// A list of the moves made this game as (sourcePosition, destinationPosition)
@@ -72,7 +71,6 @@ namespace Chess
         {
             CurrentTurnWhite = true;
             GameOver = false;
-            AwaitingPromotionResponse = false;
 
             WhiteKing = new Pieces.King(new Point(4, 0), true);
             BlackKing = new Pieces.King(new Point(4, 7), false);
@@ -245,7 +243,7 @@ namespace Chess
         /// Move a piece on the board from a <paramref name="source"/> coordinate to a <paramref name="destination"/> coordinate.
         /// </summary>
         /// <param name="promotionType">
-        /// If a pawn is promoted, what <see cref="Pieces.Piece"/> should it be promoted to. <see langword="null"/> means the user should be prompted for the type.
+        /// If a pawn is promoted, what <see cref="Pieces.Piece"/> should it be promoted to. May be set to <see langword="null"/> only if this move would not result in a promotion.
         /// </param>
         /// <param name="updateMoveText">
         /// Whether the move should update the game move text and update <see cref="PreviousGameState"/>. This should usually be <see langword="true"/>,
@@ -253,7 +251,7 @@ namespace Chess
         /// </param>
         /// <returns><see langword="true"/> if the move was valid and executed, <see langword="false"/> otherwise</returns>
         /// <remarks>This method will check if the move is completely valid, unless <paramref name="forceMove"/> is <see langword="true"/>. No other validity checks are required.</remarks>
-        public bool MovePiece(Point source, Point destination, bool forceMove = false, Type? promotionType = null, bool updateMoveText = true)
+        public bool MovePiece(Point source, Point destination, Type? promotionType, bool forceMove = false, bool updateMoveText = true)
         {
             if (!forceMove && GameOver)
             {
@@ -357,11 +355,8 @@ namespace Chess
                         }
                         else
                         {
-                            AwaitingPromotionResponse = true;
-                            PromotionPrompt prompt = new(CurrentTurnWhite);
-                            _ = prompt.ShowDialog();
-                            piece = (Pieces.Piece)Activator.CreateInstance(prompt.ChosenPieceType, piece.Position, piece.IsWhite)!;
-                            AwaitingPromotionResponse = false;
+                            throw new ArgumentException(
+                                "Promotion type must be given when moving pawn to final rank.", nameof(promotionType));
                         }
                         Board[source.X, source.Y] = piece;
                     }
@@ -700,7 +695,7 @@ namespace Chess
                             {
                                 // char - '0' gets numeric value of ASCII number
                                 // Leaves the specified number of squares as null
-                                fileIndex += pieceChar - '0' - 1; 
+                                fileIndex += pieceChar - '0' - 1;
                                 // Subtract 1 as fileIndex gets incremented by 1 as well later
                             }
                             else

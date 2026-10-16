@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Windows.Media;
+using Avalonia.Media;
 
 namespace Chess
 {
