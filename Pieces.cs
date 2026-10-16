@@ -10,8 +10,8 @@ namespace Chess.Pieces
         public abstract char SymbolLetter { get; }
         public abstract char SymbolSpecial { get; }
         public abstract double Value { get; }
-        public abstract bool IsWhite { get; }
-        public abstract Point Position { get; protected set; }
+        public bool IsWhite { get; protected init; }
+        public Point Position { get; protected set; }
 
         /// <summary>
         /// Get a set of all moves that this piece can perform on the given board
@@ -47,8 +47,6 @@ namespace Chess.Pieces
         public override char SymbolSpecial { get; }
         // King should not contribute to overall board value, as it always present
         public override double Value => 0;
-        public override bool IsWhite { get; }
-        public override Point Position { get; protected set; }
 
         public King(Point position, bool isWhite)
         {
@@ -97,8 +95,6 @@ namespace Chess.Pieces
         public override char SymbolLetter => 'Q';
         public override char SymbolSpecial { get; }
         public override double Value => 9.5;
-        public override bool IsWhite { get; }
-        public override Point Position { get; protected set; }
 
         public Queen(Point position, bool isWhite)
         {
@@ -265,8 +261,6 @@ namespace Chess.Pieces
         public override char SymbolLetter => 'R';
         public override char SymbolSpecial { get; }
         public override double Value => 5.63;
-        public override bool IsWhite { get; }
-        public override Point Position { get; protected set; }
 
         public Rook(Point position, bool isWhite)
         {
@@ -368,8 +362,6 @@ namespace Chess.Pieces
         public override char SymbolLetter => 'B';
         public override char SymbolSpecial { get; }
         public override double Value => 3.33;
-        public override bool IsWhite { get; }
-        public override Point Position { get; protected set; }
 
         public Bishop(Point position, bool isWhite)
         {
@@ -473,8 +465,6 @@ namespace Chess.Pieces
         public override char SymbolLetter => 'N';
         public override char SymbolSpecial { get; }
         public override double Value => 3.05;
-        public override bool IsWhite { get; }
-        public override Point Position { get; protected set; }
 
         public Knight(Point position, bool isWhite)
         {
@@ -515,8 +505,6 @@ namespace Chess.Pieces
         public override char SymbolLetter => 'P';
         public override char SymbolSpecial { get; }
         public override double Value => 1;
-        public override bool IsWhite { get; }
-        public override Point Position { get; protected set; }
 
         public Pawn(Point position, bool isWhite)
         {
@@ -544,13 +532,13 @@ namespace Chess.Pieces
                 _ = moves.Add(new Point(Position.X, doubleCheckY));
             }
             // Taking to diagonal left
-            if (Position.X > 0 && 
+            if (Position.X > 0 &&
                 board[Position.X - 1, checkY] is not null && board[Position.X - 1, checkY]!.IsWhite != IsWhite)
             {
                 _ = moves.Add(new Point(Position.X - 1, checkY));
             }
             // Taking to diagonal right
-            if (Position.X < board.GetLength(0) - 1 && 
+            if (Position.X < board.GetLength(0) - 1 &&
                 board[Position.X + 1, checkY] is not null && board[Position.X + 1, checkY]!.IsWhite != IsWhite)
             {
                 _ = moves.Add(new Point(Position.X + 1, checkY));

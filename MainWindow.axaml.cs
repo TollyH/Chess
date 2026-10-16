@@ -8,7 +8,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Shapes;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
@@ -21,7 +20,7 @@ namespace Chess
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, IDisposable
     {
         private ChessGame game = new();
         private readonly Settings config;
@@ -34,7 +33,7 @@ namespace Chess
 
         private HashSet<System.Drawing.Point> squareHighlights = new();
         private HashSet<(System.Drawing.Point, System.Drawing.Point)> lineHighlights = new();
-        private System.Drawing.Point? PointerPressedStartPoint = null;
+        private System.Drawing.Point? pointerPressedStartPoint = null;
 
         private bool whiteIsComputer = false;
         private bool blackIsComputer = false;
@@ -85,9 +84,37 @@ namespace Chess
             updateEvalAfterBotItem.IsChecked = config.UpdateEvalAfterBot;
             externalEngineWhiteItem.IsChecked = config.ExternalEngineWhite;
             externalEngineBlackItem.IsChecked = config.ExternalEngineBlack;
-            whiteDepthItem.Value = config.ExternalEngineWhiteDepth;
-            blackDepthItem.Value = config.ExternalEngineBlackDepth;
+            string externalDepthWhite = config.ExternalEngineWhiteDepth.ToString();
+            string externalDepthBlack = config.ExternalEngineBlackDepth.ToString();
+            foreach (MenuItem item in whiteExternalDepthItem.Items.OfType<MenuItem>())
+            {
+                if (string.Equals(externalDepthWhite, item.Tag as string, StringComparison.OrdinalIgnoreCase))
+                {
+                    item.IsChecked = true;
+                    break;
+                }
+            }
+            foreach (MenuItem item in blackExternalDepthItem.Items.OfType<MenuItem>())
+            {
+                if (string.Equals(externalDepthBlack, item.Tag as string, StringComparison.OrdinalIgnoreCase))
+                {
+                    item.IsChecked = true;
+                    break;
+                }
+            }
             updateDepthSliders = true;
+        }
+
+        ~MainWindow()
+        {
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            cancelMoveComputation.Cancel();
+
+            GC.SuppressFinalize(this);
         }
 
         public void UpdateGameDisplay()
@@ -489,12 +516,12 @@ namespace Chess
             }
 
             if ((bestMove.Value.WhiteMateLocated && !bestMove.Value.BlackMateLocated)
-                || bestMove.Value.EvaluatedFutureValue == double.NegativeInfinity)
+                || double.IsNegativeInfinity(bestMove.Value.EvaluatedFutureValue))
             {
                 toUpdate.Content = $"-M{(int)Math.Ceiling(bestMove.Value.DepthToWhiteMate / 2d)}";
             }
             else if ((bestMove.Value.BlackMateLocated && !bestMove.Value.WhiteMateLocated)
-                || bestMove.Value.EvaluatedFutureValue == double.PositiveInfinity)
+                || double.IsPositiveInfinity(bestMove.Value.EvaluatedFutureValue))
             {
                 toUpdate.Content = $"+M{(int)Math.Ceiling(bestMove.Value.DepthToBlackMate / 2d)}";
             }
@@ -696,7 +723,7 @@ namespace Chess
                 {
                     return;
                 }
-                PointerPressedStartPoint = GetCoordFromCanvasPoint(mousePos);
+                pointerPressedStartPoint = GetCoordFromCanvasPoint(mousePos);
             }
             UpdateGameDisplay();
             UpdateCursor(mousePos);
@@ -749,7 +776,7 @@ namespace Chess
                     return;
                 }
                 System.Drawing.Point onSquare = GetCoordFromCanvasPoint(mousePos);
-                if (PointerPressedStartPoint is null || PointerPressedStartPoint == onSquare)
+                if (pointerPressedStartPoint is null || pointerPressedStartPoint == onSquare)
                 {
                     if (!squareHighlights.Add(onSquare))
                     {
@@ -758,9 +785,9 @@ namespace Chess
                 }
                 else
                 {
-                    if (!lineHighlights.Add((PointerPressedStartPoint.Value, onSquare)))
+                    if (!lineHighlights.Add((pointerPressedStartPoint.Value, onSquare)))
                     {
-                        _ = lineHighlights.Remove((PointerPressedStartPoint.Value, onSquare));
+                        _ = lineHighlights.Remove((pointerPressedStartPoint.Value, onSquare));
                     }
                 }
             }
@@ -942,22 +969,22 @@ namespace Chess
             }
         }
 
-        private void whiteDepthBackingSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+        private void WhiteDepthBackingSlider_Click(object? sender, RoutedEventArgs e)
         {
-            if (!updateDepthSliders)
+            if (!updateDepthSliders || sender is not Control { Tag: string tag })
             {
                 return;
             }
-            config.ExternalEngineWhiteDepth = (uint)whiteDepthItem.Value;
+            config.ExternalEngineWhiteDepth = uint.Parse(tag);
         }
 
-        private void blackDepthBackingSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+        private void BlackDepthBackingSlider_Click(object? sender, RoutedEventArgs e)
         {
-            if (!updateDepthSliders)
+            if (!updateDepthSliders || sender is not Control { Tag: string tag })
             {
                 return;
             }
-            config.ExternalEngineBlackDepth = (uint)blackDepthItem.Value;
+            config.ExternalEngineBlackDepth = uint.Parse(tag);
         }
     }
 }

@@ -3,8 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="using:Chess"
-        xmlns:sm="using:SliderMenu"
         mc:Ignorable="d"
         Title="Chess" Height="770" Width="960" Loaded="Window_Loaded" SizeChanged="Window_SizeChanged" PointerMoved="Window_PointerMoved" PointerPressed="Window_PointerPressed" PointerReleased="Window_PointerReleased" PointerExited="Window_PointerExited" Closing="Window_Closing">
     <Grid>
@@ -34,47 +32,40 @@
                 <MenuItem x:Name="autoQueenItem" Header="Automatically Promote Pawns to _Queen" Click="SettingsCheckItem_Click" ToggleType="CheckBox"/>
                 <MenuItem x:Name="moveListSymbolsItem" Header="Use Piece _Symbols on the Move List" Click="SettingsCheckItem_Click" ToggleType="CheckBox"/>
                 <MenuItem x:Name="flipBoardItem" Header="_Flip the Board on Black's Turn" Click="SettingsCheckItem_Click" ToggleType="CheckBox"/>
-                <MenuItem x:Name="updateEvalAfterBotItem" Header="Update _Evaluation Meter Automatically After Computer Move" Click="SettingsCheckItem_Click" ToggleType="CheckBox"/>
+                <MenuItem x:Name="updateEvalAfterBotItem" Header="Update _Evaluation Meter After Computer Move" Click="SettingsCheckItem_Click" ToggleType="CheckBox"/>
                 <Separator/>
                 <MenuItem x:Name="externalEngineWhiteItem" Header="Use External Engine Executable for _White" Click="SettingsCheckItem_Click" ToggleType="CheckBox"/>
                 <MenuItem x:Name="externalEngineBlackItem" Header="Use External Engine Executable for _Black" Click="SettingsCheckItem_Click" ToggleType="CheckBox"/>
-                <MenuItem Header="External Engine Search _Depth for White">
-                    <sm:SliderMenuItem x:Name="whiteDepthItem">
-                        <MenuItem Header="1" sm:SliderMenuItem.Value="1"/>
-                        <MenuItem Header="2" sm:SliderMenuItem.Value="2"/>
-                        <MenuItem Header="4" sm:SliderMenuItem.Value="4"/>
-                        <MenuItem Header="8" sm:SliderMenuItem.Value="8"/>
-                        <MenuItem Header="12" sm:SliderMenuItem.Value="12"/>
-                        <MenuItem Header="16" sm:SliderMenuItem.Value="16"/>
-                        <MenuItem Header="24" sm:SliderMenuItem.Value="24"/>
-                        <MenuItem Header="32" sm:SliderMenuItem.Value="32"/>
-                        <MenuItem Header="44" sm:SliderMenuItem.Value="44"/>
-                        <MenuItem Header="50" sm:SliderMenuItem.Value="50"/>
-                        <MenuItem Header="64" sm:SliderMenuItem.Value="64"/>
-                    </sm:SliderMenuItem>
+                <MenuItem x:Name="whiteExternalDepthItem" Header="External Engine Search _Depth for White">
+                    <MenuItem Click="WhiteDepthBackingSlider_Click" ToggleType="Radio" Header="1" Tag="1"/>
+                    <MenuItem Click="WhiteDepthBackingSlider_Click" ToggleType="Radio" Header="2" Tag="2"/>
+                    <MenuItem Click="WhiteDepthBackingSlider_Click" ToggleType="Radio" Header="4" Tag="4"/>
+                    <MenuItem Click="WhiteDepthBackingSlider_Click" ToggleType="Radio" Header="8" Tag="8"/>
+                    <MenuItem Click="WhiteDepthBackingSlider_Click" ToggleType="Radio" Header="12" Tag="12"/>
+                    <MenuItem Click="WhiteDepthBackingSlider_Click" ToggleType="Radio" Header="16" Tag="16"/>
+                    <MenuItem Click="WhiteDepthBackingSlider_Click" ToggleType="Radio" Header="24" Tag="24"/>
+                    <MenuItem Click="WhiteDepthBackingSlider_Click" ToggleType="Radio" Header="32" Tag="32"/>
+                    <MenuItem Click="WhiteDepthBackingSlider_Click" ToggleType="Radio" Header="44" Tag="44"/>
+                    <MenuItem Click="WhiteDepthBackingSlider_Click" ToggleType="Radio" Header="50" Tag="50"/>
+                    <MenuItem Click="WhiteDepthBackingSlider_Click" ToggleType="Radio" Header="64" Tag="64"/>
                 </MenuItem>
-                <MenuItem Header="External _Engine Search Depth for Black">
-                    <sm:SliderMenuItem x:Name="blackDepthItem">
-                        <MenuItem Header="1" sm:SliderMenuItem.Value="1"/>
-                        <MenuItem Header="2" sm:SliderMenuItem.Value="2"/>
-                        <MenuItem Header="4" sm:SliderMenuItem.Value="4"/>
-                        <MenuItem Header="8" sm:SliderMenuItem.Value="8"/>
-                        <MenuItem Header="12" sm:SliderMenuItem.Value="12"/>
-                        <MenuItem Header="16" sm:SliderMenuItem.Value="16"/>
-                        <MenuItem Header="24" sm:SliderMenuItem.Value="24"/>
-                        <MenuItem Header="32" sm:SliderMenuItem.Value="32"/>
-                        <MenuItem Header="44" sm:SliderMenuItem.Value="44"/>
-                        <MenuItem Header="50" sm:SliderMenuItem.Value="50"/>
-                        <MenuItem Header="64" sm:SliderMenuItem.Value="64"/>
-                    </sm:SliderMenuItem>
+                <MenuItem x:Name="blackExternalDepthItem" Header="External _Engine Search Depth for Black">
+                    <MenuItem Click="BlackDepthBackingSlider_Click" ToggleType="Radio" Header="1" Tag="1"/>
+                    <MenuItem Click="BlackDepthBackingSlider_Click" ToggleType="Radio" Header="2" Tag="2"/>
+                    <MenuItem Click="BlackDepthBackingSlider_Click" ToggleType="Radio" Header="4" Tag="4"/>
+                    <MenuItem Click="BlackDepthBackingSlider_Click" ToggleType="Radio" Header="8" Tag="8"/>
+                    <MenuItem Click="BlackDepthBackingSlider_Click" ToggleType="Radio" Header="12" Tag="12"/>
+                    <MenuItem Click="BlackDepthBackingSlider_Click" ToggleType="Radio" Header="16" Tag="16"/>
+                    <MenuItem Click="BlackDepthBackingSlider_Click" ToggleType="Radio" Header="24" Tag="24"/>
+                    <MenuItem Click="BlackDepthBackingSlider_Click" ToggleType="Radio" Header="32" Tag="32"/>
+                    <MenuItem Click="BlackDepthBackingSlider_Click" ToggleType="Radio" Header="44" Tag="44"/>
+                    <MenuItem Click="BlackDepthBackingSlider_Click" ToggleType="Radio" Header="50" Tag="50"/>
+                    <MenuItem Click="BlackDepthBackingSlider_Click" ToggleType="Radio" Header="64" Tag="64"/>
                 </MenuItem>
                 <Separator/>
                 <MenuItem Header="Customise..." Click="CustomiseItem_Click"/>
             </MenuItem>
         </Menu>
-        <!-- Because SliderMenuItem lacks a ValueChanged event, bind its value to invisible Slider so we can listen to its ValueChanged event -->
-        <Slider Grid.Row="0" Grid.Column="0" x:Name="whiteDepthBackingSlider" IsVisible="False" Minimum="1" Maximum="64" Value="{Binding Value, ElementName=whiteDepthItem}" ValueChanged="whiteDepthBackingSlider_ValueChanged"/>
-        <Slider Grid.Row="0" Grid.Column="0" x:Name="blackDepthBackingSlider" IsVisible="False" Minimum="1" Maximum="64" Value="{Binding Value, ElementName=blackDepthItem}" ValueChanged="blackDepthBackingSlider_ValueChanged"/>
         <Grid Grid.Row="1" Grid.Column="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
@@ -191,10 +182,10 @@
                 </Viewbox>
             </DockPanel>
             <Viewbox x:Name="whiteEvaluationView" Grid.Column="0" Grid.Row="2">
-                <Label x:Name="whiteEvaluation" Content="?" Foreground="Navy" PointerReleased="evaluation_PointerReleased"/>
+                <Label x:Name="whiteEvaluation" Content="?" Foreground="DarkTurquoise" PointerReleased="evaluation_PointerReleased"/>
             </Viewbox>
             <Viewbox x:Name="blackEvaluationView" Grid.Column="2" Grid.Row="0">
-                <Label x:Name="blackEvaluation" Content="?" Foreground="Navy" PointerReleased="evaluation_PointerReleased"/>
+                <Label x:Name="blackEvaluation" Content="?" Foreground="DarkTurquoise" PointerReleased="evaluation_PointerReleased"/>
             </Viewbox>
             <Viewbox x:Name="blackCapturesView" Grid.Column="0" Grid.Row="0">
                 <Label x:Name="blackCaptures" Content="0" Foreground="Crimson"/>

@@ -100,7 +100,7 @@ namespace Chess
                 { new Pieces.Rook(new Point(7, 0), true), new Pieces.Pawn(new Point(7, 1), true), null, null, null, null, new Pieces.Pawn(new Point(7, 6), false), new Pieces.Rook(new Point(7, 7), false) }
             };
 
-            InitialState = ToString();
+            InitialState = ToString(false);
         }
 
         /// <summary>
@@ -146,7 +146,7 @@ namespace Chess
             StaleMoveCounter = staleMoveCounter;
             BoardCounts = boardCounts;
 
-            InitialState = initialState ?? ToString();
+            InitialState = initialState ?? ToString(false);
             PreviousGameState = previousGameState;
         }
 
@@ -421,7 +421,7 @@ namespace Chess
                     string newMove = destination.ToChessCoordinate();
                     if (oldGame!.Board[source.X, source.Y] is Pieces.Pawn)
                     {
-                        if (oldGame!.Board[destination.X, destination.Y] is not null
+                        if (oldGame.Board[destination.X, destination.Y] is not null
                             || destination == oldGame.EnPassantSquare)
                         {
                             newMove = source.ToChessCoordinate()[0] + "x" + newMove;
@@ -447,15 +447,16 @@ namespace Chess
                                 newMove = "O-O-O";
                             }
                         }
-                        if (oldGame!.Board[destination.X, destination.Y] is not null)
+                        if (oldGame.Board[destination.X, destination.Y] is not null)
                         {
                             newMove = 'x' + newMove;
                         }
 
                         // Disambiguate moving piece if two pieces of the same type can reach destination
-                        IEnumerable<Pieces.Piece> canReachDest = oldGame.Board.OfType<Pieces.Piece>().Where(
+                        // ReSharper disable once SuspiciousTypeConversion.Global
+                        Pieces.Piece[] canReachDest = oldGame.Board.OfType<Pieces.Piece>().Where(
                             p => piece.GetType() == p.GetType() && p.Position != source && p.IsWhite == piece.IsWhite
-                                && p.GetValidMoves(oldGame.Board, true).Contains(destination));
+                                && p.GetValidMoves(oldGame.Board, true).Contains(destination)).ToArray();
                         if (canReachDest.Any())
                         {
                             bool success = false;
@@ -598,12 +599,12 @@ namespace Chess
             bool whiteIsComputer, bool blackIsComputer)
         {
             GameState state = DetermineGameState();
-            string pgn = $"[Event \"{eventName?.Replace("\\", "\\\\")?.Replace("\"", "\\\"") ?? "?"}\"]\n" +
-                $"[Site \"{siteName?.Replace("\\", "\\\\")?.Replace("\"", "\\\"") ?? "?"}\"]\n" +
+            string pgn = $"[Event \"{eventName?.Replace("\\", "\\\\").Replace("\"", "\\\"") ?? "?"}\"]\n" +
+                $"[Site \"{siteName?.Replace("\\", "\\\\").Replace("\"", "\\\"") ?? "?"}\"]\n" +
                 $"[Date \"{startDate?.ToString("yyyy.MM.dd") ?? "????.??.??"}\"]\n" +
                 "[Round \"?\"]\n" +
-                $"[White \"{whiteName?.Replace("\\", "\\\\")?.Replace("\"", "\\\"") ?? "?"}\"]\n" +
-                $"[Black \"{blackName?.Replace("\\", "\\\\")?.Replace("\"", "\\\"") ?? "?"}\"]\n" +
+                $"[White \"{whiteName.Replace("\\", "\\\\").Replace("\"", "\\\"")}\"]\n" +
+                $"[Black \"{blackName.Replace("\\", "\\\\").Replace("\"", "\\\"")}\"]\n" +
                 $"[Result \"{(!GameOver ? "*" : state == GameState.CheckMateBlack ? "1-0" : state == GameState.CheckMateWhite ? "0-1" : "1/2-1/2")}\"]\n" +
                 $"[WhiteType \"{(whiteIsComputer ? "program" : "human")}\"]\n" +
                 $"[BlackType \"{(blackIsComputer ? "program" : "human")}\"]\n\n";

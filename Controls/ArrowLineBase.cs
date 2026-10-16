@@ -3,7 +3,6 @@
 // Modified 2026 for Avalonia by Tolly Hill
 //----------------------------------------------
 
-using System.Diagnostics.CodeAnalysis;
 using Avalonia;
 using Avalonia.Controls.Shapes;
 using Avalonia.Media;
@@ -20,10 +19,8 @@ namespace Petzold.Media2D
         protected PathFigure pathfigLine;
         protected PolyLineSegment polysegLine;
 
-        PathFigure pathfigHead1;
-        PolyLineSegment polysegHead1;
-        PathFigure pathfigHead2;
-        PolyLineSegment polysegHead2;
+        private PathFigure pathfigHead1;
+        private PathFigure pathfigHead2;
 
         /// <summary>
         ///     Identifies the ArrowAngle dependency property.
@@ -102,12 +99,12 @@ namespace Petzold.Media2D
             pathfigLine.Segments?.Add(polysegLine);
 
             pathfigHead1 = new PathFigure();
-            polysegHead1 = new PolyLineSegment();
-            pathfigHead1.Segments?.Add(polysegHead1);
+            PolyLineSegment polysegHead3 = new();
+            pathfigHead1.Segments?.Add(polysegHead3);
 
             pathfigHead2 = new PathFigure();
-            polysegHead2 = new PolyLineSegment();
-            pathfigHead2.Segments?.Add(polysegHead2);
+            PolyLineSegment polysegHead4 = new();
+            pathfigHead2.Segments?.Add(polysegHead4);
         }
 
         /// <summary>
@@ -139,7 +136,7 @@ namespace Petzold.Media2D
             return pathgeo;
         }
 
-        PathFigure CalculateArrow(PathFigure pathfig, Point pt1, Point pt2)
+        private PathFigure CalculateArrow(PathFigure pathfig, Point pt1, Point pt2)
         {
             Matrix matx = Matrix.CreateRotation(ArrowAngle / 2);
             Vector vect = pt1 - pt2;

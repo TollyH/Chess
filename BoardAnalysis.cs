@@ -257,8 +257,10 @@ namespace Chess
         public static GameState DetermineGameState(Pieces.Piece?[,] board, bool currentTurnWhite,
             Point? whiteKingPos = null, Point? blackKingPos = null)
         {
-            IEnumerable<Pieces.Piece> whitePieces = board.OfType<Pieces.Piece>().Where(p => p.IsWhite);
-            IEnumerable<Pieces.Piece> blackPieces = board.OfType<Pieces.Piece>().Where(p => !p.IsWhite);
+            // ReSharper disable SuspiciousTypeConversion.Global
+            Pieces.Piece[] whitePieces = board.OfType<Pieces.Piece>().Where(p => p.IsWhite).ToArray();
+            Pieces.Piece[] blackPieces = board.OfType<Pieces.Piece>().Where(p => !p.IsWhite).ToArray();
+            // ReSharper restore SuspiciousTypeConversion.Global
 
             bool whiteCheck = IsKingReachable(board, true, whiteKingPos ?? null);
             // White and Black cannot both be in check
@@ -303,6 +305,7 @@ namespace Chess
         /// </returns>
         public static double CalculateBoardValue(Pieces.Piece?[,] board)
         {
+            // ReSharper disable once SuspiciousTypeConversion.Global
             return board.OfType<Pieces.Piece>().Sum(p => p.IsWhite ? p.Value : -p.Value);
         }
 
@@ -348,7 +351,7 @@ namespace Chess
             {
                 if (game.CurrentTurnWhite)
                 {
-                    if (bestMove.EvaluatedFutureValue == double.NegativeInfinity
+                    if (double.IsNegativeInfinity(bestMove.EvaluatedFutureValue)
                         || (!bestMove.BlackMateLocated && potentialMove.BlackMateLocated)
                         || (!bestMove.BlackMateLocated && potentialMove.EvaluatedFutureValue > bestMove.EvaluatedFutureValue)
                         || (bestMove.BlackMateLocated && potentialMove.BlackMateLocated
@@ -359,7 +362,7 @@ namespace Chess
                 }
                 else
                 {
-                    if (bestMove.EvaluatedFutureValue == double.PositiveInfinity
+                    if (double.IsPositiveInfinity(bestMove.EvaluatedFutureValue)
                         || (!bestMove.WhiteMateLocated && potentialMove.WhiteMateLocated)
                         || (!bestMove.WhiteMateLocated && potentialMove.EvaluatedFutureValue < bestMove.EvaluatedFutureValue)
                         || (bestMove.WhiteMateLocated && potentialMove.WhiteMateLocated
@@ -518,7 +521,7 @@ namespace Chess
                         }
                         if (game.CurrentTurnWhite)
                         {
-                            if (bestMove.EvaluatedFutureValue == double.NegativeInfinity
+                            if (double.IsNegativeInfinity(bestMove.EvaluatedFutureValue)
                                 || (!bestMove.BlackMateLocated && potentialMove.BlackMateLocated)
                                 || (!bestMove.BlackMateLocated && potentialMove.EvaluatedFutureValue > bestMove.EvaluatedFutureValue)
                                 || (bestMove.BlackMateLocated && potentialMove.BlackMateLocated
@@ -539,7 +542,7 @@ namespace Chess
                         }
                         else
                         {
-                            if (bestMove.EvaluatedFutureValue == double.PositiveInfinity
+                            if (double.IsPositiveInfinity(bestMove.EvaluatedFutureValue)
                                 || (!bestMove.WhiteMateLocated && potentialMove.WhiteMateLocated)
                                 || (!bestMove.WhiteMateLocated && potentialMove.EvaluatedFutureValue < bestMove.EvaluatedFutureValue)
                                 || (bestMove.WhiteMateLocated && potentialMove.WhiteMateLocated

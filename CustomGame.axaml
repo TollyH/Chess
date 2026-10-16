@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="using:Chess"
         mc:Ignorable="d"
         Title="Custom Game Setup" Width="720" Height="510" PointerReleased="Window_PointerReleased" Loaded="Window_Loaded" SizeChanged="Window_SizeChanged">
     <Grid>
@@ -11,7 +10,7 @@
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="210"/>
         </Grid.ColumnDefinitions>
-        <Grid Grid.Row="1">
+        <Grid Grid.Column="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="12*"/>
@@ -218,7 +217,7 @@
         </Border>
         <Button x:Name="startButton" Content="Start" Grid.Column="1" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="7" Width="50" IsEnabled="False" Click="startButton_Click"/>
         <Button x:Name="importButton" Content="Load Forsyth–Edwards" Grid.Column="1" VerticalAlignment="Bottom" HorizontalAlignment="Left" Padding="10,1,10,1" Margin="7" Click="importButton_Click"/>
-        <Grid x:Name="importOverlay" Grid.ColumnSpan="2" Background="White" IsVisible="False">
+        <Grid x:Name="importOverlay" Grid.ColumnSpan="2" Grid.Column="0" Background="White" IsVisible="False">
             <Label Content="Enter a Forsyth–Edwards Notation board position string:" Margin="10" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="16"/>
             <TextBox x:Name="fenInput" Margin="12,45,12,10" VerticalAlignment="Top" FontSize="15" Text="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"/>
             <Button x:Name="submitFenButton" Content="Submit" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="10" Width="64" Click="submitFenButton_Click"/>
