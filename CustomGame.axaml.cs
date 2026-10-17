@@ -67,7 +67,8 @@ namespace Chess
                             Child = new TextBlock()
                             {
                                 Text = piece.SymbolSpecial.ToString(),
-                                FontFamily = new("Segoe UI Symbol")
+                                FontFamily = new("Segoe UI Symbol"),
+                                Foreground = Brushes.Black
                             },
                             Width = tileWidth,
                             Height = tileHeight

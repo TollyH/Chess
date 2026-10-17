@@ -8,6 +8,8 @@
     <Authors>Tolly Hill</Authors>
     <Copyright>Copyright © 2023-2026  Ptolemy Hill</Copyright>
     <Description>Chess game written in C# with Avalonia</Description>
+    <Version>2.0.0</Version>
+    <NoWarn>AVLN3001</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
